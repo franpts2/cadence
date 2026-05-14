@@ -1,1 +1,1 @@
-# cadence - a musical experience
+# cadence - a song each day
