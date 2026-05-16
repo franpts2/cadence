@@ -1,5 +1,5 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
 	plugins: [
@@ -7,5 +7,27 @@ export default defineConfig({
 	],
 	server: {
 		host: '127.0.0.1'
+	},
+	test: {
+		include: ['src/**/*.{test,spec}.{js,ts}'],
+		environment: 'jsdom',
+		globals: true,
+		setupFiles: ['./src/test/setup.ts'],
+		alias: {
+			'$lib': './src/lib'
+		},
+		server: {
+			deps: {
+				inline: [/@auth\/sveltekit/]
+			}
+		},
+		poolOptions: {
+			threads: {
+				singleThread: true
+			}
+		}
+	},
+	resolve: {
+		conditions: process.env.VITEST ? ['browser'] : undefined
 	}
 });
