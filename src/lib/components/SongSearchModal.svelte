@@ -53,7 +53,7 @@
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div 
-		class="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] px-4 bg-zinc-950/80 backdrop-blur-sm"
+		class="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] px-4 backdrop-blur-xs"
 		onclick={onClose}
 	>
 		<div 
