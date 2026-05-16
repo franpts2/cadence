@@ -35,14 +35,14 @@
 			<span class="text-sm text-zinc-400 italic">Hi, {session.user.name}</span>
 			<button
 				onclick={() => signOut()}
-				class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-zinc-100 rounded-md transition-colors text-xs font-medium"
+				class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-zinc-100 rounded-md transition-colors text-sm font-medium"
 			>
 				Log out
 			</button>
 		{:else}
 			<button
 				onclick={() => signIn('spotify')}
-				class="px-4 py-1.5 bg-[#1DB954] hover:bg-[#1ed760] text-zinc-950 font-bold rounded-full transition-colors text-xs"
+				class="px-4 py-2 bg-[#1DB954] hover:bg-[#1ed760] text-zinc-950 font-bold rounded-full transition-colors text-sm"
 			>
 				Log in to Spotify
 			</button>
