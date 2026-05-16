@@ -1,3 +1,4 @@
+import "./lib/server/env";
 import { SvelteKitAuth } from "@auth/sveltekit";
 import Spotify from "@auth/sveltekit/providers/spotify";
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "$env/static/private";
@@ -81,10 +82,11 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
         session.accessToken = token.accessToken as string;
       }
       if (token.user) {
+        const u = token.user as any;
         session.user = {
           ...session.user,
-          ...token.user,
-          id: token.user.id
+          ...u,
+          id: u.id
         };
       }
       (session as any).error = token.error;

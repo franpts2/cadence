@@ -12,10 +12,14 @@
 	let results = $state<Song[]>([]);
 	let isSearching = $state(false);
 	let inputElement = $state<HTMLInputElement>();
+	let dialogElement = $state<HTMLDialogElement>();
 
 	$effect(() => {
-		if (isOpen && inputElement) {
-			inputElement.focus();
+		if (isOpen) {
+			dialogElement?.showModal();
+			inputElement?.focus();
+		} else {
+			dialogElement?.close();
 		}
 	});
 
@@ -39,8 +43,10 @@
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Escape') onClose();
-		if (e.key === 'Enter') handleSearch();
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			handleSearch();
+		}
 	}
 
 	let debounceTimer: ReturnType<typeof setTimeout>;
@@ -48,18 +54,24 @@
 		clearTimeout(debounceTimer);
 		debounceTimer = setTimeout(handleSearch, 300);
 	}
+
+	function handleClose() {
+		searchQuery = '';
+		results = [];
+		onClose();
+	}
 </script>
 
-{#if isOpen}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div 
-		class="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] px-4 backdrop-blur-xs"
-		onclick={onClose}
-	>
+<dialog
+	bind:this={dialogElement}
+	onclose={handleClose}
+	onclick={(e) => e.target === dialogElement && handleClose()}
+	class="fixed inset-0 z-50 m-0 h-full w-full max-h-none max-w-none bg-transparent p-0 backdrop:bg-zinc-950/50 backdrop:backdrop-blur-sm"
+>
+	<div class="flex items-start justify-center pt-[15vh] px-4 h-full w-full pointer-events-none">
 		<div 
-			class="w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden"
-			onclick={(e) => e.stopPropagation()}
+			class="w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden pointer-events-auto"
+			role="document"
 		>
 			<div class="p-4 border-b border-zinc-800 flex items-center gap-3">
 				<SearchIcon class="h-5 w-5 text-zinc-500" />
@@ -71,7 +83,11 @@
 					placeholder="Search for a song..."
 					class="flex-1 bg-transparent border-none outline-none text-zinc-100 placeholder:text-zinc-600 text-lg"
 				/>
-				<button onclick={onClose} class="text-zinc-500 hover:text-zinc-300 p-1" aria-label="Close search">
+				<button 
+					onclick={handleClose} 
+					class="text-zinc-500 hover:text-zinc-300 p-1" 
+					aria-label="Close search"
+				>
 					<CloseIcon />
 				</button>
 			</div>
@@ -99,4 +115,15 @@
 			</div>
 		</div>
 	</div>
-{/if}
+</dialog>
+
+<style>
+	dialog::backdrop {
+		animation: fade-in 0.2s ease-out;
+	}
+
+	@keyframes fade-in {
+		from { opacity: 0; }
+		to { opacity: 1; }
+	}
+</style>
