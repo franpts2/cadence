@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, primaryKey } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, primaryKey, uniqueIndex } from "drizzle-orm/sqlite-core";
 import type { AdapterAccount } from "@auth/core/adapters";
 
 export const users = sqliteTable("user", {
@@ -41,18 +41,34 @@ export const sessions = sqliteTable("session", {
   expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
 });
 
-// Cadence Specific Tables
+/**
+ * Normalized Song Metadata
+ * Stores information about a song once, regardless of how many users save it.
+ */
+export const songs = sqliteTable("song", {
+  id: text("id").notNull().primaryKey(), // The Spotify ID
+  name: text("name").notNull(),
+  artistName: text("artist_name").notNull(),
+  albumName: text("album_name").notNull(),
+  albumImageUrl: text("album_image_url"),
+  previewUrl: text("preview_url"),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$defaultFn(() => new Date()),
+});
+
+/**
+ * User Daily Entries
+ * Links a user to a specific date and a song.
+ */
 export const dailySongs = sqliteTable("daily_song", {
   id: text("id").notNull().primaryKey(),
   userId: text("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   dateKey: text("date_key").notNull(), // "YYYY-MM-DD"
-  songId: text("song_id").notNull(),
-  songName: text("song_name").notNull(),
-  artistName: text("artist_name").notNull(),
-  albumName: text("album_name").notNull(),
-  albumImageUrl: text("album_image_url"),
-  previewUrl: text("preview_url"),
+  songId: text("song_id")
+    .notNull()
+    .references(() => songs.id), // Reference the normalized song table
   createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(() => new Date()),
-});
+}, (table) => ({
+  userDateIdx: uniqueIndex("user_date_idx").on(table.userId, table.dateKey),
+}));

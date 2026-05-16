@@ -10,6 +10,9 @@ export class CalendarState {
 	// Song storage: key is "YYYY-MM-DD"
 	songsPerDay = $state<Record<string, Song>>({});
 	
+	// Cache: keep track of which YYYY-MM have been loaded
+	loadedMonths = new Set<string>();
+	
 	// Modal state
 	isSearchOpen = $state(false);
 	searchingForDate = $state<Date | null>(null);
@@ -19,6 +22,11 @@ export class CalendarState {
 
 	constructor(initialSongs: Record<string, Song> = {}) {
 		this.songsPerDay = initialSongs;
+		// Mark current month as loaded if initial songs provided
+		if (Object.keys(initialSongs).length > 0) {
+			const key = `${this.today.getFullYear()}-${this.today.getMonth() + 1}`;
+			this.loadedMonths.add(key);
+		}
 	}
 
 	prevMonth = () => {
@@ -60,18 +68,29 @@ export class CalendarState {
 	};
 
 	loadSongs = async () => {
+		const year = this.viewDate.getFullYear();
+		const month = this.viewDate.getMonth() + 1;
+		const cacheKey = `${year}-${month}`;
+
+		// Check if we've already loaded this month
+		if (this.loadedMonths.has(cacheKey)) {
+			return;
+		}
+
 		try {
-			const response = await fetch('/api/songs');
+			const response = await fetch(`/api/songs?year=${year}&month=${month}`);
 			if (response.ok) {
 				const dbSongs: DbSong[] = await response.json();
-				this.songsPerDay = this.mapDbSongsToRecord(dbSongs);
+				const mapped = this.mapDbSongsToRecord(dbSongs);
+				this.songsPerDay = { ...this.songsPerDay, ...mapped };
+				this.loadedMonths.add(cacheKey);
 			}
 		} catch (err) {
 			console.error('Failed to load songs:', err);
 		}
 	};
 
-	mapDbSongsToRecord = (dbSongs: DbSong[]): Record<string, Song> => {
+	mapDbSongsToRecord = (dbSongs: any[]): Record<string, Song> => {
 		const mapped: Record<string, Song> = {};
 		dbSongs.forEach((s) => {
 			mapped[s.dateKey] = {

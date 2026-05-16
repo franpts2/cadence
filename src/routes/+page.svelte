@@ -13,6 +13,15 @@
 	// Initialize state with data from server
 	const cal = setCalendarState();
 
+	// Load songs when navigating months
+	$effect(() => {
+		if (session?.user) {
+			// viewDate changes when user clicks Prev/Next
+			// This triggers a background fetch for that month
+			cal.loadSongs();
+		}
+	});
+
 	$effect(() => {
 		if (data.songs) {
 			cal.songsPerDay = cal.mapDbSongsToRecord(data.songs);
