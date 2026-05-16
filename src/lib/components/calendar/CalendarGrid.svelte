@@ -15,7 +15,7 @@
 	<!-- Day Labels -->
 	<div class="grid grid-cols-7 border-b border-zinc-800 bg-zinc-950/50">
 		{#each daysOfWeek as day}
-			<div class="py-3 text-center text-[10px] font-bold text-zinc-500 tracking-[0.2em]">
+			<div class="py-2 sm:py-3 text-center text-[8px] sm:text-[10px] font-bold text-zinc-500 tracking-widest md:tracking-[0.2em]">
 				{day}
 			</div>
 		{/each}
