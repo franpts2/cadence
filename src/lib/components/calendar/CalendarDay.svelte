@@ -9,11 +9,22 @@
 		onclick: () => void;
 		onAddSong: () => void;
 	}>();
+
+	function handleKeyDown(e: KeyboardEvent) {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			onclick();
+		}
+	}
 </script>
 
-<button
-	{onclick}
-	class="relative group border-b border-r border-zinc-900 text-left p-1.5 sm:p-2 md:p-3 transition-colors h-full w-full min-h-[80px] md:min-h-[120px] flex flex-col
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<div
+	onclick={onclick}
+	onkeydown={handleKeyDown}
+	role="button"
+	tabindex="0"
+	class="relative group border-b border-r border-zinc-900 text-left p-1.5 sm:p-2 md:p-3 transition-colors h-full w-full min-h-[80px] md:min-h-[120px] flex flex-col cursor-default
 		{isSelected ? 'bg-zinc-900/50' : 'hover:bg-zinc-900/30'}"
 >
 	<div class="flex justify-between items-start w-full">
@@ -23,7 +34,7 @@
 			{day}
 		</span>
 
-		{#if songs.length === 0}
+		{#if !songs || songs.length === 0}
 			<button 
 				onclick={(e) => { e.stopPropagation(); onAddSong(); }}
 				class="opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity p-1 text-zinc-400"
@@ -36,18 +47,21 @@
 		{/if}
 	</div>
 	
-	<div class="mt-2 space-y-1 overflow-hidden">
+	<div class="mt-2 space-y-1 overflow-hidden flex-1 w-full">
 		{#each songs as song}
-			<div class="flex items-center gap-2 p-1 rounded bg-zinc-900/50 border border-zinc-800/50 overflow-hidden">
+			<button 
+				onclick={(e) => { e.stopPropagation(); onAddSong(); }}
+				class="w-full flex items-center gap-2 p-1 rounded bg-zinc-900/50 border border-zinc-800/50 overflow-hidden hover:bg-zinc-800 transition-colors group/song text-left"
+			>
 				{#if song.album.images[0]}
 					<img src={song.album.images[0].url} alt="" class="w-4 h-4 rounded-sm flex-shrink-0" />
 				{/if}
-				<span class="text-[10px] text-zinc-300 truncate font-medium">{song.name}</span>
-			</div>
+				<span class="text-[10px] text-zinc-300 truncate font-medium group-hover/song:text-zinc-100">{song.name}</span>
+			</button>
 		{/each}
 	</div>
 	
 	{#if isToday}
 		<div class="absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2 md:bottom-3 md:right-3 w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-zinc-100 animate-pulse"></div>
 	{/if}
-</button>
+</div>

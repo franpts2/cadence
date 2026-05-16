@@ -14,6 +14,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
   session: {
     strategy: "jwt",
   },
+  trustHost: true,
   providers: [
     Spotify({
       clientId: SPOTIFY_CLIENT_ID,
@@ -23,7 +24,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
   ],
   callbacks: {
     async jwt({ token, account, user }) {
-      if (account) {
+      if (account && account.access_token) {
         token.accessToken = account.access_token;
       }
       if (user) {
@@ -32,8 +33,10 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
       return token;
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken as string;
-      if (session.user) {
+      if (token.accessToken) {
+        session.accessToken = token.accessToken as string;
+      }
+      if (session.user && token.id) {
         session.user.id = token.id as string;
       }
       return session;
