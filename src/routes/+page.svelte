@@ -2,6 +2,8 @@
 	import Calendar from '$lib/components/calendar/Calendar.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import SongSearchModal from '$lib/components/SongSearchModal.svelte';
+	import Toast from '$lib/components/ui/Toast.svelte';
+	import LoadingIndicator from '$lib/components/ui/LoadingIndicator.svelte';
 	import { page } from '$app/state';
 	import { setCalendarState } from '$lib';
 	import type { PageData } from './$types';
@@ -16,8 +18,6 @@
 	// Load songs when navigating months
 	$effect(() => {
 		if (session?.user) {
-			// viewDate changes when user clicks Prev/Next
-			// This triggers a background fetch for that month
 			cal.loadSongs();
 		}
 	});
@@ -31,11 +31,16 @@
 	$effect(() => {
 		if (!session?.user) {
 			cal.songsPerDay = {};
+			cal.loadedMonths.clear();
 		}
 	});
 </script>
 
-<div class="h-screen w-screen overflow-hidden bg-zinc-950 flex flex-col">
+<div class="h-screen w-screen overflow-hidden bg-zinc-950 flex flex-col relative">
+	{#if cal.isLoading}
+		<LoadingIndicator />
+	{/if}
+
 	<Header {session} />
 	
 	<main class="flex-1 overflow-hidden flex flex-col">
@@ -52,3 +57,5 @@
 		}
 	}}
 />
+
+<Toast />

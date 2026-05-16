@@ -1,4 +1,5 @@
 import { sqliteTable, text, integer, primaryKey, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
 import type { AdapterAccount } from "@auth/core/adapters";
 
 export const users = sqliteTable("user", {
@@ -43,7 +44,6 @@ export const sessions = sqliteTable("session", {
 
 /**
  * Normalized Song Metadata
- * Stores information about a song once, regardless of how many users save it.
  */
 export const songs = sqliteTable("song", {
   id: text("id").notNull().primaryKey(), // The Spotify ID
@@ -57,18 +57,17 @@ export const songs = sqliteTable("song", {
 
 /**
  * User Daily Entries
- * Links a user to a specific date and a song.
  */
 export const dailySongs = sqliteTable("daily_song", {
-  id: text("id").notNull().primaryKey(),
+  id: text("id").notNull().primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: text("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   dateKey: text("date_key").notNull(), // "YYYY-MM-DD"
   songId: text("song_id")
     .notNull()
-    .references(() => songs.id), // Reference the normalized song table
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(() => new Date()),
+    .references(() => songs.id),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sql`(strftime('%s', 'now') * 1000)`),
 }, (table) => ({
   userDateIdx: uniqueIndex("user_date_idx").on(table.userId, table.dateKey),
 }));

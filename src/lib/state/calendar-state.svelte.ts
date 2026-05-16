@@ -1,5 +1,5 @@
 import { getContext, setContext } from 'svelte';
-import type { Song, DbSong } from '../types';
+import type { Song, Toast, ToastType } from '../types/index';
 import { getDateKey, MONTHS } from '../utils/date';
 
 export class CalendarState {
@@ -13,6 +13,10 @@ export class CalendarState {
 	// Cache: keep track of which YYYY-MM have been loaded
 	loadedMonths = new Set<string>();
 	
+	// UI State
+	isLoading = $state(false);
+	toasts = $state<Toast[]>([]);
+	
 	// Modal state
 	isSearchOpen = $state(false);
 	searchingForDate = $state<Date | null>(null);
@@ -22,12 +26,22 @@ export class CalendarState {
 
 	constructor(initialSongs: Record<string, Song> = {}) {
 		this.songsPerDay = initialSongs;
-		// Mark current month as loaded if initial songs provided
 		if (Object.keys(initialSongs).length > 0) {
 			const key = `${this.today.getFullYear()}-${this.today.getMonth() + 1}`;
 			this.loadedMonths.add(key);
 		}
 	}
+
+	// Toast Logic
+	addToast = (message: string, type: ToastType = 'info') => {
+		const id = crypto.randomUUID();
+		this.toasts.push({ id, message, type });
+		setTimeout(() => this.removeToast(id), 5000);
+	};
+
+	removeToast = (id: string) => {
+		this.toasts = this.toasts.filter(t => t.id !== id);
+	};
 
 	prevMonth = () => {
 		this.viewDate = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth() - 1, 1);
@@ -72,21 +86,24 @@ export class CalendarState {
 		const month = this.viewDate.getMonth() + 1;
 		const cacheKey = `${year}-${month}`;
 
-		// Check if we've already loaded this month
-		if (this.loadedMonths.has(cacheKey)) {
-			return;
-		}
+		if (this.loadedMonths.has(cacheKey)) return;
 
+		this.isLoading = true;
 		try {
 			const response = await fetch(`/api/songs?year=${year}&month=${month}`);
 			if (response.ok) {
-				const dbSongs: DbSong[] = await response.json();
+				const dbSongs: any[] = await response.json();
 				const mapped = this.mapDbSongsToRecord(dbSongs);
 				this.songsPerDay = { ...this.songsPerDay, ...mapped };
 				this.loadedMonths.add(cacheKey);
+			} else {
+				this.addToast('Failed to load songs', 'error');
 			}
 		} catch (err) {
 			console.error('Failed to load songs:', err);
+			this.addToast('Network error while loading songs', 'error');
+		} finally {
+			this.isLoading = false;
 		}
 	};
 
@@ -109,6 +126,7 @@ export class CalendarState {
 
 	addSongToDate = async (date: Date, song: Song) => {
 		const dateKey = getDateKey(date);
+		this.isLoading = true;
 		
 		try {
 			const response = await fetch('/api/songs', {
@@ -119,10 +137,16 @@ export class CalendarState {
 
 			if (response.ok) {
 				this.songsPerDay[dateKey] = song;
+				this.addToast('Song saved to calendar', 'success');
+			} else {
+				const data = await response.json();
+				this.addToast(data.error || 'Failed to save song', 'error');
 			}
 		} catch (err) {
 			console.error('Failed to persist song:', err);
+			this.addToast('Network error while saving', 'error');
 		} finally {
+			this.isLoading = false;
 			this.closeSearch();
 		}
 	};
@@ -130,6 +154,7 @@ export class CalendarState {
 	removeSongFromDate = async (day: number) => {
 		const date = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth(), day);
 		const dateKey = getDateKey(date);
+		this.isLoading = true;
 
 		try {
 			const response = await fetch(`/api/songs?dateKey=${dateKey}`, {
@@ -138,9 +163,15 @@ export class CalendarState {
 
 			if (response.ok) {
 				delete this.songsPerDay[dateKey];
+				this.addToast('Song removed', 'info');
+			} else {
+				this.addToast('Failed to remove song', 'error');
 			}
 		} catch (err) {
 			console.error('Failed to delete song:', err);
+			this.addToast('Network error while removing', 'error');
+		} finally {
+			this.isLoading = false;
 		}
 	};
 }

@@ -3,7 +3,13 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import { dailySongs, songs } from '$lib/server/db/schema';
 import { eq, and, like } from 'drizzle-orm';
-import type { Song } from '$lib';
+import { SongSchema } from '$lib';
+import { z } from 'zod';
+
+const postSchema = z.object({
+	dateKey: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+	song: SongSchema
+});
 
 export const GET: RequestHandler = async ({ locals, url }) => {
 	const session = await locals.auth();
@@ -22,7 +28,6 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 			conditions.push(like(dailySongs.dateKey, pattern));
 		}
 
-		// Use a JOIN to get normalized song data
 		const results = await db
 			.select({
 				dateKey: dailySongs.dateKey,
@@ -50,17 +55,23 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Unauthorized' }, { status: 401 });
 	}
 
-	const { dateKey, song }: { dateKey: string, song: Song } = await request.json();
+	const body = await request.json();
+	const result = postSchema.safeParse(body);
+
+	if (!result.success) {
+		return json({ error: 'Invalid request data', details: result.error.format() }, { status: 400 });
+	}
+
+	const { dateKey, song } = result.data;
 
 	try {
-		// 1. Ensure the song exists in the normalized 'songs' table
 		await db.insert(songs).values({
 			id: song.id,
 			name: song.name,
 			artistName: song.artists.map((a) => a.name).join(', '),
 			albumName: song.album.name,
 			albumImageUrl: song.album.images[0]?.url ?? null,
-			previewUrl: (song as any).preview_url ?? null,
+			previewUrl: song.preview_url ?? null,
 		}).onConflictDoUpdate({
 			target: songs.id,
 			set: {
@@ -68,15 +79,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				artistName: song.artists.map((a) => a.name).join(', '),
 				albumName: song.album.name,
 				albumImageUrl: song.album.images[0]?.url ?? null,
-				previewUrl: (song as any).preview_url ?? null,
+				previewUrl: song.preview_url ?? null,
 				updatedAt: new Date()
 			}
 		});
 
-		// 2. Link the song to the user and date in 'dailySongs'
-		const entryId = crypto.randomUUID();
 		await db.insert(dailySongs).values({
-			id: entryId,
 			userId: session.user.id,
 			dateKey,
 			songId: song.id,
@@ -101,8 +109,8 @@ export const DELETE: RequestHandler = async ({ url, locals }) => {
 	}
 
 	const dateKey = url.searchParams.get('dateKey');
-	if (!dateKey) {
-		return json({ error: 'Missing dateKey' }, { status: 400 });
+	if (!dateKey || !/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
+		return json({ error: 'Missing or invalid dateKey' }, { status: 400 });
 	}
 
 	try {
