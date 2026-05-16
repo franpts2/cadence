@@ -1,10 +1,14 @@
 <script lang="ts">
+	import type { Song } from './calendar.svelte';
 	import CalendarGrid from './components/calendar/CalendarGrid.svelte';
 
-	let { viewDate, selectedDate, selectDate } = $props<{
+	let { viewDate, selectedDate, selectDate, getSongsForDate, onAddSong, onDeleteSong } = $props<{
 		viewDate: Date;
 		selectedDate: Date;
 		selectDate: (day: number) => void;
+		getSongsForDate: (day: number) => Song[];
+		onAddSong: (day: number) => void;
+		onDeleteSong: (day: number) => void;
 	}>();
 
 	const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -41,6 +45,9 @@
 		{daysInMonth}
 		{isToday}
 		{isSelected}
+		getSongsForDate={(day) => getSongsForDate(day)}
 		onSelectDate={selectDate}
+		onAddSong={(day) => onAddSong(day)}
+		onDeleteSong={(day) => onDeleteSong(day)}
 	/>
 </div>
