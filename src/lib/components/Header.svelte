@@ -14,44 +14,49 @@
 </script>
 
 <header
-	class="flex items-center justify-between px-8 py-4 border-b border-zinc-800 bg-zinc-950"
+	class="grid grid-cols-2 items-center gap-y-4 px-4 py-4 border-b border-zinc-800 bg-zinc-950 md:flex md:justify-between md:px-8"
 >
-	<div class="flex items-center">
-		<div class="flex items-center gap-4">
-			<h1 class="text-2xl font-light tracking-tighter text-zinc-400">
-				CADENCE
-			</h1>
-			<div class="h-5 w-px bg-zinc-800"></div>
-			<h2 class="text-xl text-zinc-100 min-w-[150px]">
-				{monthLabel} {yearLabel}
-			</h2>
-		</div>
-
-		<CalendarNav {onPrev} {onNext} {onToday} />
+	<div class="flex items-center gap-3 md:gap-4 order-1">
+		<h1 class="text-xl font-light tracking-tighter text-zinc-400 md:text-2xl">
+			CADENCE
+		</h1>
+		<div class="hidden h-5 w-px bg-zinc-800 md:block"></div>
+		<h2 class="hidden text-lg text-zinc-100 min-w-[120px] md:block lg:text-xl lg:min-w-[150px]">
+			{monthLabel} {yearLabel}
+		</h2>
 	</div>
 
-	<div class="flex items-center gap-4">
+	<div class="flex items-center justify-center col-span-2 order-3 md:order-2 md:col-auto">
+		<div class="flex flex-col items-center gap-2 md:flex-row md:gap-0">
+			<h2 class="text-xl font-medium text-zinc-100 md:hidden">
+				{monthLabel} {yearLabel}
+			</h2>
+			<CalendarNav {onPrev} {onNext} {onToday} />
+		</div>
+	</div>
+
+	<div class="flex items-center justify-end gap-2 md:gap-4 order-2 md:order-3">
 		{#if session?.user}
-			<div class="flex items-center gap-3">
+			<div class="flex items-center gap-2 md:gap-3">
 				{#if session.user.image}
 					<img 
 						src={session.user.image} 
 						alt={session.user.name ?? 'User'} 
-						class="w-8 h-8 rounded-full border border-zinc-800" 
+						class="w-7 h-7 md:w-8 md:h-8 rounded-full border border-zinc-800" 
 					/>
 				{/if}
-				<span class="text-sm text-zinc-100 font-medium">{session.user.name}</span>
+				<span class="hidden text-sm text-zinc-100 font-medium sm:block">{session.user.name}</span>
 			</div>
 			<button
 				onclick={() => signOut()}
-				class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-zinc-100 rounded-md transition-colors text-sm font-medium"
+				class="px-3 py-1.5 md:px-4 md:py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-zinc-100 rounded-md transition-colors text-xs md:text-sm font-medium"
 			>
 				Log out
 			</button>
 		{:else}
 			<button
 				onclick={() => signIn('spotify')}
-				class="px-6 py-2 bg-[#1DB954] hover:bg-[#1ed760] text-zinc-950 font-bold rounded-full transition-colors text-sm"
+				class="px-4 py-1.5 md:px-6 md:py-2 bg-[#1DB954] hover:bg-[#1ed760] text-zinc-950 font-bold rounded-full transition-colors text-xs md:text-sm"
 			>
 				Log in to Spotify
 			</button>
