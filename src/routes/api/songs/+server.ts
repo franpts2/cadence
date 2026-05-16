@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import { dailySongs } from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
-import type { Song } from '$lib/types';
+import type { Song } from '$lib';
 
 export const GET: RequestHandler = async ({ locals }) => {
 	const session = await locals.auth();

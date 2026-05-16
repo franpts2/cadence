@@ -2,7 +2,7 @@
 	import CalendarNav from "./calendar/CalendarNav.svelte";
 	import { signIn, signOut } from '@auth/sveltekit/client';
 	import type { Session } from "@auth/sveltekit";
-	import { getCalendarState } from "$lib/state/calendar-state.svelte";
+	import { getCalendarState } from "$lib";
 
 	let { session } = $props<{
 		session: Session | null | undefined;

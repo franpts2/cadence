@@ -1,6 +1,6 @@
 import { getContext, setContext } from 'svelte';
-import type { Song, DbSong } from '$lib/types';
-import { getDateKey, MONTHS } from '$lib/utils/date';
+import type { Song, DbSong } from '../types';
+import { getDateKey, MONTHS } from '../utils/date';
 
 export class CalendarState {
 	today = new Date();

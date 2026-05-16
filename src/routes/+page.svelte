@@ -3,7 +3,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import SongSearchModal from '$lib/components/SongSearchModal.svelte';
 	import { page } from '$app/state';
-	import { setCalendarState } from '$lib/state/calendar-state.svelte';
+	import { setCalendarState } from '$lib';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

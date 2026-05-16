@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Song } from '$lib/types';
+	import type { Song } from '$lib';
 
 	let { isOpen, onSelect, onClose } = $props<{
 		isOpen: boolean;

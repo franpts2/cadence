@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getCalendarState } from "$lib/state/calendar-state.svelte";
+	import { getCalendarState } from "$lib";
 
 	const cal = getCalendarState();
 </script>

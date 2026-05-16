@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { getCalendarState } from '$lib/state/calendar-state.svelte';
-	import { DAYS_OF_WEEK, isSameDay } from '$lib/utils/date';
+	import { getCalendarState, DAYS_OF_WEEK, isSameDay } from '$lib';
 	import CalendarDay from './CalendarDay.svelte';
 
 	let { startDay, daysInMonth } = $props<{

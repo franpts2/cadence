@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { getCalendarState } from '$lib/state/calendar-state.svelte';
-	import { getDaysInMonth, getStartDayOfMonth } from '$lib/utils/date';
+	import { getCalendarState, getDaysInMonth, getStartDayOfMonth } from '$lib';
 	import CalendarGrid from './CalendarGrid.svelte';
 
 	const cal = getCalendarState();

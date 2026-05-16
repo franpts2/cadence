@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Song } from '$lib/types';
+	import type { Song } from '$lib';
 
 	let { day, isToday, isSelected, songs = [], onclick, onAddSong, onDeleteSong } = $props<{
 		day: number;
