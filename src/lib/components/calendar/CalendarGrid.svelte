@@ -1,13 +1,16 @@
 <script lang="ts">
+	import type { Song } from '$lib/calendar.svelte';
 	import CalendarDay from './CalendarDay.svelte';
 
-	let { daysOfWeek, startDay, daysInMonth, isToday, isSelected, onSelectDate } = $props<{
+	let { daysOfWeek, startDay, daysInMonth, isToday, isSelected, getSongsForDate, onSelectDate, onAddSong } = $props<{
 		daysOfWeek: string[];
 		startDay: number;
 		daysInMonth: number;
 		isToday: (day: number) => boolean;
 		isSelected: (day: number) => boolean;
+		getSongsForDate: (day: number) => Song[];
 		onSelectDate: (day: number) => void;
+		onAddSong: (day: number) => void;
 	}>();
 </script>
 
@@ -33,7 +36,9 @@
 				{day}
 				isToday={isToday(day)}
 				isSelected={isSelected(day)}
+				songs={getSongsForDate(day)}
 				onclick={() => onSelectDate(day)}
+				onAddSong={() => onAddSong(day)}
 			/>
 		{/each}
 

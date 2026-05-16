@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Calendar from '$lib/Calendar.svelte';
 	import Header from '$lib/components/Header.svelte';
+	import SongSearchModal from '$lib/components/SongSearchModal.svelte';
 	import { page } from '$app/state';
 	import { CalendarState } from '$lib/calendar.svelte';
 
@@ -22,7 +23,19 @@
 		<Calendar 
 			viewDate={cal.viewDate} 
 			selectedDate={cal.selectedDate} 
-			selectDate={cal.selectDate} 
+			selectDate={cal.selectDate}
+			getSongsForDate={(day) => cal.getSongsForDay(day)}
+			onAddSong={(day) => cal.startSearchForDay(day)}
 		/>
 	</main>
 </div>
+
+<SongSearchModal 
+	isOpen={cal.isSearchOpen} 
+	onClose={() => cal.closeSearch()}
+	onSelect={(song) => {
+		if (cal.searchingForDate) {
+			cal.addSongToDate(cal.searchingForDate, song);
+		}
+	}}
+/>
