@@ -1,3 +1,10 @@
+export const MONTHS = [
+	'January', 'February', 'March', 'April', 'May', 'June',
+	'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+export const DAYS_OF_WEEK = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
 export function getDaysInMonth(year: number, month: number): number {
 	return new Date(year, month + 1, 0).getDate();
 }
@@ -17,10 +24,3 @@ export function isSameDay(date1: Date, date2: Date): boolean {
 		date1.getFullYear() === date2.getFullYear()
 	);
 }
-
-export const MONTHS = [
-	'January', 'February', 'March', 'April', 'May', 'June',
-	'July', 'August', 'September', 'October', 'November', 'December'
-];
-
-export const DAYS_OF_WEEK = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
