@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import { dailySongs } from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
+import type { Song } from '$lib/types';
 
 export const GET: RequestHandler = async ({ locals }) => {
 	const session = await locals.auth();
@@ -29,7 +30,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Unauthorized' }, { status: 401 });
 	}
 
-	const { dateKey, song } = await request.json();
+	const { dateKey, song }: { dateKey: string, song: Song } = await request.json();
 
 	try {
 		const id = crypto.randomUUID();
@@ -39,10 +40,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			dateKey,
 			songId: song.id,
 			songName: song.name,
-			artistName: song.artists.map((a: any) => a.name).join(', '),
+			artistName: song.artists.map((a) => a.name).join(', '),
 			albumName: song.album.name,
-			albumImageUrl: song.album.images[0]?.url,
-			previewUrl: song.preview_url,
+			albumImageUrl: song.album.images[0]?.url ?? null,
+			previewUrl: (song as any).preview_url ?? null,
 		};
 
 		await db.insert(dailySongs).values(newSong);

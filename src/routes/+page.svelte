@@ -1,17 +1,26 @@
 <script lang="ts">
-	import Calendar from '$lib/Calendar.svelte';
+	import Calendar from '$lib/components/calendar/Calendar.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import SongSearchModal from '$lib/components/SongSearchModal.svelte';
 	import { page } from '$app/state';
-	import { CalendarState } from '$lib/calendar.svelte';
+	import { setCalendarState } from '$lib/state/calendar-state.svelte';
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
 
 	const session = $derived(page.data.session);
-	const cal = new CalendarState();
+	
+	// Initialize state with data from server
+	const cal = setCalendarState();
 
 	$effect(() => {
-		if (session?.user) {
-			cal.loadSongs();
-		} else {
+		if (data.songs) {
+			cal.songsPerDay = cal.mapDbSongsToRecord(data.songs);
+		}
+	});
+
+	$effect(() => {
+		if (!session?.user) {
 			cal.songsPerDay = {};
 		}
 	});
@@ -28,14 +37,7 @@
 	/>
 	
 	<main class="flex-1 overflow-hidden flex flex-col">
-		<Calendar 
-			viewDate={cal.viewDate} 
-			selectedDate={cal.selectedDate} 
-			selectDate={cal.selectDate}
-			getSongsForDate={(day) => cal.getSongsForDay(day)}
-			onAddSong={(day) => cal.startSearchForDay(day)}
-			onDeleteSong={(day) => cal.removeSongFromDate(day)}
-		/>
+		<Calendar />
 	</main>
 </div>
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Song } from '$lib/calendar.svelte';
+	import type { Song } from '$lib/types';
 
 	let { day, isToday, isSelected, songs = [], onclick, onAddSong, onDeleteSong } = $props<{
 		day: number;

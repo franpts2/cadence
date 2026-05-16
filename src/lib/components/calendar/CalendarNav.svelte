@@ -1,14 +1,12 @@
 <script lang="ts">
-	let { onPrev, onNext, onToday } = $props<{
-		onPrev: () => void;
-		onNext: () => void;
-		onToday: () => void;
-	}>();
+	import { getCalendarState } from "$lib/state/calendar-state.svelte";
+
+	const cal = getCalendarState();
 </script>
 
 <div class="flex items-center bg-zinc-900 rounded-lg p-1 border border-zinc-800">
 	<button
-		onclick={onPrev}
+		onclick={cal.prevMonth}
 		class="p-2 hover:bg-zinc-800 rounded-md transition-colors text-zinc-400 hover:text-zinc-100"
 		aria-label="Previous Month"
 	>
@@ -17,13 +15,13 @@
 		</svg>
 	</button>
 	<button
-		onclick={onToday}
+		onclick={cal.goToToday}
 		class="px-4 py-1 text-sm font-medium hover:bg-zinc-800 rounded-md transition-colors text-zinc-100"
 	>
 		Today
 	</button>
 	<button
-		onclick={onNext}
+		onclick={cal.nextMonth}
 		class="p-2 hover:bg-zinc-800 rounded-md transition-colors text-zinc-400 hover:text-zinc-100"
 		aria-label="Next Month"
 	>

@@ -1,24 +1,30 @@
 <script lang="ts">
-	import type { Song } from '$lib/calendar.svelte';
+	import { getCalendarState } from '$lib/state/calendar-state.svelte';
+	import { DAYS_OF_WEEK, isSameDay } from '$lib/utils/date';
 	import CalendarDay from './CalendarDay.svelte';
 
-	let { daysOfWeek, startDay, daysInMonth, isToday, isSelected, getSongsForDate, onSelectDate, onAddSong, onDeleteSong } = $props<{
-		daysOfWeek: string[];
+	let { startDay, daysInMonth } = $props<{
 		startDay: number;
 		daysInMonth: number;
-		isToday: (day: number) => boolean;
-		isSelected: (day: number) => boolean;
-		getSongsForDate: (day: number) => Song[];
-		onSelectDate: (day: number) => void;
-		onAddSong: (day: number) => void;
-		onDeleteSong: (day: number) => void;
 	}>();
+
+	const cal = getCalendarState();
+
+	function isToday(day: number) {
+		const date = new Date(cal.viewDate.getFullYear(), cal.viewDate.getMonth(), day);
+		return isSameDay(new Date(), date);
+	}
+
+	function isSelected(day: number) {
+		const date = new Date(cal.viewDate.getFullYear(), cal.viewDate.getMonth(), day);
+		return isSameDay(cal.selectedDate, date);
+	}
 </script>
 
 <div class="flex-1 flex flex-col overflow-hidden">
 	<!-- Day Labels -->
 	<div class="grid grid-cols-7 border-b border-zinc-800 bg-zinc-950/50">
-		{#each daysOfWeek as day}
+		{#each DAYS_OF_WEEK as day}
 			<div class="py-2 sm:py-3 text-center text-[8px] sm:text-[10px] font-bold text-zinc-500 tracking-widest md:tracking-[0.2em]">
 				{day}
 			</div>
@@ -37,10 +43,10 @@
 				{day}
 				isToday={isToday(day)}
 				isSelected={isSelected(day)}
-				songs={getSongsForDate(day)}
-				onclick={() => onSelectDate(day)}
-				onAddSong={() => onAddSong(day)}
-				onDeleteSong={() => onDeleteSong(day)}
+				songs={cal.getSongsForDay(day)}
+				onclick={() => cal.selectDate(day)}
+				onAddSong={() => cal.startSearchForDay(day)}
+				onDeleteSong={() => cal.removeSongFromDate(day)}
 			/>
 		{/each}
 
