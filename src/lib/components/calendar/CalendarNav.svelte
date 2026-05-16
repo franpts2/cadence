@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getCalendarState } from "$lib";
+	import { getCalendarState, ChevronLeftIcon, ChevronRightIcon } from "$lib";
 
 	const cal = getCalendarState();
 </script>
@@ -10,9 +10,7 @@
 		class="p-2 hover:bg-zinc-800 rounded-md transition-colors text-zinc-400 hover:text-zinc-100"
 		aria-label="Previous Month"
 	>
-		<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-		</svg>
+		<ChevronLeftIcon class="h-4 w-4" />
 	</button>
 	<button
 		onclick={cal.goToToday}
@@ -25,8 +23,6 @@
 		class="p-2 hover:bg-zinc-800 rounded-md transition-colors text-zinc-400 hover:text-zinc-100"
 		aria-label="Next Month"
 	>
-		<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-		</svg>
+		<ChevronRightIcon class="h-4 w-4" />
 	</button>
 </div>

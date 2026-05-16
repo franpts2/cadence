@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Song } from '$lib';
+	import { type Song, SearchIcon, CloseIcon } from '$lib';
 	import SongSearchResult from './SongSearchResult.svelte';
 
 	let { isOpen, onSelect, onClose } = $props<{
@@ -62,9 +62,7 @@
 			onclick={(e) => e.stopPropagation()}
 		>
 			<div class="p-4 border-b border-zinc-800 flex items-center gap-3">
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-				</svg>
+				<SearchIcon class="h-5 w-5 text-zinc-500" />
 				<input
 					bind:this={inputElement}
 					bind:value={searchQuery}
@@ -74,9 +72,7 @@
 					class="flex-1 bg-transparent border-none outline-none text-zinc-100 placeholder:text-zinc-600 text-lg"
 				/>
 				<button onclick={onClose} class="text-zinc-500 hover:text-zinc-300 p-1" aria-label="Close search">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-					</svg>
+					<CloseIcon />
 				</button>
 			</div>
 
