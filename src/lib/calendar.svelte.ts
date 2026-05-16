@@ -66,13 +66,55 @@ export class CalendarState {
 		this.searchingForDate = null;
 	};
 
-	addSongToDate = (date: Date, song: Song) => {
-		const dateKey = this.getDateKey(date);
-		if (!this.songsPerDay[dateKey]) {
-			this.songsPerDay[dateKey] = [];
+	loadSongs = async () => {
+		try {
+			const response = await fetch('/api/songs');
+			if (response.ok) {
+				const dbSongs = await response.json();
+				const mapped: Record<string, Song[]> = {};
+				
+				dbSongs.forEach((s: any) => {
+					if (!mapped[s.dateKey]) mapped[s.dateKey] = [];
+					mapped[s.dateKey].push({
+						id: s.songId,
+						name: s.songName,
+						artists: [{ name: s.artistName }],
+						album: {
+							name: s.albumName,
+							images: [{ url: s.albumImageUrl }]
+						},
+						duration_ms: 0 // Not stored
+					});
+				});
+				
+				this.songsPerDay = mapped;
+			}
+		} catch (err) {
+			console.error('Failed to load songs:', err);
 		}
-		this.songsPerDay[dateKey].push(song);
-		this.closeSearch();
+	};
+
+	addSongToDate = async (date: Date, song: Song) => {
+		const dateKey = this.getDateKey(date);
+		
+		try {
+			const response = await fetch('/api/songs', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ dateKey, song })
+			});
+
+			if (response.ok) {
+				if (!this.songsPerDay[dateKey]) {
+					this.songsPerDay[dateKey] = [];
+				}
+				this.songsPerDay[dateKey].push(song);
+			}
+		} catch (err) {
+			console.error('Failed to persist song:', err);
+		} finally {
+			this.closeSearch();
+		}
 	};
 
 	getDateKey = (date: Date) => {

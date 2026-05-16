@@ -4,9 +4,18 @@
 	import SongSearchModal from '$lib/components/SongSearchModal.svelte';
 	import { page } from '$app/state';
 	import { CalendarState } from '$lib/calendar.svelte';
+	import { onMount } from 'svelte';
 
 	const session = $derived(page.data.session);
 	const cal = new CalendarState();
+
+	$effect(() => {
+		if (session?.user) {
+			cal.loadSongs();
+		} else {
+			cal.songsPerDay = {};
+		}
+	});
 </script>
 
 <div class="h-screen w-screen overflow-hidden bg-zinc-950 flex flex-col">

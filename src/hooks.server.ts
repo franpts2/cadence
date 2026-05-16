@@ -11,22 +11,31 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
     accountsTable: accounts,
     sessionsTable: sessions,
   }),
+  session: {
+    strategy: "jwt",
+  },
   providers: [
     Spotify({
       clientId: SPOTIFY_CLIENT_ID,
       clientSecret: SPOTIFY_CLIENT_SECRET,
-      authorization: "https://accounts.spotify.com/authorize?scope=playlist-modify-public,playlist-modify-private,playlist-read-private"
+      authorization: "https://accounts.spotify.com/authorize?scope=user-read-email,user-read-private,playlist-modify-public,playlist-modify-private,playlist-read-private"
     }),
   ],
   callbacks: {
-    async jwt({ token, account }) {
+    async jwt({ token, account, user }) {
       if (account) {
         token.accessToken = account.access_token;
+      }
+      if (user) {
+        token.id = user.id;
       }
       return token;
     },
     async session({ session, token }) {
       session.accessToken = token.accessToken as string;
+      if (session.user) {
+        session.user.id = token.id as string;
+      }
       return session;
     }
   }
