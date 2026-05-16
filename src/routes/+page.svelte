@@ -27,14 +27,7 @@
 </script>
 
 <div class="h-screen w-screen overflow-hidden bg-zinc-950 flex flex-col">
-	<Header
-		monthLabel={cal.monthLabel}
-		yearLabel={cal.yearLabel}
-		onPrev={cal.prevMonth}
-		onNext={cal.nextMonth}
-		onToday={cal.goToToday}
-		{session}
-	/>
+	<Header {session} />
 	
 	<main class="flex-1 overflow-hidden flex flex-col">
 		<Calendar />
