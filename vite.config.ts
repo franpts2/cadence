@@ -21,10 +21,8 @@ export default defineConfig({
 				inline: [/@auth\/sveltekit/]
 			}
 		},
-		poolOptions: {
-			threads: {
-				singleThread: true
-			}
+		threads: {
+			singleThread: true
 		}
 	},
 	resolve: {
