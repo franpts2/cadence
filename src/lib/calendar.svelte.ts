@@ -15,7 +15,7 @@ export class CalendarState {
 	selectedDate = $state(this.today);
 	
 	// Song storage: key is "YYYY-MM-DD"
-	songsPerDay = $state<Record<string, Song[]>>({});
+	songsPerDay = $state<Record<string, Song>>({});
 	
 	// Modal state
 	isSearchOpen = $state(false);
@@ -53,7 +53,8 @@ export class CalendarState {
 
 	getSongsForDay = (day: number) => {
 		const date = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth(), day);
-		return this.getSongsForDate(date);
+		const song = this.songsPerDay[this.getDateKey(date)];
+		return song ? [song] : [];
 	};
 
 	openSearch = (date: Date) => {
@@ -71,11 +72,10 @@ export class CalendarState {
 			const response = await fetch('/api/songs');
 			if (response.ok) {
 				const dbSongs = await response.json();
-				const mapped: Record<string, Song[]> = {};
+				const mapped: Record<string, Song> = {};
 				
 				dbSongs.forEach((s: any) => {
-					if (!mapped[s.dateKey]) mapped[s.dateKey] = [];
-					mapped[s.dateKey].push({
+					mapped[s.dateKey] = {
 						id: s.songId,
 						name: s.songName,
 						artists: [{ name: s.artistName }],
@@ -83,8 +83,8 @@ export class CalendarState {
 							name: s.albumName,
 							images: [{ url: s.albumImageUrl }]
 						},
-						duration_ms: 0 // Not stored
-					});
+						duration_ms: 0
+					};
 				});
 				
 				this.songsPerDay = mapped;
@@ -105,10 +105,7 @@ export class CalendarState {
 			});
 
 			if (response.ok) {
-				if (!this.songsPerDay[dateKey]) {
-					this.songsPerDay[dateKey] = [];
-				}
-				this.songsPerDay[dateKey].push(song);
+				this.songsPerDay[dateKey] = song;
 			}
 		} catch (err) {
 			console.error('Failed to persist song:', err);
@@ -117,11 +114,24 @@ export class CalendarState {
 		}
 	};
 
-	getDateKey = (date: Date) => {
-		return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+	removeSongFromDate = async (day: number) => {
+		const date = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth(), day);
+		const dateKey = this.getDateKey(date);
+
+		try {
+			const response = await fetch(`/api/songs?dateKey=${dateKey}`, {
+				method: 'DELETE'
+			});
+
+			if (response.ok) {
+				delete this.songsPerDay[dateKey];
+			}
+		} catch (err) {
+			console.error('Failed to delete song:', err);
+		}
 	};
 
-	getSongsForDate = (date: Date) => {
-		return this.songsPerDay[this.getDateKey(date)] || [];
+	getDateKey = (date: Date) => {
+		return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 	};
 }

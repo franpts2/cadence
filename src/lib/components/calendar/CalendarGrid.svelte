@@ -2,7 +2,7 @@
 	import type { Song } from '$lib/calendar.svelte';
 	import CalendarDay from './CalendarDay.svelte';
 
-	let { daysOfWeek, startDay, daysInMonth, isToday, isSelected, getSongsForDate, onSelectDate, onAddSong } = $props<{
+	let { daysOfWeek, startDay, daysInMonth, isToday, isSelected, getSongsForDate, onSelectDate, onAddSong, onDeleteSong } = $props<{
 		daysOfWeek: string[];
 		startDay: number;
 		daysInMonth: number;
@@ -11,6 +11,7 @@
 		getSongsForDate: (day: number) => Song[];
 		onSelectDate: (day: number) => void;
 		onAddSong: (day: number) => void;
+		onDeleteSong: (day: number) => void;
 	}>();
 </script>
 
@@ -39,6 +40,7 @@
 				songs={getSongsForDate(day)}
 				onclick={() => onSelectDate(day)}
 				onAddSong={() => onAddSong(day)}
+				onDeleteSong={() => onDeleteSong(day)}
 			/>
 		{/each}
 

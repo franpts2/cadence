@@ -4,7 +4,6 @@
 	import SongSearchModal from '$lib/components/SongSearchModal.svelte';
 	import { page } from '$app/state';
 	import { CalendarState } from '$lib/calendar.svelte';
-	import { onMount } from 'svelte';
 
 	const session = $derived(page.data.session);
 	const cal = new CalendarState();
@@ -35,6 +34,7 @@
 			selectDate={cal.selectDate}
 			getSongsForDate={(day) => cal.getSongsForDay(day)}
 			onAddSong={(day) => cal.startSearchForDay(day)}
+			onDeleteSong={(day) => cal.removeSongFromDate(day)}
 		/>
 	</main>
 </div>
