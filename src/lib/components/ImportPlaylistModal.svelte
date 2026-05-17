@@ -50,9 +50,10 @@
 				return;
 			}
 
-			let successMessage = `Successfully imported ${data.count} songs to your ${data.period}.`;
+			const dateLabel = importType === 'monthly' ? `${MONTHS[month]} of ${year}` : `${year}`;
+			let successMessage = `Successfully imported ${data.count} songs to ${dateLabel}.`;
 			if (data.skipped > 0) {
-				successMessage += ` ${data.skipped} songs were skipped as they exceeded the ${data.period}'s days.`;
+				successMessage += ` ${data.skipped} songs were skipped as they exceeded the period's days.`;
 			}
 
 			cal.addToast(successMessage, 'success');
