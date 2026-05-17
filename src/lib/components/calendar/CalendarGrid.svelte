@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getCalendarState, DAYS_OF_WEEK, isSameDay } from '$lib';
+	import { getCalendarState, DAYS_OF_WEEK, isSameDay, MONTHS } from '$lib';
 	import CalendarDay from './CalendarDay.svelte';
 	import CalendarSong from './CalendarSong.svelte';
 
@@ -19,6 +19,19 @@
 		const date = new Date(cal.viewDate.getFullYear(), cal.viewDate.getMonth(), day);
 		return isSameDay(cal.selectedDate, date);
 	}
+
+	let hoveringType = $state<'prev' | 'next' | null>(null);
+
+	function handleEnter(type: 'prev' | 'next') {
+		if (!cal.draggingSong) return;
+		hoveringType = type;
+		cal.startDelayedNav(type);
+	}
+
+	function handleLeave() {
+		hoveringType = null;
+		cal.cancelDelayedNav();
+	}
 </script>
 
 <div class="flex-1 flex flex-col overflow-hidden">
@@ -33,12 +46,22 @@
 
 	<!-- Grid Cells -->
 	<div class="flex-1 grid grid-cols-7 grid-rows-6">
-		{#each Array(startDay) as _}
+		{#each Array(startDay) as _, i}
 			<div 
-				class="border-b border-r border-border-dim bg-bg/20 transition-colors hover:bg-surface/10"
-				ondragenter={() => cal.prevMonth()}
+				class="relative border-b border-r border-border-dim bg-bg/20 transition-colors flex items-center justify-center p-2 text-center"
+				ondragenter={() => handleEnter('prev')}
+				ondragleave={handleLeave}
 				ondragover={(e) => e.preventDefault()}
-			></div>
+			>
+				{#if i === startDay - 1 && hoveringType === 'prev' && cal.navTargetDate}
+					<div class="flex flex-col items-center gap-2 animate-in fade-in zoom-in duration-300">
+						<div class="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+						<span class="text-[9px] font-medium text-accent uppercase tracking-tight">
+							Moving to {MONTHS[cal.navTargetDate.getMonth()]} {cal.navTargetDate.getFullYear()}...
+						</span>
+					</div>
+				{/if}
+			</div>
 		{/each}
 
 		{#each Array(daysInMonth) as _, i}
@@ -55,12 +78,22 @@
 		{/each}
 
 		<!-- Fill remaining grid cells -->
-		{#each Array(42 - startDay - daysInMonth) as _}
+		{#each Array(42 - startDay - daysInMonth) as _, i}
 			<div 
-				class="border-b border-r border-border-dim bg-bg/20 transition-colors hover:bg-surface/10"
-				ondragenter={() => cal.nextMonth()}
+				class="relative border-b border-r border-border-dim bg-bg/20 transition-colors flex items-center justify-center p-2 text-center"
+				ondragenter={() => handleEnter('next')}
+				ondragleave={handleLeave}
 				ondragover={(e) => e.preventDefault()}
-			></div>
+			>
+				{#if i === 0 && hoveringType === 'next' && cal.navTargetDate}
+					<div class="flex flex-col items-center gap-2 animate-in fade-in zoom-in duration-300">
+						<div class="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+						<span class="text-[9px] font-medium text-accent uppercase tracking-tight">
+							Moving to {MONTHS[cal.navTargetDate.getMonth()]} {cal.navTargetDate.getFullYear()}...
+						</span>
+					</div>
+				{/if}
+			</div>
 		{/each}
 	</div>
 

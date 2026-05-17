@@ -26,6 +26,12 @@ export class CalendarState {
 	// Drag state
 	draggingSong = $state<Song | null>(null);
 	draggingFromDay = $state<number | null>(null);
+	
+	// Navigation feedback state
+	navTargetDate = $state<Date | null>(null);
+	private navTimeout: ReturnType<typeof setTimeout> | null = null;
+	private navCancelTimeout: ReturnType<typeof setTimeout> | null = null;
+	private readonly NAV_DELAY = 1200;
 
 	private lastNavTime = 0;
 	private navCooldown = 500;
@@ -76,6 +82,59 @@ export class CalendarState {
 		if (now - this.lastNavTime < this.navCooldown) return;
 		this.lastNavTime = now;
 		this.viewDate = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth() + 1, 1);
+	};
+
+	startDelayedNav = (direction: 'prev' | 'next') => {
+		// Clear any pending cancel
+		if (this.navCancelTimeout) {
+			clearTimeout(this.navCancelTimeout);
+			this.navCancelTimeout = null;
+		}
+
+		// If already navigating to this direction, do nothing
+		if (this.navTimeout && this.navTargetDate) {
+			const isSameDirection = direction === 'prev' 
+				? (this.navTargetDate.getMonth() < this.viewDate.getMonth() || (this.navTargetDate.getMonth() === 11 && this.viewDate.getMonth() === 0))
+				: (this.navTargetDate.getMonth() > this.viewDate.getMonth() || (this.navTargetDate.getMonth() === 0 && this.viewDate.getMonth() === 11));
+			
+			if (isSameDirection) return;
+		}
+
+		this.cancelDelayedNav(true); // Cancel any current ones immediately
+
+		const target = new Date(this.viewDate);
+		if (direction === 'prev') {
+			target.setMonth(target.getMonth() - 1);
+		} else {
+			target.setMonth(target.getMonth() + 1);
+		}
+		
+		this.navTargetDate = target;
+		this.navTimeout = setTimeout(() => {
+			if (direction === 'prev') this.prevMonth();
+			else this.nextMonth();
+			this.cancelDelayedNav(true);
+		}, this.NAV_DELAY);
+	};
+
+	cancelDelayedNav = (immediate = false) => {
+		if (immediate) {
+			if (this.navTimeout) {
+				clearTimeout(this.navTimeout);
+				this.navTimeout = null;
+			}
+			if (this.navCancelTimeout) {
+				clearTimeout(this.navCancelTimeout);
+				this.navCancelTimeout = null;
+			}
+			this.navTargetDate = null;
+		} else {
+			// Delay cancel to allow moving between cells
+			if (this.navCancelTimeout) return;
+			this.navCancelTimeout = setTimeout(() => {
+				this.cancelDelayedNav(true);
+			}, 100);
+		}
 	};
 
 	goToToday = () => {
