@@ -20,6 +20,7 @@ export class CalendarState {
 	// Modal state
 	isSearchOpen = $state(false);
 	searchingForDate = $state<Date | null>(null);
+	previewingSong = $state<Song | null>(null);
 
 	monthLabel = $derived(MONTHS[this.viewDate.getMonth()]);
 	yearLabel = $derived(this.viewDate.getFullYear());
@@ -31,6 +32,15 @@ export class CalendarState {
 			this.loadedMonths.add(key);
 		}
 	}
+
+	// Preview Logic
+	openPreview = (song: Song) => {
+		this.previewingSong = song;
+	};
+
+	closePreview = () => {
+		this.previewingSong = null;
+	};
 
 	// Toast Logic
 	addToast = (message: string, type: ToastType = 'info') => {

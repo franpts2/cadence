@@ -8,8 +8,7 @@ export const SongSchema = z.object({
 		name: z.string(),
 		images: z.array(z.object({ url: z.string() }))
 	}),
-	duration_ms: z.number().optional().default(0),
-	preview_url: z.string().nullable().optional()
+	duration_ms: z.number().optional().default(0)
 });
 
 export type Song = z.infer<typeof SongSchema>;
@@ -23,7 +22,6 @@ export interface DbSong {
 	artistName: string;
 	albumName: string;
 	albumImageUrl: string | null;
-	previewUrl: string | null;
 	createdAt: Date | null;
 }
 

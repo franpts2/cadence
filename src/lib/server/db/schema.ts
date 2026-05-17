@@ -51,7 +51,6 @@ export const songs = sqliteTable("song", {
   artistName: text("artist_name").notNull(),
   albumName: text("album_name").notNull(),
   albumImageUrl: text("album_image_url"),
-  previewUrl: text("preview_url"),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$defaultFn(() => new Date()),
 });
 

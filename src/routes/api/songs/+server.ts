@@ -36,7 +36,6 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 				artistName: songs.artistName,
 				albumName: songs.albumName,
 				albumImageUrl: songs.albumImageUrl,
-				previewUrl: songs.previewUrl,
 			})
 			.from(dailySongs)
 			.innerJoin(songs, eq(dailySongs.songId, songs.id))
@@ -71,7 +70,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			artistName: song.artists.map((a) => a.name).join(', '),
 			albumName: song.album.name,
 			albumImageUrl: song.album.images[0]?.url ?? null,
-			previewUrl: song.preview_url ?? null,
 		}).onConflictDoUpdate({
 			target: songs.id,
 			set: {
@@ -79,7 +77,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				artistName: song.artists.map((a) => a.name).join(', '),
 				albumName: song.album.name,
 				albumImageUrl: song.album.images[0]?.url ?? null,
-				previewUrl: song.preview_url ?? null,
 				updatedAt: new Date()
 			}
 		});

@@ -2,6 +2,7 @@
 	import Calendar from '$lib/components/calendar/Calendar.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import SongSearchModal from '$lib/components/SongSearchModal.svelte';
+	import SongPreviewModal from '$lib/components/song_preview/SongPreviewModal.svelte';
 	import Toast from '$lib/components/ui/Toast.svelte';
 	import LoadingIndicator from '$lib/components/ui/LoadingIndicator.svelte';
 	import { page } from '$app/state';
@@ -56,6 +57,12 @@
 			cal.addSongToDate(cal.searchingForDate, song);
 		}
 	}}
+/>
+
+<SongPreviewModal
+	song={cal.previewingSong}
+	isOpen={!!cal.previewingSong}
+	onClose={() => cal.closePreview()}
 />
 
 <Toast />
