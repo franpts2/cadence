@@ -1,22 +1,48 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { dailySongs } from '$lib/server/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { dailySongs, songs } from '$lib/server/db/schema';
+import { eq, and, like } from 'drizzle-orm';
+import { SongSchema } from '$lib';
+import { z } from 'zod';
 
-export const GET: RequestHandler = async ({ locals }) => {
+const postSchema = z.object({
+	dateKey: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+	song: SongSchema
+});
+
+export const GET: RequestHandler = async ({ locals, url }) => {
 	const session = await locals.auth();
 	if (!session?.user?.id) {
 		return json({ error: 'Unauthorized' }, { status: 401 });
 	}
 
+	const year = url.searchParams.get('year');
+	const month = url.searchParams.get('month');
+
 	try {
-		const songs = await db
-			.select()
-			.from(dailySongs)
-			.where(eq(dailySongs.userId, session.user.id));
+		let conditions = [eq(dailySongs.userId, session.user.id)];
 		
-		return json(songs);
+		if (year && month) {
+			const pattern = `${year}-${month.padStart(2, '0')}-%`;
+			conditions.push(like(dailySongs.dateKey, pattern));
+		}
+
+		const results = await db
+			.select({
+				dateKey: dailySongs.dateKey,
+				songId: songs.id,
+				songName: songs.name,
+				artistName: songs.artistName,
+				albumName: songs.albumName,
+				albumImageUrl: songs.albumImageUrl,
+				previewUrl: songs.previewUrl,
+			})
+			.from(dailySongs)
+			.innerJoin(songs, eq(dailySongs.songId, songs.id))
+			.where(and(...conditions));
+		
+		return json(results);
 	} catch (err) {
 		console.error('Failed to fetch songs:', err);
 		return json({ error: 'Database error' }, { status: 500 });
@@ -29,24 +55,47 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Unauthorized' }, { status: 401 });
 	}
 
-	const { dateKey, song } = await request.json();
+	const body = await request.json();
+	const result = postSchema.safeParse(body);
+
+	if (!result.success) {
+		return json({ error: 'Invalid request data', details: result.error.format() }, { status: 400 });
+	}
+
+	const { dateKey, song } = result.data;
 
 	try {
-		const id = crypto.randomUUID();
-		const newSong = {
-			id,
+		await db.insert(songs).values({
+			id: song.id,
+			name: song.name,
+			artistName: song.artists.map((a) => a.name).join(', '),
+			albumName: song.album.name,
+			albumImageUrl: song.album.images[0]?.url ?? null,
+			previewUrl: song.preview_url ?? null,
+		}).onConflictDoUpdate({
+			target: songs.id,
+			set: {
+				name: song.name,
+				artistName: song.artists.map((a) => a.name).join(', '),
+				albumName: song.album.name,
+				albumImageUrl: song.album.images[0]?.url ?? null,
+				previewUrl: song.preview_url ?? null,
+				updatedAt: new Date()
+			}
+		});
+
+		await db.insert(dailySongs).values({
 			userId: session.user.id,
 			dateKey,
 			songId: song.id,
-			songName: song.name,
-			artistName: song.artists.map((a: any) => a.name).join(', '),
-			albumName: song.album.name,
-			albumImageUrl: song.album.images[0]?.url,
-			previewUrl: song.preview_url,
-		};
-
-		await db.insert(dailySongs).values(newSong);
-		return json(newSong);
+		}).onConflictDoUpdate({
+			target: [dailySongs.userId, dailySongs.dateKey],
+			set: {
+				songId: song.id
+			}
+		});
+		
+		return json({ success: true });
 	} catch (err) {
 		console.error('Failed to save song:', err);
 		return json({ error: 'Database error' }, { status: 500 });
@@ -60,8 +109,8 @@ export const DELETE: RequestHandler = async ({ url, locals }) => {
 	}
 
 	const dateKey = url.searchParams.get('dateKey');
-	if (!dateKey) {
-		return json({ error: 'Missing dateKey' }, { status: 400 });
+	if (!dateKey || !/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
+		return json({ error: 'Missing or invalid dateKey' }, { status: 400 });
 	}
 
 	try {

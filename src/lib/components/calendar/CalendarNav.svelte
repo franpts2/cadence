@@ -1,34 +1,28 @@
 <script lang="ts">
-	let { onPrev, onNext, onToday } = $props<{
-		onPrev: () => void;
-		onNext: () => void;
-		onToday: () => void;
-	}>();
+	import { getCalendarState, ChevronLeftIcon, ChevronRightIcon } from "$lib";
+
+	const cal = getCalendarState();
 </script>
 
-<div class="flex items-center bg-zinc-900 rounded-lg p-1 border border-zinc-800">
+<div class="flex items-center bg-surface rounded-lg p-1 border border-border">
 	<button
-		onclick={onPrev}
-		class="p-2 hover:bg-zinc-800 rounded-md transition-colors text-zinc-400 hover:text-zinc-100"
+		onclick={cal.prevMonth}
+		class="p-2 hover:bg-surface-hover rounded-md transition-colors text-text-muted hover:text-text"
 		aria-label="Previous Month"
 	>
-		<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-		</svg>
+		<ChevronLeftIcon class="h-4 w-4" />
 	</button>
 	<button
-		onclick={onToday}
-		class="px-4 py-1 text-sm font-medium hover:bg-zinc-800 rounded-md transition-colors text-zinc-100"
+		onclick={cal.goToToday}
+		class="px-4 py-1 text-sm font-medium hover:bg-surface-hover rounded-md transition-colors text-text"
 	>
 		Today
 	</button>
 	<button
-		onclick={onNext}
-		class="p-2 hover:bg-zinc-800 rounded-md transition-colors text-zinc-400 hover:text-zinc-100"
+		onclick={cal.nextMonth}
+		class="p-2 hover:bg-surface-hover rounded-md transition-colors text-text-muted hover:text-text"
 		aria-label="Next Month"
 	>
-		<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-		</svg>
+		<ChevronRightIcon class="h-4 w-4" />
 	</button>
 </div>
