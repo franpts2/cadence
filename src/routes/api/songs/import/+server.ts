@@ -48,39 +48,73 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		// 3. Fetch Playlist Metadata
 		console.log(`[Import] Fetching metadata for playlist: ${playlistId}`);
-		console.log(`[Import] Token prefix: ${accessToken.substring(0, 10)}...`);
-
-		const playlistRes = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}?fields=name,public,owner,tracks.items(track(id,name,artists,album(name,images)))`, {
+		
+		const playlistRes = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
 			headers: authHeader
 		});
 
 		if (!playlistRes.ok) {
 			const errorData = await playlistRes.json();
-			console.error('[Import] Metadata fetch failed:', { 
-				status: playlistRes.status, 
-				playlistId,
-				errorData 
-			});
-			
-			if (playlistRes.status === 403) {
-				return json({ 
-					error: `Spotify Forbidden (403): ${errorData.error?.message}. This usually happens if the app is not fully authorized, the user is not whitelisted, or the playlist is restricted.` 
-				}, { status: 403 });
-			}
+			console.error('[Import] Metadata fetch failed:', { status: playlistRes.status, errorData });
 			return json({ error: `Spotify Error: ${errorData.error?.message}` }, { status: playlistRes.status });
 		}
 
 		const playlistData = await playlistRes.json();
-		const tracks = playlistData.tracks?.items
-			?.filter((item: any) => item.track)
-			?.map((item: any) => item.track) || [];
+		
+		let rawItems = [];
+		if (playlistData.tracks?.items && Array.isArray(playlistData.tracks.items)) {
+			rawItems = playlistData.tracks.items;
+		} else if (playlistData.items) {
+			if (Array.isArray(playlistData.items)) {
+				rawItems = playlistData.items;
+			} else if (playlistData.items.items && Array.isArray(playlistData.items.items)) {
+				rawItems = playlistData.items.items;
+			}
+		}
+
+		if (rawItems.length > 0) {
+			console.log(`[Import] Inspecting first of ${rawItems.length} items...`);
+			const sample = rawItems[0];
+			console.log(`[Import] Sample Item Keys: ${Object.keys(sample).join(', ')}`);
+			if (sample.track) {
+				console.log(`[Import] Sample Item Name (via .track): ${sample.track.name}`);
+			} else if (sample.item) {
+				console.log(`[Import] Sample Item Name (via .item): ${sample.item.name}`);
+			} else if (sample.name) {
+				console.log(`[Import] Sample Item Name (direct): ${sample.name}`);
+			}
+		}
+
+		// Robust track extraction
+		let tracks = rawItems.map((item: any) => {
+			if (item?.track) return item.track;
+			if (item?.item) return item.item; // Fix: Look for .item property
+			if (item?.name && item?.id) return item; // Item might already be a track object
+			return null;
+		}).filter(Boolean);
+
+		// Fallback: Only if we still have nothing
+		if (tracks.length === 0) {
+			console.log('[Import] Tracks still missing. Attempting dedicated tracks endpoint...');
+			const tracksRes = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+				headers: authHeader
+			});
+			if (tracksRes.ok) {
+				const tracksData = await tracksRes.json();
+				if (tracksData && Array.isArray(tracksData.items)) {
+					tracks = tracksData.items.map((item: any) => item?.track || item?.item || item).filter(Boolean);
+				}
+			}
+		}
 
 		console.log('--- Playlist Import Debug ---');
 		console.log(`Playlist Name: ${playlistData.name}`);
-		console.log(`Total Tracks: ${tracks.length}`);
+		console.log(`Total Tracks Found: ${tracks.length}`);
+		
 		console.log('First 5 songs:');
 		tracks.slice(0, 5).forEach((t: any, i: number) => {
-			console.log(`  ${i + 1}. ${t.name} by ${t.artists.map((a: any) => a.name).join(', ')}`);
+			const artists = t.artists?.map((a: any) => a.name).join(', ') || 'Unknown Artist';
+			console.log(`  ${i + 1}. ${t.name} by ${artists}`);
 		});
 		console.log('-----------------------------');
 
@@ -90,7 +124,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			debug: {
 				name: playlistData.name,
 				trackCount: tracks.length,
-				firstSongs: tracks.slice(0, 5).map((t: any) => t.name)
+				firstSongs: tracks.slice(0, 5).map((t: any) => t?.name || 'Unknown')
 			}
 		});
 
