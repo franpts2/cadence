@@ -66,26 +66,26 @@
 	bind:this={dialogElement}
 	onclose={handleClose}
 	onclick={(e) => e.target === dialogElement && handleClose()}
-	class="fixed inset-0 z-50 m-0 h-full w-full max-h-none max-w-none bg-transparent p-0 backdrop:bg-zinc-950/50 backdrop:backdrop-blur-sm"
+	class="fixed inset-0 z-50 m-0 h-full w-full max-h-none max-w-none bg-transparent p-0 backdrop:bg-bg/50 backdrop:backdrop-blur-sm"
 >
 	<div class="flex items-start justify-center pt-[15vh] px-4 h-full w-full pointer-events-none">
 		<div 
-			class="w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden pointer-events-auto"
+			class="w-full max-w-lg bg-surface border border-border rounded-xl shadow-2xl overflow-hidden pointer-events-auto"
 			role="document"
 		>
-			<div class="p-4 border-b border-zinc-800 flex items-center gap-3">
-				<SearchIcon class="h-5 w-5 text-zinc-500" />
+			<div class="p-4 border-b border-border flex items-center gap-3">
+				<SearchIcon class="h-5 w-5 text-text-dim" />
 				<input
 					bind:this={inputElement}
 					bind:value={searchQuery}
 					oninput={debouncedSearch}
 					onkeydown={handleKeydown}
 					placeholder="Search for a song..."
-					class="flex-1 bg-transparent border-none outline-none text-zinc-100 placeholder:text-zinc-600 text-lg"
+					class="flex-1 bg-transparent border-none outline-none text-text placeholder:text-text-subtle text-lg"
 				/>
 				<button 
 					onclick={handleClose} 
-					class="text-zinc-500 hover:text-zinc-300 p-1" 
+					class="text-text-dim hover:text-accent-hover p-1" 
 					aria-label="Close search"
 				>
 					<CloseIcon />
@@ -94,7 +94,7 @@
 
 			<div class="max-h-[60vh] overflow-y-auto">
 				{#if isSearching && results.length === 0}
-					<div class="p-8 text-center text-zinc-500">
+					<div class="p-8 text-center text-text-dim">
 						<div class="animate-pulse">Searching...</div>
 					</div>
 				{:else if results.length > 0}
@@ -104,11 +104,11 @@
 						{/each}
 					</div>
 				{:else if searchQuery && !isSearching}
-					<div class="p-8 text-center text-zinc-600">
+					<div class="p-8 text-center text-text-subtle">
 						No results found for "{searchQuery}"
 					</div>
 				{:else}
-					<div class="p-12 text-center text-zinc-700">
+					<div class="p-12 text-center text-border-subtle">
 						Start typing to search Spotify...
 					</div>
 				{/if}

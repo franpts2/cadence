@@ -12,7 +12,7 @@
 			animate:flip={{ duration: 300 }}
 			in:slide={{ axis: 'y' }}
 			out:fade
-			class="pointer-events-auto flex items-center justify-between gap-3 px-4 py-3 rounded-lg shadow-lg border border-zinc-800 bg-zinc-900 text-sm text-white"
+			class="pointer-events-auto flex items-center justify-between gap-3 px-4 py-3 rounded-lg shadow-lg border border-border bg-surface text-sm text-white"
 		>
 			<div class="flex items-center gap-2">
 				<div class="w-1.5 h-1.5 rounded-full 
@@ -24,7 +24,7 @@
 			</div>
 			<button 
 				onclick={() => cal.removeToast(toast.id)}
-				class="text-zinc-500 hover:text-zinc-300 transition-colors"
+				class="text-text-dim hover:text-accent-hover transition-colors"
 			>
 				<CloseIcon class="h-4 w-4" />
 			</button>

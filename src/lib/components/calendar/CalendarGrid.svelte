@@ -22,9 +22,9 @@
 
 <div class="flex-1 flex flex-col overflow-hidden">
 	<!-- Day Labels -->
-	<div class="grid grid-cols-7 border-b border-zinc-800 bg-zinc-950/50">
+	<div class="grid grid-cols-7 border-b border-border bg-bg/50">
 		{#each DAYS_OF_WEEK as day}
-			<div class="py-2 sm:py-3 text-center text-[8px] sm:text-[10px] font-bold text-zinc-500 tracking-widest md:tracking-[0.2em]">
+			<div class="py-2 sm:py-3 text-center text-[8px] sm:text-[10px] font-bold text-text-dim tracking-widest md:tracking-[0.2em]">
 				{day}
 			</div>
 		{/each}
@@ -33,7 +33,7 @@
 	<!-- Grid Cells -->
 	<div class="flex-1 grid grid-cols-7 grid-rows-6">
 		{#each Array(startDay) as _}
-			<div class="border-b border-r border-zinc-900 bg-zinc-950/20"></div>
+			<div class="border-b border-r border-border-dim bg-bg/20"></div>
 		{/each}
 
 		{#each Array(daysInMonth) as _, i}
@@ -51,7 +51,7 @@
 
 		<!-- Fill remaining grid cells -->
 		{#each Array(42 - startDay - daysInMonth) as _}
-			<div class="border-b border-r border-zinc-900 bg-zinc-950/20"></div>
+			<div class="border-b border-r border-border-dim bg-bg/20"></div>
 		{/each}
 	</div>
 </div>
