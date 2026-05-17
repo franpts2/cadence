@@ -34,7 +34,7 @@
 	}
 </script>
 
-<div class="flex-1 flex flex-col overflow-hidden relative">
+<div class="flex-1 flex flex-col relative">
 	<!-- Day Labels - Also acts as a fallback for Prev Month nav if no blank cells -->
 	<div 
 		class="relative grid grid-cols-7 border-b border-border bg-bg/50"

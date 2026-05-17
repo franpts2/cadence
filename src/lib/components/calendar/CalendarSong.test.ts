@@ -15,12 +15,12 @@ describe('CalendarSong component', () => {
 	};
 
 	it('should render song name', () => {
-		render(CalendarSong, { song: mockSong });
+		render(CalendarSong, { song: mockSong, day: 1 });
 		expect(screen.getByText('Test Song')).toBeInTheDocument();
 	});
 
 	it('should render album image if provided', () => {
-		const { container } = render(CalendarSong, { song: mockSong });
+		const { container } = render(CalendarSong, { song: mockSong, day: 1 });
 		const img = container.querySelector('img');
 		expect(img).toBeInTheDocument();
 		expect(img).toHaveAttribute('src', 'https://example.com/image.jpg');

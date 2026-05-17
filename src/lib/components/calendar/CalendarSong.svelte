@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getCalendarState, type Song } from '$lib';
+	import Tooltip from '../ui/Tooltip.svelte';
 
 	let { song, day }: { song: Song; day: number } = $props();
 	const cal = getCalendarState();
@@ -24,19 +25,21 @@
 	}
 </script>
 
-<button 
-	onclick={handleClick}
-	ondragstart={handleDragStart}
-	ondragend={handleDragEnd}
-	draggable="true"
-	class="w-full flex flex-col items-center gap-1 text-center px-1 outline-none rounded-lg transition-all cursor-grab active:cursor-grabbing hover:bg-surface/50"
->
-	{#if song.album.images[0]}
-		<div class="w-full max-w-[4rem] sm:max-w-[5rem] md:max-w-[6rem] aspect-square overflow-hidden rounded-sm flex-shrink-0">
-			<img src={song.album.images[0].url} alt="" class="w-full h-full object-cover" />
-		</div>
-	{/if}
-	<span class="text-[9px] sm:text-[10px] text-accent-hover truncate font-medium w-full px-1">
-		{song.name}
-	</span>
-</button>
+<Tooltip text={"Click to open song details\nDrag to change the day"}>
+	<button 
+		onclick={handleClick}
+		ondragstart={handleDragStart}
+		ondragend={handleDragEnd}
+		draggable="true"
+		class="w-full flex flex-col items-center gap-1 text-center px-1 outline-none rounded-lg transition-all cursor-grab active:cursor-grabbing hover:bg-surface/50"
+	>
+		{#if song.album.images[0]}
+			<div class="w-full max-w-[4rem] sm:max-w-[5rem] md:max-w-[6rem] aspect-square overflow-hidden rounded-sm flex-shrink-0">
+				<img src={song.album.images[0].url} alt="" class="w-full h-full object-cover" />
+			</div>
+		{/if}
+		<span class="text-[9px] sm:text-[10px] text-accent-hover truncate font-medium w-full px-1">
+			{song.name}
+		</span>
+	</button>
+</Tooltip>
