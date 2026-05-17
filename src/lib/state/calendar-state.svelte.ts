@@ -27,6 +27,10 @@ export class CalendarState {
 	draggingSong = $state<Song | null>(null);
 	draggingFromDay = $state<number | null>(null);
 	
+	// Pending move state
+	pendingMove = $state<{ fromDay: number; toDay: number } | null>(null);
+	isMoveConfirmOpen = $state(false);
+
 	// Navigation feedback state
 	navTargetDate = $state<Date | null>(null);
 	private navTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -277,6 +281,34 @@ export class CalendarState {
 	moveSong = async (fromDay: number, toDay: number) => {
 		if (fromDay === toDay) return;
 
+		const toDate = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth(), toDay);
+		const toKey = getDateKey(toDate);
+
+		// If target is occupied, show confirmation
+		if (this.songsPerDay[toKey]) {
+			this.pendingMove = { fromDay, toDay };
+			this.isMoveConfirmOpen = true;
+			return;
+		}
+
+		await this.executeMove(fromDay, toDay);
+	};
+
+	confirmMove = async () => {
+		if (this.pendingMove) {
+			const { fromDay, toDay } = this.pendingMove;
+			this.isMoveConfirmOpen = false;
+			this.pendingMove = null;
+			await this.executeMove(fromDay, toDay);
+		}
+	};
+
+	cancelMove = () => {
+		this.isMoveConfirmOpen = false;
+		this.pendingMove = null;
+	};
+
+	private executeMove = async (fromDay: number, toDay: number) => {
 		const fromDate = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth(), fromDay);
 		const toDate = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth(), toDay);
 		const fromKey = getDateKey(fromDate);
