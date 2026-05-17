@@ -33,3 +33,7 @@ yarn-error.log*
 .eslintcache
 .stylelintcache
 .prettiercache
+
+# e2e
+test-results/
+playwright-report/

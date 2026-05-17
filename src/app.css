@@ -2,15 +2,19 @@
 
 @theme {
   --color-bg: var(--color-zinc-950);
+
   --color-surface: var(--color-zinc-900);
   --color-surface-hover: var(--color-zinc-800);
+  
   --color-border: var(--color-zinc-800);
   --color-border-dim: var(--color-zinc-900);
   --color-border-subtle: var(--color-zinc-700);
+  
   --color-text: var(--color-zinc-100);
   --color-text-muted: var(--color-zinc-400);
   --color-text-dim: var(--color-zinc-500);
   --color-text-subtle: var(--color-zinc-600);
+  
   --color-accent: var(--color-zinc-100);
   --color-accent-hover: var(--color-zinc-300);
 }
