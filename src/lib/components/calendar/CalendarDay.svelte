@@ -32,14 +32,14 @@
 	class="relative group border-b border-r border-border-dim text-left p-1.5 sm:p-2 transition-colors h-full w-full min-h-[90px] md:min-h-[130px] flex flex-col items-start justify-start md:items-center md:justify-center focus:outline-none
 		{isSelected ? 'bg-surface/50' : 'hover:bg-surface/30'}"
 >
-	<div class="relative w-full md:absolute md:top-1.5 md:left-1.5 md:right-1.5 flex justify-between items-start z-10 pointer-events-none mb-1 md:mb-0">
+	<div class="relative w-full md:absolute md:top-1.5 md:left-1.5 md:right-3 flex justify-between items-start z-10 pointer-events-none mb-1 md:mb-0 px-0.5 md:px-0">
 		<span class="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 text-[10px] sm:text-xs rounded-full transition-all
 			{isToday ? 'bg-text text-bg font-bold scale-110' : 'text-text-muted group-hover:text-text'}
 			{isSelected && !isToday ? 'ring-1 ring-border-subtle text-text' : ''}">
 			{day}
 		</span>
 
-		<div class="flex items-center gap-1 pointer-events-auto">
+		<div class="flex items-center pointer-events-auto pr-2">
 			{#if hasSong}
 				<button
 					onclick={(e) => { e.stopPropagation(); onDeleteSong(); }}
