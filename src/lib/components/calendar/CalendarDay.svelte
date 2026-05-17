@@ -43,7 +43,7 @@
 			{#if hasSong}
 				<button
 					onclick={(e) => { e.stopPropagation(); onDeleteSong(); }}
-					class="opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity p-1 text-text-muted focus:opacity-100 outline-none"
+					class=" cursor-pointer opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity p-1 text-text-muted focus:opacity-100 outline-none"
 					aria-label="Remove song for day {day}"
 				>
 					<TrashIcon class="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -51,7 +51,7 @@
 			{:else}
 				<button 
 					onclick={(e) => { e.stopPropagation(); onAddSong(); }}
-					class="opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity p-1 text-text-muted focus:opacity-100 outline-none"
+					class="cursor-pointer opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity p-1 text-text-muted focus:opacity-100 outline-none"
 					aria-label="Add song for day {day}"
 				>
 					<PlusIcon class="h-4 w-4 sm:h-5 sm:w-5" />

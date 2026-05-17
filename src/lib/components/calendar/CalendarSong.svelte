@@ -12,10 +12,10 @@
 
 <button 
 	onclick={handleClick}
-	class="w-full flex flex-col items-center gap-1 text-center px-1 outline-none rounded-lg transition-all"
+	class="w-full flex flex-col items-center gap-1 text-center px-1 outline-none rounded-lg transition-all cursor-pointer"
 >
 	{#if song.album.images[0]}
-		<div class="w-full max-w-[4rem] sm:max-w-[5rem] md:max-w-[6rem] aspect-square overflow-hidden rounded-sm shadow-[0_4px_12px_rgba(150,150,150,0.2)] flex-shrink-0">
+		<div class="w-full max-w-[4rem] sm:max-w-[5rem] md:max-w-[6rem] aspect-square overflow-hidden rounded-sm flex-shrink-0">
 			<img src={song.album.images[0].url} alt="" class="w-full h-full object-cover" />
 		</div>
 	{/if}
