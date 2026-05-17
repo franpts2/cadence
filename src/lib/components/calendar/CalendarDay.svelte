@@ -29,7 +29,7 @@
 	tabindex="0"
 	aria-current={isToday ? 'date' : undefined}
 	aria-selected={isSelected}
-	class="relative group border-b border-r border-border-dim text-left p-1.5 sm:p-2 transition-colors h-full w-full min-h-[90px] md:min-h-[130px] flex flex-col items-start justify-start md:items-center md:justify-center focus:outline-none focus:bg-surface/40
+	class="relative group border-b border-r border-border-dim text-left p-1.5 sm:p-2 transition-colors h-full w-full min-h-[90px] md:min-h-[130px] flex flex-col items-start justify-start md:items-center md:justify-center focus:outline-none
 		{isSelected ? 'bg-surface/50' : 'hover:bg-surface/30'}"
 >
 	<div class="relative w-full md:absolute md:top-1.5 md:left-1.5 md:right-1.5 flex justify-between items-start z-10 pointer-events-none mb-1 md:mb-0">
@@ -60,7 +60,7 @@
 		</div>
 	</div>
 
-	<div class="w-full flex flex-col items-center justify-center overflow-hidden pointer-events-none md:pt-2">
+	<div class="w-full flex flex-col items-center justify-center overflow-hidden md:pt-2">
 		{#each songs as song}
 			<CalendarSong {song} />
 		{/each}
