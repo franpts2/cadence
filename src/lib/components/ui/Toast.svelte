@@ -15,11 +15,6 @@
 			class="pointer-events-auto flex items-center justify-between gap-3 px-4 py-3 rounded-lg shadow-xl border border-border bg-surface/95 backdrop-blur-md text-sm text-white"
 		>
 			<div class="flex items-center gap-2">
-				<div class="w-1.5 h-1.5 rounded-full 
-					{toast.type === 'success' ? 'bg-emerald-500' : ''}
-					{toast.type === 'error' ? 'bg-red-500' : ''}
-					{toast.type === 'info' ? 'bg-sky-500' : ''}"
-				></div>
 				<span>{toast.message}</span>
 			</div>
 			<button 
