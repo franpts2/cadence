@@ -10,3 +10,4 @@ export { default as TrashIcon } from './components/icons/TrashIcon.svelte';
 export { default as PlusIcon } from './components/icons/PlusIcon.svelte';
 export { default as ChevronLeftIcon } from './components/icons/ChevronLeftIcon.svelte';
 export { default as ChevronRightIcon } from './components/icons/ChevronRightIcon.svelte';
+export { default as PlayIcon } from './components/icons/PlayIcon.svelte';
