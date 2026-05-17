@@ -23,6 +23,13 @@ export class CalendarState {
 	searchingForDate = $state<Date | null>(null);
 	previewingSong = $state<Song | null>(null);
 
+	// Drag state
+	draggingSong = $state<Song | null>(null);
+	draggingFromDay = $state<number | null>(null);
+
+	private lastNavTime = 0;
+	private navCooldown = 500;
+
 	monthLabel = $derived(MONTHS[this.viewDate.getMonth()]);
 	yearLabel = $derived(this.viewDate.getFullYear());
 
@@ -58,10 +65,16 @@ export class CalendarState {
 	};
 
 	prevMonth = () => {
+		const now = Date.now();
+		if (now - this.lastNavTime < this.navCooldown) return;
+		this.lastNavTime = now;
 		this.viewDate = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth() - 1, 1);
 	};
 
 	nextMonth = () => {
+		const now = Date.now();
+		if (now - this.lastNavTime < this.navCooldown) return;
+		this.lastNavTime = now;
 		this.viewDate = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth() + 1, 1);
 	};
 

@@ -16,24 +16,24 @@ describe('CalendarState', () => {
 		expect(state.viewDate.getFullYear()).toBe(now.getFullYear());
 	});
 
-	it('should navigate to previous month correctly', () => {
-		const initialMonth = state.viewDate.getMonth();
+	it('should navigate to previous month correctly with debounce', () => {
+		state.viewDate = new Date(2026, 4, 1); // May 2026
 		state.prevMonth();
+		expect(state.viewDate.getMonth()).toBe(3); // April
 		
-		let expectedMonth = initialMonth - 1;
-		if (expectedMonth < 0) expectedMonth = 11;
-		
-		expect(state.viewDate.getMonth()).toBe(expectedMonth);
+		// Immediate second call should be ignored due to debounce
+		state.prevMonth();
+		expect(state.viewDate.getMonth()).toBe(3); 
 	});
 
-	it('should navigate to next month correctly', () => {
-		const initialMonth = state.viewDate.getMonth();
+	it('should navigate to next month correctly with debounce', () => {
+		state.viewDate = new Date(2026, 4, 1); // May 2026
 		state.nextMonth();
+		expect(state.viewDate.getMonth()).toBe(5); // June
 		
-		let expectedMonth = initialMonth + 1;
-		if (expectedMonth > 11) expectedMonth = 0;
-		
-		expect(state.viewDate.getMonth()).toBe(expectedMonth);
+		// Immediate second call should be ignored due to debounce
+		state.nextMonth();
+		expect(state.viewDate.getMonth()).toBe(5);
 	});
 
 	it('should add toasts correctly', () => {

@@ -13,13 +13,21 @@
 		if (e.dataTransfer) {
 			e.dataTransfer.setData('text/plain', day.toString());
 			e.dataTransfer.effectAllowed = 'move';
+			cal.draggingSong = song;
+			cal.draggingFromDay = day;
 		}
+	}
+
+	function handleDragEnd() {
+		cal.draggingSong = null;
+		cal.draggingFromDay = null;
 	}
 </script>
 
 <button 
 	onclick={handleClick}
 	ondragstart={handleDragStart}
+	ondragend={handleDragEnd}
 	draggable="true"
 	class="w-full flex flex-col items-center gap-1 text-center px-1 outline-none rounded-lg transition-all cursor-grab active:cursor-grabbing hover:bg-surface/50"
 >

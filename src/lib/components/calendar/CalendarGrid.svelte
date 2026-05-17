@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getCalendarState, DAYS_OF_WEEK, isSameDay } from '$lib';
 	import CalendarDay from './CalendarDay.svelte';
+	import CalendarSong from './CalendarSong.svelte';
 
 	let { startDay, daysInMonth } = $props<{
 		startDay: number;
@@ -33,7 +34,11 @@
 	<!-- Grid Cells -->
 	<div class="flex-1 grid grid-cols-7 grid-rows-6">
 		{#each Array(startDay) as _}
-			<div class="border-b border-r border-border-dim bg-bg/20"></div>
+			<div 
+				class="border-b border-r border-border-dim bg-bg/20 transition-colors hover:bg-surface/10"
+				ondragenter={() => cal.prevMonth()}
+				ondragover={(e) => e.preventDefault()}
+			></div>
 		{/each}
 
 		{#each Array(daysInMonth) as _, i}
@@ -51,7 +56,18 @@
 
 		<!-- Fill remaining grid cells -->
 		{#each Array(42 - startDay - daysInMonth) as _}
-			<div class="border-b border-r border-border-dim bg-bg/20"></div>
+			<div 
+				class="border-b border-r border-border-dim bg-bg/20 transition-colors hover:bg-surface/10"
+				ondragenter={() => cal.nextMonth()}
+				ondragover={(e) => e.preventDefault()}
+			></div>
 		{/each}
 	</div>
+
+	<!-- Hidden persistent source for dragging across months -->
+	{#if cal.draggingSong}
+		<div class="hidden" aria-hidden="true">
+			<CalendarSong song={cal.draggingSong} day={cal.draggingFromDay ?? 0} />
+		</div>
+	{/if}
 </div>
