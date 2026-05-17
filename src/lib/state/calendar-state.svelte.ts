@@ -19,6 +19,7 @@ export class CalendarState {
 	
 	// Modal state
 	isSearchOpen = $state(false);
+	isImportOpen = $state(false);
 	searchingForDate = $state<Date | null>(null);
 	previewingSong = $state<Song | null>(null);
 
@@ -89,6 +90,14 @@ export class CalendarState {
 	closeSearch = () => {
 		this.isSearchOpen = false;
 		this.searchingForDate = null;
+	};
+
+	openImport = () => {
+		this.isImportOpen = true;
+	};
+
+	closeImport = () => {
+		this.isImportOpen = false;
 	};
 
 	loadSongs = async () => {

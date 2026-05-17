@@ -10,5 +10,7 @@ export { default as TrashIcon } from './components/icons/TrashIcon.svelte';
 export { default as PlusIcon } from './components/icons/PlusIcon.svelte';
 export { default as ChevronLeftIcon } from './components/icons/ChevronLeftIcon.svelte';
 export { default as ChevronRightIcon } from './components/icons/ChevronRightIcon.svelte';
+export { default as ChevronDownIcon } from './components/icons/ChevronDownIcon.svelte';
+export { default as ChevronUpIcon } from './components/icons/ChevronUpIcon.svelte';
 export { default as ExportIcon } from './components/icons/ExportIcon.svelte';
 export { default as ImportIcon } from './components/icons/ImportIcon.svelte';

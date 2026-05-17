@@ -4,6 +4,7 @@
 	import SongSearchModal from '$lib/components/SongSearchModal.svelte';
 	import SongPreviewModal from '$lib/components/song_preview/SongPreviewModal.svelte';
 	import PlaylistControls from '$lib/components/PlaylistControls.svelte';
+	import ImportPlaylistModal from '$lib/components/ImportPlaylistModal.svelte';
 	import Toast from '$lib/components/ui/Toast.svelte';
 	import LoadingIndicator from '$lib/components/ui/LoadingIndicator.svelte';
 	import { page } from '$app/state';
@@ -65,6 +66,8 @@
 	isOpen={!!cal.previewingSong}
 	onClose={() => cal.closePreview()}
 />
+
+<ImportPlaylistModal />
 
 <PlaylistControls />
 
