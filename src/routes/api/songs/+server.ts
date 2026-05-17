@@ -13,8 +13,8 @@ const postSchema = z.object({
 
 export const GET: RequestHandler = async ({ locals, url }) => {
 	const session = await locals.auth();
-	if (!session?.user?.id) {
-		return json({ error: 'Unauthorized' }, { status: 401 });
+	if (!session?.user?.id || (session as any)?.error === 'RefreshAccessTokenError') {
+		return json({ error: 'Unauthorized', code: 'AUTH_EXPIRED' }, { status: 401 });
 	}
 
 	const year = url.searchParams.get('year');
@@ -50,8 +50,8 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const session = await locals.auth();
-	if (!session?.user?.id) {
-		return json({ error: 'Unauthorized' }, { status: 401 });
+	if (!session?.user?.id || (session as any)?.error === 'RefreshAccessTokenError') {
+		return json({ error: 'Unauthorized', code: 'AUTH_EXPIRED' }, { status: 401 });
 	}
 
 	const body = await request.json();
@@ -101,8 +101,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 export const DELETE: RequestHandler = async ({ url, locals }) => {
 	const session = await locals.auth();
-	if (!session?.user?.id) {
-		return json({ error: 'Unauthorized' }, { status: 401 });
+	if (!session?.user?.id || (session as any)?.error === 'RefreshAccessTokenError') {
+		return json({ error: 'Unauthorized', code: 'AUTH_EXPIRED' }, { status: 401 });
 	}
 
 	const dateKey = url.searchParams.get('dateKey');

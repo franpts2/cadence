@@ -2,13 +2,11 @@ import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async ({ url, locals }) => {
 	const session = await locals.auth();
+	const accessToken = (session as any)?.accessToken;
+	const sessionError = (session as any)?.error;
 	
-	if (!session) {
-		return json({ error: 'No session found' }, { status: 401 });
-	}
-
-	if (!session.accessToken) {
-		return json({ error: 'No Spotify access token in session' }, { status: 401 });
+	if (!session || !accessToken || sessionError === 'RefreshAccessTokenError') {
+		return json({ error: 'Spotify session expired. Please log in again.', code: 'AUTH_EXPIRED' }, { status: 401 });
 	}
 
 	const query = url.searchParams.get('q');
@@ -19,7 +17,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	try {
 		const response = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=10`, {
 			headers: { 
-				Authorization: `Bearer ${session.accessToken}` 
+				Authorization: `Bearer ${accessToken}` 
 			}
 		});
 

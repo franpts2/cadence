@@ -20,8 +20,14 @@
 
 	// Load songs when navigating months
 	$effect(() => {
-		if (session?.user) {
+		if (session?.user && !session.error) {
 			cal.loadSongs();
+		}
+	});
+
+	$effect(() => {
+		if (session?.error === 'RefreshAccessTokenError') {
+			cal.addToast('Your Spotify session has expired. Please log in again.', 'error');
 		}
 	});
 
