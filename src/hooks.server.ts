@@ -57,7 +57,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
     Spotify({
       clientId: SPOTIFY_CLIENT_ID,
       clientSecret: SPOTIFY_CLIENT_SECRET,
-      authorization: "https://accounts.spotify.com/authorize?scope=user-read-email,user-read-private"
+      authorization: "https://accounts.spotify.com/authorize?scope=user-read-email+user-read-private+playlist-read-private+playlist-read-collaborative&show_dialog=true"
     }),
   ],
   callbacks: {

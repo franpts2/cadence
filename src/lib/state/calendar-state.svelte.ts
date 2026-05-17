@@ -19,6 +19,7 @@ export class CalendarState {
 	
 	// Modal state
 	isSearchOpen = $state(false);
+	isImportOpen = $state(false);
 	searchingForDate = $state<Date | null>(null);
 	previewingSong = $state<Song | null>(null);
 
@@ -44,6 +45,9 @@ export class CalendarState {
 
 	// Toast Logic
 	addToast = (message: string, type: ToastType = 'info') => {
+		// Prevent duplicate toasts with the same message
+		if (this.toasts.some(t => t.message === message)) return;
+
 		const id = crypto.randomUUID();
 		this.toasts.push({ id, message, type });
 		setTimeout(() => this.removeToast(id), 5000);
@@ -91,6 +95,14 @@ export class CalendarState {
 		this.searchingForDate = null;
 	};
 
+	openImport = () => {
+		this.isImportOpen = true;
+	};
+
+	closeImport = () => {
+		this.isImportOpen = false;
+	};
+
 	loadSongs = async () => {
 		const year = this.viewDate.getFullYear();
 		const month = this.viewDate.getMonth() + 1;
@@ -107,7 +119,12 @@ export class CalendarState {
 				this.songsPerDay = { ...this.songsPerDay, ...mapped };
 				this.loadedMonths.add(cacheKey);
 			} else {
-				this.addToast('Failed to load songs', 'error');
+				const data = await response.json();
+				if (data.code === 'AUTH_EXPIRED') {
+					this.addToast('Spotify session expired. Please log in again.', 'error');
+				} else {
+					this.addToast('Failed to load songs', 'error');
+				}
 			}
 		} catch (err) {
 			console.error('Failed to load songs:', err);

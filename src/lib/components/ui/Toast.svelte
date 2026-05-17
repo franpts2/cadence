@@ -6,13 +6,13 @@
 	const cal = getCalendarState();
 </script>
 
-<div class="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 w-full max-w-xs pointer-events-none">
+<div class="fixed top-2 left-1/2 -translate-x-1/2 z-[110] flex flex-col gap-2 w-full max-w-xs pointer-events-none">
 	{#each cal.toasts as toast (toast.id)}
 		<div
 			animate:flip={{ duration: 300 }}
 			in:slide={{ axis: 'y' }}
 			out:fade
-			class="pointer-events-auto flex items-center justify-between gap-3 px-4 py-3 rounded-lg shadow-lg border border-border bg-surface text-sm text-white"
+			class="pointer-events-auto flex items-center justify-between gap-3 px-4 py-3 rounded-lg shadow-xl border border-border bg-surface/95 backdrop-blur-md text-sm text-white"
 		>
 			<div class="flex items-center gap-2">
 				<div class="w-1.5 h-1.5 rounded-full 
