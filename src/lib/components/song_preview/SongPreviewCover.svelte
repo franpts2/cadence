@@ -18,7 +18,7 @@
 
 	<!-- Hover Overlay -->
 	<div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-		<div class="bg-white/20 backdrop-blur-md rounded-full p-4 mb-2 transform scale-90 group-hover:scale-100 transition-transform duration-300">
+		<div class="bg-white/30 rounded-full p-4 mb-2 transform scale-90 group-hover:scale-100 transition-transform duration-300">
 			<PlayIcon class="h-10 w-10 text-white" />
 		</div>
 		<span class="text-white font-bold text-sm tracking-wider uppercase">
