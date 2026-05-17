@@ -1,4 +1,4 @@
-# Cadence [in progress]
+# cadence [in progress]
 
 <div align="left">
 	<img src="https://img.shields.io/badge/Svelte_5-FF3E00?style=for-the-badge&logo=svelte&logoColor=white" alt="Svelte 5"/>
