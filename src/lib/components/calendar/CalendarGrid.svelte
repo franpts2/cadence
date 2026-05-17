@@ -34,14 +34,30 @@
 	}
 </script>
 
-<div class="flex-1 flex flex-col overflow-hidden">
-	<!-- Day Labels -->
-	<div class="grid grid-cols-7 border-b border-border bg-bg/50">
+<div class="flex-1 flex flex-col overflow-hidden relative">
+	<!-- Day Labels - Also acts as a fallback for Prev Month nav if no blank cells -->
+	<div 
+		class="relative grid grid-cols-7 border-b border-border bg-bg/50"
+		ondragenter={() => handleEnter('prev')}
+		ondragleave={handleLeave}
+		ondragover={(e) => e.preventDefault()}
+	>
 		{#each DAYS_OF_WEEK as day}
 			<div class="py-2 sm:py-3 text-center text-[8px] sm:text-[10px] font-bold text-text-dim tracking-widest md:tracking-[0.2em]">
 				{day}
 			</div>
 		{/each}
+
+		{#if startDay === 0 && hoveringType === 'prev' && cal.navTargetDate}
+			<div class="absolute inset-0 flex items-center justify-center bg-bg/90 backdrop-blur-sm z-[60] animate-in fade-in duration-200">
+				<div class="flex items-center gap-3">
+					<div class="w-5 h-5 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+					<span class="text-[10px] font-bold text-accent uppercase tracking-widest">
+						Moving to {MONTHS[cal.navTargetDate.getMonth()]} {cal.navTargetDate.getFullYear()}...
+					</span>
+				</div>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Grid Cells -->
@@ -95,6 +111,25 @@
 				{/if}
 			</div>
 		{/each}
+	</div>
+
+	<!-- Fallback for Next Month nav if grid is full -->
+	<div 
+		class="h-2 w-full transition-colors {cal.draggingSong ? 'bg-accent/5' : ''}"
+		ondragenter={() => handleEnter('next')}
+		ondragleave={handleLeave}
+		ondragover={(e) => e.preventDefault()}
+	>
+		{#if (42 - startDay - daysInMonth) === 0 && hoveringType === 'next' && cal.navTargetDate}
+			<div class="absolute bottom-0 left-0 right-0 h-16 flex items-center justify-center bg-bg/90 backdrop-blur-sm z-[60] border-t border-accent/20 animate-in slide-in-from-bottom-4 duration-300">
+				<div class="flex items-center gap-3">
+					<div class="w-5 h-5 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+					<span class="text-[10px] font-bold text-accent uppercase tracking-widest">
+						Moving to {MONTHS[cal.navTargetDate.getMonth()]} {cal.navTargetDate.getFullYear()}...
+					</span>
+				</div>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Hidden persistent source for dragging across months -->
