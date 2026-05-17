@@ -201,6 +201,52 @@ export class CalendarState {
 			this.isLoading = false;
 		}
 	};
+
+	moveSong = async (fromDay: number, toDay: number) => {
+		if (fromDay === toDay) return;
+
+		const fromDate = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth(), fromDay);
+		const toDate = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth(), toDay);
+		const fromKey = getDateKey(fromDate);
+		const toKey = getDateKey(toDate);
+
+		const song = this.songsPerDay[fromKey];
+		if (!song) return;
+
+		// Optimistic update
+		const originalTargetSong = this.songsPerDay[toKey];
+		this.songsPerDay[toKey] = song;
+		delete this.songsPerDay[fromKey];
+
+		try {
+			const response = await fetch('/api/songs', {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ fromKey, toKey })
+			});
+
+			if (!response.ok) {
+				// Revert on failure
+				this.songsPerDay[fromKey] = song;
+				if (originalTargetSong) {
+					this.songsPerDay[toKey] = originalTargetSong;
+				} else {
+					delete this.songsPerDay[toKey];
+				}
+				this.addToast('Failed to move song', 'error');
+			}
+		} catch (err) {
+			console.error('Failed to move song:', err);
+			// Revert on error
+			this.songsPerDay[fromKey] = song;
+			if (originalTargetSong) {
+				this.songsPerDay[toKey] = originalTargetSong;
+			} else {
+				delete this.songsPerDay[toKey];
+			}
+			this.addToast('Network error while moving', 'error');
+		}
+	};
 }
 
 const CALENDAR_KEY = Symbol('calendar');

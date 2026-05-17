@@ -1,18 +1,27 @@
 <script lang="ts">
 	import { getCalendarState, type Song } from '$lib';
 
-	let { song }: { song: Song } = $props();
+	let { song, day }: { song: Song; day: number } = $props();
 	const cal = getCalendarState();
 
 	function handleClick(e: MouseEvent) {
 		e.stopPropagation();
 		cal.openPreview(song);
 	}
+
+	function handleDragStart(e: DragEvent) {
+		if (e.dataTransfer) {
+			e.dataTransfer.setData('text/plain', day.toString());
+			e.dataTransfer.effectAllowed = 'move';
+		}
+	}
 </script>
 
 <button 
 	onclick={handleClick}
-	class="w-full flex flex-col items-center gap-1 text-center px-1 outline-none rounded-lg transition-all cursor-pointer"
+	ondragstart={handleDragStart}
+	draggable="true"
+	class="w-full flex flex-col items-center gap-1 text-center px-1 outline-none rounded-lg transition-all cursor-grab active:cursor-grabbing hover:bg-surface/50"
 >
 	{#if song.album.images[0]}
 		<div class="w-full max-w-[4rem] sm:max-w-[5rem] md:max-w-[6rem] aspect-square overflow-hidden rounded-sm flex-shrink-0">
