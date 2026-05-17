@@ -4,9 +4,13 @@
 	let { song }: { song: Song } = $props();
 </script>
 
-<div class="w-full flex items-center gap-2 p-1 rounded bg-surface/50 border-border/50 overflow-hidden text-left">
+<div class="w-full flex flex-col items-center gap-1 text-center px-1">
 	{#if song.album.images[0]}
-		<img src={song.album.images[0].url} alt="" class="w-4 h-4 rounded-sm flex-shrink-0" />
+		<div class="w-full max-w-[4rem] sm:max-w-[5rem] md:max-w-[6rem] aspect-square overflow-hidden rounded-sm flex-shrink-0">
+			<img src={song.album.images[0].url} alt="" class="w-full h-full object-cover" />
+		</div>
 	{/if}
-	<span class="text-[10px] text-accent-hover truncate font-medium group-hover:text-text">{song.name}</span>
+	<span class="text-[9px] sm:text-[10px] text-accent-hover truncate font-medium w-full px-1">
+		{song.name}
+	</span>
 </div>
