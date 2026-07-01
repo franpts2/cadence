@@ -126,3 +126,59 @@ export const DELETE: RequestHandler = async ({ url, locals }) => {
 		return json({ error: 'Database error' }, { status: 500 });
 	}
 };
+
+export const PATCH: RequestHandler = async ({ request, locals }) => {
+	const session = await locals.auth();
+	if (!session?.user?.id || (session as any)?.error === 'RefreshAccessTokenError') {
+		return json({ error: 'Unauthorized', code: 'AUTH_EXPIRED' }, { status: 401 });
+	}
+
+	const { fromKey, toKey } = await request.json();
+
+	if (!fromKey || !toKey) {
+		return json({ error: 'Missing fromKey or toKey' }, { status: 400 });
+	}
+
+	const userId = session.user.id;
+
+	try {
+		await db.transaction(async (tx) => {
+			// Get the song from the original date
+			const existing = await tx
+				.select()
+				.from(dailySongs)
+				.where(
+					and(
+						eq(dailySongs.userId, userId),
+						eq(dailySongs.dateKey, fromKey)
+					)
+				)
+				.get();
+
+			if (!existing) {
+				throw new Error('No song found at original date');
+			}
+
+			// Delete any song at the target date (to avoid unique constraint violation)
+			await tx
+				.delete(dailySongs)
+				.where(
+					and(
+						eq(dailySongs.userId, userId),
+						eq(dailySongs.dateKey, toKey)
+					)
+				);
+
+			// Update the dateKey
+			await tx
+				.update(dailySongs)
+				.set({ dateKey: toKey })
+				.where(eq(dailySongs.id, existing.id));
+		});
+
+		return json({ success: true });
+	} catch (err) {
+		console.error('Failed to move song:', err);
+		return json({ error: 'Database error' }, { status: 500 });
+	}
+};

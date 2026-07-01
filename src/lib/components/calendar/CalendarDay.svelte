@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Song, TrashIcon, PlusIcon } from '$lib';
+	import { type Song, TrashIcon, PlusIcon, getCalendarState } from '$lib';
 	import CalendarSong from './CalendarSong.svelte';
 
 	let { day, isToday, isSelected, songs = [], onclick, onAddSong, onDeleteSong } = $props<{
@@ -12,6 +12,9 @@
 		onDeleteSong: () => void;
 	}>();
 
+	const cal = getCalendarState();
+	let isDraggingOver = $state(false);
+
 	function handleKeyDown(e: KeyboardEvent) {
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
@@ -20,17 +23,44 @@
 	}
 
 	const hasSong = $derived(songs && songs.length > 0);
+	const isTouchHovered = $derived(cal.touchHoveredDay === day && cal.draggingSong);
+
+	function handleDragOver(e: DragEvent) {
+		e.preventDefault();
+		if (e.dataTransfer) {
+			e.dataTransfer.dropEffect = 'move';
+		}
+		isDraggingOver = true;
+	}
+
+	function handleDragLeave() {
+		isDraggingOver = false;
+	}
+
+	function handleDrop(e: DragEvent) {
+		e.preventDefault();
+		isDraggingOver = false;
+		const fromDay = e.dataTransfer?.getData('text/plain');
+		if (fromDay) {
+			cal.moveSong(parseInt(fromDay), day);
+		}
+	}
 </script>
 
 <div
 	onclick={onclick}
 	onkeydown={handleKeyDown}
+	ondragover={handleDragOver}
+	ondragleave={handleDragLeave}
+	ondrop={handleDrop}
+	data-day={day}
 	role="gridcell"
 	tabindex="0"
 	aria-current={isToday ? 'date' : undefined}
 	aria-selected={isSelected}
-	class="relative group border-b border-r border-border-dim text-left p-1.5 sm:p-2 transition-colors h-full w-full min-h-[90px] md:min-h-[130px] flex flex-col items-start justify-start md:items-center md:justify-center focus:outline-none
-		{isSelected ? 'bg-surface/50' : 'hover:bg-surface/30'}"
+	class="relative group border-b border-r border-border-dim text-left p-1.5 sm:p-2 transition-colors h-full w-full min-h-[90px] md:min-h-[130px] flex flex-col items-start justify-start md:items-center md:justify-center focus:outline-none hover:z-50
+		{isSelected ? 'bg-surface/50' : 'hover:bg-surface/30'}
+		{isDraggingOver || isTouchHovered ? 'bg-accent/10 ring-2 ring-inset ring-accent/30' : ''}"
 >
 	<div class="relative w-full md:absolute md:top-1.5 md:left-1.5 md:right-3 flex justify-between items-start z-10 pointer-events-none mb-1 md:mb-0 px-0.5 md:px-0">
 		<span class="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 text-[10px] sm:text-xs rounded-full transition-all
@@ -60,9 +90,9 @@
 		</div>
 	</div>
 
-	<div class="w-full flex flex-col items-center justify-center overflow-hidden md:pt-2">
+	<div class="w-full flex flex-col items-center justify-center md:pt-2">
 		{#each songs as song}
-			<CalendarSong {song} />
+			<CalendarSong {song} {day} />
 		{/each}
 	</div>
 

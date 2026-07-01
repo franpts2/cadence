@@ -23,6 +23,25 @@ export class CalendarState {
 	searchingForDate = $state<Date | null>(null);
 	previewingSong = $state<Song | null>(null);
 
+	// Drag state
+	draggingSong = $state<Song | null>(null);
+	draggingFromDay = $state<number | null>(null);
+	touchHoveredDay = $state<number | null>(null);
+	hoveringType = $state<'prev' | 'next' | null>(null);
+	
+	// Pending move state
+	pendingMove = $state<{ fromDay: number; toDay: number } | null>(null);
+	isMoveConfirmOpen = $state(false);
+
+	// Navigation feedback state
+	navTargetDate = $state<Date | null>(null);
+	private navTimeout: ReturnType<typeof setTimeout> | null = null;
+	private navCancelTimeout: ReturnType<typeof setTimeout> | null = null;
+	private readonly NAV_DELAY = 1200;
+
+	private lastNavTime = 0;
+	private navCooldown = 500;
+
 	monthLabel = $derived(MONTHS[this.viewDate.getMonth()]);
 	yearLabel = $derived(this.viewDate.getFullYear());
 
@@ -58,11 +77,72 @@ export class CalendarState {
 	};
 
 	prevMonth = () => {
+		const now = Date.now();
+		if (now - this.lastNavTime < this.navCooldown) return;
+		this.lastNavTime = now;
 		this.viewDate = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth() - 1, 1);
 	};
 
 	nextMonth = () => {
+		const now = Date.now();
+		if (now - this.lastNavTime < this.navCooldown) return;
+		this.lastNavTime = now;
 		this.viewDate = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth() + 1, 1);
+	};
+
+	startDelayedNav = (direction: 'prev' | 'next') => {
+		// Clear any pending cancel
+		if (this.navCancelTimeout) {
+			clearTimeout(this.navCancelTimeout);
+			this.navCancelTimeout = null;
+		}
+
+		// If already navigating to this direction, do nothing
+		if (this.navTimeout && this.navTargetDate) {
+			const isSameDirection = direction === 'prev' 
+				? (this.navTargetDate.getMonth() < this.viewDate.getMonth() || (this.navTargetDate.getMonth() === 11 && this.viewDate.getMonth() === 0))
+				: (this.navTargetDate.getMonth() > this.viewDate.getMonth() || (this.navTargetDate.getMonth() === 0 && this.viewDate.getMonth() === 11));
+			
+			if (isSameDirection) return;
+		}
+
+		this.cancelDelayedNav(true); // Cancel any current ones immediately
+
+		const target = new Date(this.viewDate);
+		if (direction === 'prev') {
+			target.setMonth(target.getMonth() - 1);
+		} else {
+			target.setMonth(target.getMonth() + 1);
+		}
+		
+		this.navTargetDate = target;
+		this.hoveringType = direction;
+		this.navTimeout = setTimeout(() => {
+			if (direction === 'prev') this.prevMonth();
+			else this.nextMonth();
+			this.cancelDelayedNav(true);
+		}, this.NAV_DELAY);
+	};
+
+	cancelDelayedNav = (immediate = false) => {
+		if (immediate) {
+			if (this.navTimeout) {
+				clearTimeout(this.navTimeout);
+				this.navTimeout = null;
+			}
+			if (this.navCancelTimeout) {
+				clearTimeout(this.navCancelTimeout);
+				this.navCancelTimeout = null;
+			}
+			this.navTargetDate = null;
+			this.hoveringType = null;
+		} else {
+			// Delay cancel to allow moving between cells
+			if (this.navCancelTimeout) return;
+			this.navCancelTimeout = setTimeout(() => {
+				this.cancelDelayedNav(true);
+			}, 100);
+		}
 	};
 
 	goToToday = () => {
@@ -199,6 +279,80 @@ export class CalendarState {
 			this.addToast('Network error while removing', 'error');
 		} finally {
 			this.isLoading = false;
+		}
+	};
+
+	moveSong = async (fromDay: number, toDay: number) => {
+		if (fromDay === toDay) return;
+
+		const toDate = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth(), toDay);
+		const toKey = getDateKey(toDate);
+
+		// If target is occupied, show confirmation
+		if (this.songsPerDay[toKey]) {
+			this.pendingMove = { fromDay, toDay };
+			this.isMoveConfirmOpen = true;
+			return;
+		}
+
+		await this.executeMove(fromDay, toDay);
+	};
+
+	confirmMove = async () => {
+		if (this.pendingMove) {
+			const { fromDay, toDay } = this.pendingMove;
+			this.isMoveConfirmOpen = false;
+			this.pendingMove = null;
+			await this.executeMove(fromDay, toDay);
+		}
+	};
+
+	cancelMove = () => {
+		this.isMoveConfirmOpen = false;
+		this.pendingMove = null;
+	};
+
+	private executeMove = async (fromDay: number, toDay: number) => {
+		const fromDate = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth(), fromDay);
+		const toDate = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth(), toDay);
+		const fromKey = getDateKey(fromDate);
+		const toKey = getDateKey(toDate);
+
+		const song = this.songsPerDay[fromKey];
+		if (!song) return;
+
+		// Optimistic update
+		const originalTargetSong = this.songsPerDay[toKey];
+		this.songsPerDay[toKey] = song;
+		delete this.songsPerDay[fromKey];
+
+		try {
+			const response = await fetch('/api/songs', {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ fromKey, toKey })
+			});
+
+			if (!response.ok) {
+				// Revert on failure
+				this.songsPerDay[fromKey] = song;
+				if (originalTargetSong) {
+					this.songsPerDay[toKey] = originalTargetSong;
+				} else {
+					delete this.songsPerDay[toKey];
+				}
+				this.addToast('Failed to move song', 'error');
+			}
+		} catch (err) {
+			console.error('Failed to move song:', err);
+			// Revert on error
+			this.songsPerDay[fromKey] = song;
+			if (originalTargetSong) {
+				this.songsPerDay[toKey] = originalTargetSong;
+			} else {
+				delete this.songsPerDay[toKey];
+			}
+			this.addToast('Network error while moving', 'error');
 		}
 	};
 }
