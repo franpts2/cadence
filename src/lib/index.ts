@@ -16,3 +16,6 @@ export { default as ExportIcon } from './components/icons/ExportIcon.svelte';
 export { default as ImportIcon } from './components/icons/ImportIcon.svelte';
 export { default as WarningIcon } from './components/icons/WarningIcon.svelte';
 export { default as InfoIcon } from './components/icons/InfoIcon.svelte';
+export { default as ErrorIcon } from './components/icons/ErrorIcon.svelte';
+export { default as SuccessIcon } from './components/icons/SuccessIcon.svelte';
+export { default as QuestionIcon } from './components/icons/QuestionIcon.svelte';
