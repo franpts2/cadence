@@ -135,11 +135,11 @@
 			{/if}
 
 			<div class="mt-4">
-				<Alert title="Important Note" variant="error">
+				<Alert title="Important Note" variant="warning">
 					<p>
 						Songs will be added to your calendar starting from the first day of the {importType === 'monthly' ? 'month' : 'year'}. Each song will take up one day, following the order of your playlist.
 					</p>
-					<p class="mt-2 font-bold text-red-400">
+					<p class="mt-2 font-bold text-amber-300">
 						Warning: This will permanently replace any songs already scheduled during this period.
 					</p>
 				</Alert>
