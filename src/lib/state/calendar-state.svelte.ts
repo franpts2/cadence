@@ -26,6 +26,8 @@ export class CalendarState {
 	// Drag state
 	draggingSong = $state<Song | null>(null);
 	draggingFromDay = $state<number | null>(null);
+	touchHoveredDay = $state<number | null>(null);
+	hoveringType = $state<'prev' | 'next' | null>(null);
 	
 	// Pending move state
 	pendingMove = $state<{ fromDay: number; toDay: number } | null>(null);
@@ -114,6 +116,7 @@ export class CalendarState {
 		}
 		
 		this.navTargetDate = target;
+		this.hoveringType = direction;
 		this.navTimeout = setTimeout(() => {
 			if (direction === 'prev') this.prevMonth();
 			else this.nextMonth();
@@ -132,6 +135,7 @@ export class CalendarState {
 				this.navCancelTimeout = null;
 			}
 			this.navTargetDate = null;
+			this.hoveringType = null;
 		} else {
 			// Delay cancel to allow moving between cells
 			if (this.navCancelTimeout) return;

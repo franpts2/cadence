@@ -20,16 +20,12 @@
 		return isSameDay(cal.selectedDate, date);
 	}
 
-	let hoveringType = $state<'prev' | 'next' | null>(null);
-
 	function handleEnter(type: 'prev' | 'next') {
 		if (!cal.draggingSong) return;
-		hoveringType = type;
 		cal.startDelayedNav(type);
 	}
 
 	function handleLeave() {
-		hoveringType = null;
 		cal.cancelDelayedNav();
 	}
 </script>
@@ -38,6 +34,9 @@
 	<!-- Day Labels - Also acts as a fallback for Prev Month nav if no blank cells -->
 	<div 
 		class="relative grid grid-cols-7 border-b border-border bg-bg/50"
+		data-nav-target="prev"
+		role="row"
+		tabindex="-1"
 		ondragenter={() => handleEnter('prev')}
 		ondragleave={handleLeave}
 		ondragover={(e) => e.preventDefault()}
@@ -48,7 +47,7 @@
 			</div>
 		{/each}
 
-		{#if startDay === 0 && hoveringType === 'prev' && cal.navTargetDate}
+		{#if startDay === 0 && cal.hoveringType === 'prev' && cal.navTargetDate}
 			<div class="absolute inset-0 flex items-center justify-center bg-bg/90 backdrop-blur-sm z-[60] animate-in fade-in duration-200">
 				<div class="flex items-center gap-3">
 					<div class="w-5 h-5 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
@@ -65,11 +64,14 @@
 		{#each Array(startDay) as _, i}
 			<div 
 				class="relative border-b border-r border-border-dim bg-bg/20 transition-colors flex items-center justify-center p-2 text-center"
+				data-nav-target="prev"
+				role="gridcell"
+				tabindex="-1"
 				ondragenter={() => handleEnter('prev')}
 				ondragleave={handleLeave}
 				ondragover={(e) => e.preventDefault()}
 			>
-				{#if i === startDay - 1 && hoveringType === 'prev' && cal.navTargetDate}
+				{#if i === startDay - 1 && cal.hoveringType === 'prev' && cal.navTargetDate}
 					<div class="flex flex-col items-center gap-2 animate-in fade-in zoom-in duration-300">
 						<div class="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
 						<span class="text-[9px] font-medium text-accent uppercase tracking-tight">
@@ -97,11 +99,14 @@
 		{#each Array(42 - startDay - daysInMonth) as _, i}
 			<div 
 				class="relative border-b border-r border-border-dim bg-bg/20 transition-colors flex items-center justify-center p-2 text-center"
+				data-nav-target="next"
+				role="gridcell"
+				tabindex="-1"
 				ondragenter={() => handleEnter('next')}
 				ondragleave={handleLeave}
 				ondragover={(e) => e.preventDefault()}
 			>
-				{#if i === 0 && hoveringType === 'next' && cal.navTargetDate}
+				{#if i === 0 && cal.hoveringType === 'next' && cal.navTargetDate}
 					<div class="flex flex-col items-center gap-2 animate-in fade-in zoom-in duration-300">
 						<div class="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
 						<span class="text-[9px] font-medium text-accent uppercase tracking-tight">
@@ -116,11 +121,14 @@
 	<!-- Fallback for Next Month nav if grid is full -->
 	<div 
 		class="h-2 w-full transition-colors {cal.draggingSong ? 'bg-accent/5' : ''}"
+		data-nav-target="next"
+		role="region"
+		aria-label="Next Month Drag Zone"
 		ondragenter={() => handleEnter('next')}
 		ondragleave={handleLeave}
 		ondragover={(e) => e.preventDefault()}
 	>
-		{#if (42 - startDay - daysInMonth) === 0 && hoveringType === 'next' && cal.navTargetDate}
+		{#if (42 - startDay - daysInMonth) === 0 && cal.hoveringType === 'next' && cal.navTargetDate}
 			<div class="absolute bottom-0 left-0 right-0 h-16 flex items-center justify-center bg-bg/90 backdrop-blur-sm z-[60] border-t border-accent/20 animate-in slide-in-from-bottom-4 duration-300">
 				<div class="flex items-center gap-3">
 					<div class="w-5 h-5 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>

@@ -139,6 +139,8 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Missing fromKey or toKey' }, { status: 400 });
 	}
 
+	const userId = session.user.id;
+
 	try {
 		await db.transaction(async (tx) => {
 			// Get the song from the original date
@@ -147,7 +149,7 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 				.from(dailySongs)
 				.where(
 					and(
-						eq(dailySongs.userId, session.user.id),
+						eq(dailySongs.userId, userId),
 						eq(dailySongs.dateKey, fromKey)
 					)
 				)
@@ -162,7 +164,7 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 				.delete(dailySongs)
 				.where(
 					and(
-						eq(dailySongs.userId, session.user.id),
+						eq(dailySongs.userId, userId),
 						eq(dailySongs.dateKey, toKey)
 					)
 				);
