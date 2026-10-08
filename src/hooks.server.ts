@@ -52,7 +52,6 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
   session: {
     strategy: "jwt",
   },
-  trustHost: true,
   providers: [
     Spotify({
       clientId: SPOTIFY_CLIENT_ID,
