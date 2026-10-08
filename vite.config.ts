@@ -1,8 +1,11 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
+import tailwindcss from '@tailwindcss/vite';
+import path from 'path';
 
 export default defineConfig({
 	plugins: [
+		tailwindcss(),
 		sveltekit()
 	],
 	server: {
@@ -13,19 +16,17 @@ export default defineConfig({
 		environment: 'jsdom',
 		globals: true,
 		setupFiles: ['./src/test/setup.ts'],
-		alias: {
-			'$lib': './src/lib'
-		},
 		server: {
 			deps: {
 				inline: [/@auth\/sveltekit/]
 			}
 		},
-		threads: {
-			singleThread: true
-		}
+		pool: 'threads'
 	},
 	resolve: {
+		alias: {
+			'$lib': path.resolve(__dirname, './src/lib')
+		},
 		conditions: process.env.VITEST ? ['browser'] : undefined
 	}
 });

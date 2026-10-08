@@ -364,5 +364,5 @@ export function setCalendarState(initialSongs?: Record<string, Song>) {
 }
 
 export function getCalendarState() {
-	return getContext<CalendarState>(CALENDAR_KEY);
+	return getContext<CalendarState>(CALENDAR_KEY) ?? new CalendarState();
 }
