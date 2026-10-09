@@ -97,6 +97,6 @@
 	</div>
 
 	{#if isToday}
-		<div class="absolute bottom-1.5 right-1.5 w-1 h-1 rounded-full bg-text animate-pulse"></div>
+		<div class="absolute bottom-1.5 right-1.5 w-1 h-1 rounded-full bg-text"></div>
 	{/if}
 </div>

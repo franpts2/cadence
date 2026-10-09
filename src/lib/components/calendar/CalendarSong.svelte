@@ -190,7 +190,7 @@
 
 {#if isTouchDragging}
 	<div 
-		class="fixed pointer-events-none z-[9999] flex flex-col items-center gap-1.5 text-center bg-surface/95 border border-accent/30 rounded-lg p-2 shadow-2xl transition-transform duration-75 backdrop-blur-md"
+		class="fixed pointer-events-none z-[9999] flex flex-col items-center gap-1.5 text-center bg-surface/95 border border-accent/30 rounded-lg p-2 shadow-2xl transition-transform duration-75 ease-out backdrop-blur-md"
 		style="left: {touchX}px; top: {touchY}px; transform: translate(-50%, -120%); width: 80px;"
 	>
 		{#if song.album.images[0]}
