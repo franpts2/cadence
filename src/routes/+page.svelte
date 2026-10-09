@@ -5,6 +5,7 @@
 	import SongPreviewModal from '$lib/components/song_preview/SongPreviewModal.svelte';
 	import PlaylistControls from '$lib/components/PlaylistControls.svelte';
 	import ImportPlaylistModal from '$lib/components/ImportPlaylistModal.svelte';
+	import ExportPlaylistModal from '$lib/components/ExportPlaylistModal.svelte';
 	import MoveConfirmModal from '$lib/components/MoveConfirmModal.svelte';
 	import Toast from '$lib/components/ui/Toast.svelte';
 	import LoadingIndicator from '$lib/components/ui/LoadingIndicator.svelte';
@@ -75,6 +76,8 @@
 />
 
 <ImportPlaylistModal />
+
+<ExportPlaylistModal />
 
 <MoveConfirmModal />
 

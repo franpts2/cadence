@@ -20,6 +20,7 @@ export class CalendarState {
 	// Modal state
 	isSearchOpen = $state(false);
 	isImportOpen = $state(false);
+	isExportOpen = $state(false);
 	searchingForDate = $state<Date | null>(null);
 	previewingSong = $state<Song | null>(null);
 
@@ -181,6 +182,14 @@ export class CalendarState {
 
 	closeImport = () => {
 		this.isImportOpen = false;
+	};
+
+	openExport = () => {
+		this.isExportOpen = true;
+	};
+
+	closeExport = () => {
+		this.isExportOpen = false;
 	};
 
 	loadSongs = async () => {
@@ -364,5 +373,5 @@ export function setCalendarState(initialSongs?: Record<string, Song>) {
 }
 
 export function getCalendarState() {
-	return getContext<CalendarState>(CALENDAR_KEY);
+	return getContext<CalendarState>(CALENDAR_KEY) ?? new CalendarState();
 }

@@ -24,8 +24,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 	const playlistId = playlistIdMatch[1];
 
-	console.log(`[Import] Processing playlist: ${playlistId} for user ${session.user.id}`);
-
 	try {
 		const authHeader = { Authorization: `Bearer ${accessToken}` };
 
@@ -56,8 +54,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		if (tracks.length === 0) {
 			return json({ error: 'Playlist is empty or tracks could not be read.' }, { status: 400 });
 		}
-
-		console.log(`[Import] Successfully extracted ${tracks.length} tracks from "${playlistData.name}"`);
 
 		// 4. Determine Date Range
 		const entries: { userId: string; dateKey: string; songId: string }[] = [];
@@ -127,8 +123,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				});
 			}
 		});
-
-		console.log(`[Import] Saved ${songsToImportCount} songs to database for user ${session.user.id}`);
 
 		return json({
 			success: true,
