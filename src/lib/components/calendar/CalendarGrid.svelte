@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { getCalendarState, DAYS_OF_WEEK, isSameDay, MONTHS } from '$lib';
+	import { getCalendarState, DAYS_OF_WEEK, isSameDay, MONTHS, pop } from '$lib';
+	import { fade, fly } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
 	import CalendarDay from './CalendarDay.svelte';
 	import CalendarSong from './CalendarSong.svelte';
 
@@ -48,7 +50,7 @@
 		{/each}
 
 		{#if startDay === 0 && cal.hoveringType === 'prev' && cal.navTargetDate}
-			<div class="absolute inset-0 flex items-center justify-center bg-bg/90 backdrop-blur-sm z-[60] animate-in fade-in duration-200">
+			<div class="absolute inset-0 flex items-center justify-center bg-bg/90 backdrop-blur-sm z-[60]" transition:fade={{ duration: 200, easing: cubicOut }}>
 				<div class="flex items-center gap-3">
 					<div class="w-5 h-5 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
 					<span class="text-[10px] font-bold text-accent uppercase tracking-widest">
@@ -72,7 +74,7 @@
 				ondragover={(e) => e.preventDefault()}
 			>
 				{#if i === startDay - 1 && cal.hoveringType === 'prev' && cal.navTargetDate}
-					<div class="flex flex-col items-center gap-2 animate-in fade-in zoom-in-95 duration-300">
+					<div class="flex flex-col items-center gap-2" transition:pop={{ duration: 200, start: 0.9 }}>
 						<div class="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
 						<span class="text-[9px] font-medium text-accent uppercase tracking-tight">
 							Moving to {MONTHS[cal.navTargetDate.getMonth()]} {cal.navTargetDate.getFullYear()}...
@@ -107,7 +109,7 @@
 				ondragover={(e) => e.preventDefault()}
 			>
 				{#if i === 0 && cal.hoveringType === 'next' && cal.navTargetDate}
-					<div class="flex flex-col items-center gap-2 animate-in fade-in zoom-in-95 duration-300">
+					<div class="flex flex-col items-center gap-2" transition:pop={{ duration: 200, start: 0.9 }}>
 						<div class="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
 						<span class="text-[9px] font-medium text-accent uppercase tracking-tight">
 							Moving to {MONTHS[cal.navTargetDate.getMonth()]} {cal.navTargetDate.getFullYear()}...
@@ -129,7 +131,7 @@
 		ondragover={(e) => e.preventDefault()}
 	>
 		{#if (42 - startDay - daysInMonth) === 0 && cal.hoveringType === 'next' && cal.navTargetDate}
-			<div class="absolute bottom-0 left-0 right-0 h-16 flex items-center justify-center bg-bg/90 backdrop-blur-sm z-[60] border-t border-accent/20 animate-in slide-in-from-bottom-4 duration-300">
+			<div class="absolute bottom-0 left-0 right-0 h-16 flex items-center justify-center bg-bg/90 backdrop-blur-sm z-[60] border-t border-accent/20" transition:fly={{ y: 16, duration: 200, easing: cubicOut }}>
 				<div class="flex items-center gap-3">
 					<div class="w-5 h-5 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
 					<span class="text-[10px] font-bold text-accent uppercase tracking-widest">
