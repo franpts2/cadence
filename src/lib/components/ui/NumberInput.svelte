@@ -34,7 +34,7 @@
 		oninput={handleInput}
 		{min}
 		{max}
-		class="w-full px-4 py-2.5 bg-bg border border-border rounded-xl text-text focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/50 transition-all no-spinner"
+		class="w-full px-4 py-2.5 bg-bg border border-border rounded-xl text-text focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/50 transition-colors no-spinner"
 	/>
 	<div class="absolute right-2 inset-y-0 flex flex-col justify-center">
 		<button

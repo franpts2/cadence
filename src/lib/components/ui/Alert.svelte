@@ -46,7 +46,7 @@
 	};
 </script>
 
-<div class="p-4 border rounded-xl flex items-start gap-3.5 transition-all {variants[variant].container}">
+<div class="p-4 border rounded-xl flex items-start gap-3.5 {variants[variant].container}">
 	<!-- Icon -->
 	<div class="flex-shrink-0 mt-0.5 {variants[variant].iconColor}">
 		{#if variant === 'error'}

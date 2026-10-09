@@ -32,3 +32,19 @@
     animation: none;
   }
 }
+
+/* Press feedback for controls. Uses :active so it works on touch as well as
+   pointer. Controls that manage their own transform can opt out with .no-press. */
+@media (prefers-reduced-motion: no-preference) {
+  button:not(.no-press):not(:disabled),
+  [role="button"]:not(.no-press) {
+    transition-property: transform, background-color, border-color, color, opacity, box-shadow;
+    transition-duration: 160ms;
+    transition-timing-function: var(--ease-out);
+  }
+
+  button:not(.no-press):not(:disabled):active,
+  [role="button"]:not(.no-press):active {
+    transform: scale(0.97);
+  }
+}

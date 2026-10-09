@@ -29,7 +29,7 @@
 		{id}
 		type="button"
 		onclick={() => (isOpen = !isOpen)}
-		class="w-full flex items-center justify-between px-4 py-2.5 bg-bg border border-border rounded-xl text-text focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/50 transition-all text-left"
+		class="w-full flex items-center justify-between px-4 py-2.5 bg-bg border border-border rounded-xl text-text focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/50 transition-colors text-left"
 	>
 		<span class="truncate">{selectedLabel}</span>
 		<ChevronDownIcon class="h-4 w-4 text-text-muted transition-transform duration-200 ease-out {isOpen ? 'rotate-180' : ''}" />

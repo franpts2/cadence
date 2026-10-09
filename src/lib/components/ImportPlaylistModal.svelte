@@ -106,7 +106,7 @@
 					bind:value={playlistUrl}
 					placeholder="https://open.spotify.com/playlist/..."
 					required
-					class="w-full px-4 py-2.5 bg-bg border border-border rounded-xl text-text placeholder:text-text-dim focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/50 transition-all"
+					class="w-full px-4 py-2.5 bg-bg border border-border rounded-xl text-text placeholder:text-text-dim focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/50 transition-colors"
 				/>
 			</div>
 
@@ -151,14 +151,14 @@
 				type="button"
 				onclick={() => cal.closeImport()}
 				disabled={isImporting}
-				class="flex-1 px-4 py-2.5 border border-border text-text-muted hover:text-text hover:bg-surface-hover rounded-xl transition-all font-medium disabled:opacity-50"
+				class="flex-1 px-4 py-2.5 border border-border text-text-muted hover:text-text hover:bg-surface-hover rounded-xl transition-colors font-medium disabled:opacity-50"
 			>
 				Cancel
 			</button>
 			<button
 				type="submit"
 				disabled={isImporting}
-				class="flex-1 px-4 py-2.5 bg-text text-bg hover:bg-white rounded-xl transition-all font-bold disabled:opacity-50"
+				class="flex-1 px-4 py-2.5 bg-text text-bg hover:bg-white rounded-xl transition-colors font-bold disabled:opacity-50"
 			>
 				{isImporting ? 'Importing...' : 'Import Playlist'}
 			</button>
