@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ChevronDownIcon from '../icons/ChevronDownIcon.svelte';
-	import { fade } from 'svelte/transition';
+	import { pop } from '$lib';
 
 	interface Option {
 		value: any;
@@ -32,7 +32,7 @@
 		class="w-full flex items-center justify-between px-4 py-2.5 bg-bg border border-border rounded-xl text-text focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/50 transition-all text-left"
 	>
 		<span class="truncate">{selectedLabel}</span>
-		<ChevronDownIcon class="h-4 w-4 text-text-muted transition-transform duration-200 {isOpen ? 'rotate-180' : ''}" />
+		<ChevronDownIcon class="h-4 w-4 text-text-muted transition-transform duration-200 ease-out {isOpen ? 'rotate-180' : ''}" />
 	</button>
 
 	{#if isOpen}
@@ -45,8 +45,8 @@
 		></button>
 
 		<div
-			class="absolute z-[70] w-full mt-2 bg-bg border border-border rounded-xl shadow-xl overflow-hidden py-1.5"
-			transition:fade={{ duration: 100 }}
+			class="absolute z-[70] w-full mt-2 bg-bg border border-border rounded-xl shadow-xl overflow-hidden py-1.5 origin-top"
+			transition:pop={{ duration: 150, start: 0.95, y: -4 }}
 		>
 			<div class="max-h-60 overflow-y-auto">
 				{#each options as option}

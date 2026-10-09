@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
+	import { pop } from '$lib';
 	import type { Snippet } from 'svelte';
 
 	let { 
@@ -48,8 +48,8 @@
 	
 	{#if showTooltip}
 		<div 
-			transition:fade={{ duration: 100 }}
-			class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-surface border border-border rounded-lg text-[10px] font-medium leading-tight text-text-muted whitespace-nowrap z-[70] pointer-events-none shadow-2xl min-w-max"
+			transition:pop={{ duration: 125, start: 0.97 }}
+			class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-surface border border-border rounded-lg text-[10px] font-medium leading-tight text-text-muted whitespace-nowrap z-[70] pointer-events-none shadow-2xl min-w-max origin-bottom"
 		>
 			<div class="flex flex-col gap-1 items-center">
 				{#each text.split('\n') as line}

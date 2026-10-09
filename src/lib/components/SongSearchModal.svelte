@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Song, SearchIcon, CloseIcon } from '$lib';
+	import { type Song, SearchIcon, CloseIcon, pop } from '$lib';
 	import SongSearchResult from './SongSearchResult.svelte';
 
 	let { isOpen, onSelect, onClose } = $props<{
@@ -70,7 +70,7 @@
 >
 	<div class="flex items-start justify-center pt-[15vh] px-4 h-full w-full pointer-events-none">
 		<div 
-			class="w-full max-w-lg bg-surface border border-border rounded-xl shadow-2xl overflow-hidden pointer-events-auto"
+			class="search-panel w-full max-w-lg bg-surface border border-border rounded-xl shadow-2xl overflow-hidden pointer-events-auto"
 			role="document"
 		>
 			<div class="p-4 border-b border-border flex items-center gap-3">
@@ -98,11 +98,13 @@
 						<div class="animate-pulse">Searching...</div>
 					</div>
 				{:else if results.length > 0}
-					<div class="p-2">
-						{#each results as song}
-							<SongSearchResult {song} onclick={() => onSelect(song)} />
-						{/each}
-					</div>
+					{#key results}
+						<div class="p-2" in:pop={{ duration: 120, start: 1 }}>
+							{#each results as song}
+								<SongSearchResult {song} onclick={() => onSelect(song)} />
+							{/each}
+						</div>
+					{/key}
 				{:else if searchQuery && !isSearching}
 					<div class="p-8 text-center text-text-subtle">
 						No results found for "{searchQuery}"
@@ -119,11 +121,28 @@
 
 <style>
 	dialog::backdrop {
-		animation: fade-in 0.2s ease-out;
+		animation: fade-in 200ms cubic-bezier(0.23, 1, 0.32, 1) both;
+	}
+
+	dialog[open] .search-panel {
+		animation: panel-in 150ms cubic-bezier(0.23, 1, 0.32, 1) both;
 	}
 
 	@keyframes fade-in {
 		from { opacity: 0; }
 		to { opacity: 1; }
+	}
+
+	@keyframes panel-in {
+		from {
+			opacity: 0;
+			transform: scale(0.97) translateY(-4px);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		dialog[open] .search-panel {
+			animation: fade-in 150ms cubic-bezier(0.23, 1, 0.32, 1) both;
+		}
 	}
 </style>
