@@ -72,7 +72,7 @@
 				ondragover={(e) => e.preventDefault()}
 			>
 				{#if i === startDay - 1 && cal.hoveringType === 'prev' && cal.navTargetDate}
-					<div class="flex flex-col items-center gap-2 animate-in fade-in zoom-in duration-300">
+					<div class="flex flex-col items-center gap-2 animate-in fade-in zoom-in-95 duration-300">
 						<div class="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
 						<span class="text-[9px] font-medium text-accent uppercase tracking-tight">
 							Moving to {MONTHS[cal.navTargetDate.getMonth()]} {cal.navTargetDate.getFullYear()}...
@@ -107,7 +107,7 @@
 				ondragover={(e) => e.preventDefault()}
 			>
 				{#if i === 0 && cal.hoveringType === 'next' && cal.navTargetDate}
-					<div class="flex flex-col items-center gap-2 animate-in fade-in zoom-in duration-300">
+					<div class="flex flex-col items-center gap-2 animate-in fade-in zoom-in-95 duration-300">
 						<div class="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
 						<span class="text-[9px] font-medium text-accent uppercase tracking-tight">
 							Moving to {MONTHS[cal.navTargetDate.getMonth()]} {cal.navTargetDate.getFullYear()}...
