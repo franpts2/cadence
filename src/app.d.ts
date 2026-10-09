@@ -13,6 +13,7 @@ declare global {
 declare module "@auth/sveltekit" {
 	interface Session {
 		accessToken?: string;
+		scope?: string;
 		error?: string;
 		user: {
 			id?: string;
@@ -25,6 +26,7 @@ declare module "@auth/core/jwt" {
 		accessToken?: string;
 		accessTokenExpires?: number;
 		refreshToken?: string;
+		scope?: string;
 		user?: any;
 		error?: string;
 	}

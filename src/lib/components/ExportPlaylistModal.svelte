@@ -6,6 +6,8 @@
 	import LoadingIndicator from './ui/LoadingIndicator.svelte';
 	import { getCalendarState, MONTHS } from '$lib';
 	import { fade } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
+	import { signIn, signOut } from '@auth/sveltekit/client';
 
 	const cal = getCalendarState();
 
@@ -14,6 +16,8 @@
 	let month = $state(cal.viewDate.getMonth());
 	let isExporting = $state(false);
 	let exportedUrl = $state<string | null>(null);
+	let needsReconnect = $state(false);
+	let isReconnecting = $state(false);
 
 	const exportTypeOptions = [
 		{ value: 'monthly', label: 'Monthly' },
@@ -28,6 +32,7 @@
 		year = cal.viewDate.getFullYear();
 		month = cal.viewDate.getMonth();
 		exportedUrl = null;
+		needsReconnect = false;
 	}
 
 	async function handleExport(e: SubmitEvent) {
@@ -60,6 +65,8 @@
 			if (!response.ok) {
 				if (data.code === 'AUTH_EXPIRED') {
 					cal.addToast(data.error || 'Spotify session expired. Please log in again.', 'error');
+				} else if (data.code === 'SCOPE_MISSING') {
+					needsReconnect = true;
 				} else {
 					cal.addToast(data.error || 'Failed to export playlist', 'error');
 				}
@@ -73,6 +80,19 @@
 			cal.addToast('An unexpected error occurred during export.', 'error');
 		} finally {
 			isExporting = false;
+		}
+	}
+
+	async function handleReconnect() {
+		if (isReconnecting) return;
+		isReconnecting = true;
+		try {
+			await signOut({ redirect: false });
+			await signIn('spotify');
+		} catch (err) {
+			console.error('Reconnect error:', err);
+			isReconnecting = false;
+			cal.addToast('Could not reconnect to Spotify. Please try again.', 'error');
 		}
 	}
 
@@ -93,7 +113,7 @@
 	</p>
 
 	{#if exportedUrl}
-		<div class="space-y-4" in:fade={{ duration: 150 }}>
+		<div class="w-full space-y-4" in:fade={{ duration: 180, easing: cubicOut }}>
 			<Alert title="Export Complete" variant="success">
 				<p>Your playlist was created successfully on Spotify.</p>
 			</Alert>
@@ -102,7 +122,7 @@
 				href={exportedUrl}
 				target="_blank"
 				rel="noopener noreferrer"
-				class="block w-full px-4 py-3 bg-[#1DB954] hover:bg-[#1ed760] text-bg font-bold rounded-xl transition-all text-center"
+				class="block w-full px-4 py-3 bg-[#1DB954] hover:bg-[#1ed760] text-bg font-bold rounded-xl text-center transition-[background-color,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.98] motion-reduce:active:scale-100"
 			>
 				Open Playlist on Spotify
 			</a>
@@ -110,16 +130,45 @@
 			<button
 				type="button"
 				onclick={handleClose}
-				class="w-full px-4 py-2.5 border border-border text-text-muted hover:text-text hover:bg-surface-hover rounded-xl transition-all font-medium"
+				class="w-full px-4 py-2.5 border border-border text-text-muted hover:text-text hover:bg-surface-hover rounded-xl font-medium transition-[background-color,color,border-color,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.98] motion-reduce:active:scale-100"
 			>
 				Close
 			</button>
 		</div>
+	{:else if needsReconnect}
+		<div class="w-full space-y-4" in:fade={{ duration: 180, easing: cubicOut }}>
+			<Alert title="Spotify Permission Needed" variant="warning">
+				<p>
+					Cadence needs permission to create playlists. Reconnect your Spotify account to grant it.
+				</p>
+				<p class="mt-2">
+					This signs you out and back in. If the Spotify prompt doesn't ask for playlist access, remove Cadence from your Spotify account's apps and reconnect.
+				</p>
+			</Alert>
+
+			<button
+				type="button"
+				onclick={handleReconnect}
+				disabled={isReconnecting}
+				class="w-full px-4 py-3 bg-[#1DB954] hover:bg-[#1ed760] text-bg font-bold rounded-xl disabled:opacity-50 transition-[background-color,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.98] motion-reduce:active:scale-100"
+			>
+				{isReconnecting ? 'Reconnecting...' : 'Reconnect Spotify'}
+			</button>
+
+			<button
+				type="button"
+				onclick={handleClose}
+				disabled={isReconnecting}
+				class="w-full px-4 py-2.5 border border-border text-text-muted hover:text-text hover:bg-surface-hover rounded-xl font-medium disabled:opacity-50 transition-[background-color,color,border-color,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.98] motion-reduce:active:scale-100"
+			>
+				Cancel
+			</button>
+		</div>
 	{:else}
 		<form onsubmit={handleExport} class="w-full space-y-4 text-left">
-			<div class={isExporting ? 'opacity-50 pointer-events-none' : ''}>
+			<div class="space-y-4 {isExporting ? 'opacity-50 pointer-events-none' : ''}">
 				<div class="grid grid-cols-2 gap-4">
-					<div>
+					<div class={exportType === 'all' ? 'col-span-2' : ''}>
 						<label for="export-type" class="block text-xs font-medium text-text-muted uppercase tracking-wider mb-1.5 ml-1">
 							Export Type
 						</label>
@@ -136,7 +185,7 @@
 				</div>
 
 				{#if exportType === 'monthly'}
-					<div transition:fade={{ duration: 150 }}>
+					<div transition:fade={{ duration: 150, easing: cubicOut }}>
 						<label for="export-month" class="block text-xs font-medium text-text-muted uppercase tracking-wider mb-1.5 ml-1">
 							Month
 						</label>
@@ -144,31 +193,29 @@
 					</div>
 				{/if}
 
-				<div>
-					<Alert title="Important Note" variant="info">
-						<p>
-							A <strong>private</strong> playlist will be created in your Spotify account. Songs are ordered by date, from oldest to newest.
-						</p>
-						<p class="mt-2">
-							If this is your first export, you may be asked to log in again to grant playlist creation permission.
-						</p>
-					</Alert>
-				</div>
+				<Alert title="Important Note" variant="info">
+					<p>
+						A <strong>private</strong> playlist will be created in your Spotify account. Songs are ordered by date, from oldest to newest.
+					</p>
+					<p class="mt-2">
+						If this is your first export, you may be asked to log in again to grant playlist creation permission.
+					</p>
+				</Alert>
 			</div>
 
-			<div class="pt-2 flex gap-3">
+			<div class="flex gap-3">
 				<button
 					type="button"
 					onclick={handleClose}
 					disabled={isExporting}
-					class="flex-1 px-4 py-2.5 border border-border text-text-muted hover:text-text hover:bg-surface-hover rounded-xl transition-all font-medium disabled:opacity-50"
+					class="flex-1 px-4 py-2.5 border border-border text-text-muted hover:text-text hover:bg-surface-hover rounded-xl font-medium disabled:opacity-50 transition-[background-color,color,border-color,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.98] motion-reduce:active:scale-100"
 				>
 					Cancel
 				</button>
 				<button
 					type="submit"
 					disabled={isExporting}
-					class="flex-1 px-4 py-2.5 bg-text text-bg hover:bg-white rounded-xl transition-all font-bold disabled:opacity-50"
+					class="flex-1 px-4 py-2.5 bg-text text-bg hover:bg-white rounded-xl font-bold disabled:opacity-50 transition-[background-color,color,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.98] motion-reduce:active:scale-100"
 				>
 					{isExporting ? 'Exporting...' : 'Export Playlist'}
 				</button>

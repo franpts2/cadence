@@ -4,6 +4,7 @@ import { db } from '$lib/server/db';
 import { dailySongs, songs } from '$lib/server/db/schema';
 import { eq, and, like, asc } from 'drizzle-orm';
 import { z } from 'zod';
+import { hasScopes, REQUIRED_EXPORT_SCOPES } from '$lib/server/spotify';
 
 const exportSchema = z.object({
 	exportType: z.enum(['monthly', 'yearly', 'all']),
@@ -13,10 +14,6 @@ const exportSchema = z.object({
 
 const SPOTIFY_API_BASE = 'https://api.spotify.com/v1';
 const TRACKS_PER_REQUEST = 100;
-
-interface SpotifyProfile {
-	id: string;
-}
 
 interface SpotifyPlaylist {
 	id: string;
@@ -43,10 +40,25 @@ function getPlaylistName(exportType: string, year?: number, month?: number): str
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const session = await locals.auth();
-	const accessToken = (session as any)?.accessToken;
+	const accessToken = session?.accessToken;
+	const scope = session?.scope;
 
 	if (!session?.user?.id || !accessToken) {
 		return json({ error: 'Not authenticated' }, { status: 401 });
+	}
+
+	// The token must have been granted the playlist-modify-private scope.
+	// Sessions created before the scope was requested won't have it, even
+	// though their access token may still be valid, so we ask the user to
+	// reconnect (which forces a fresh Spotify consent screen).
+	if (!hasScopes(scope, REQUIRED_EXPORT_SCOPES)) {
+		return json(
+			{
+				error: 'Missing permission to create playlists. Please reconnect your Spotify account.',
+				code: 'SCOPE_MISSING'
+			},
+			{ status: 403 }
+		);
 	}
 
 	const body = await request.json();
@@ -69,29 +81,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
 		const authHeader = { Authorization: `Bearer ${accessToken}` };
 
-		// 1. Get the user's Spotify ID
-		const profileRes = await fetch(`${SPOTIFY_API_BASE}/me`, {
-			headers: authHeader
-		});
-
-		if (!profileRes.ok) {
-			const errorData = await profileRes.json();
-			console.error('[Export] Spotify profile error:', errorData);
-
-			if (profileRes.status === 401 || profileRes.status === 403) {
-				return json({
-					error: 'Spotify session expired or missing playlist permission. Please log in again.',
-					code: 'AUTH_EXPIRED'
-				}, { status: 401 });
-			}
-
-			return json({ error: errorData.error?.message || 'Spotify profile error' }, { status: profileRes.status });
-		}
-
-		const profile: SpotifyProfile = await profileRes.json();
-		const spotifyUserId = profile.id;
-
-		// 2. Fetch the requested songs from the database
+		// 1. Fetch the requested songs from the database
 		const conditions = [eq(dailySongs.userId, session.user.id)];
 
 		if (exportType === 'monthly') {
@@ -116,9 +106,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'No songs found for the selected period' }, { status: 400 });
 		}
 
-		// 3. Create the playlist
+		// 2. Create the playlist for the current user
 		const playlistName = getPlaylistName(exportType, year, month);
-		const createRes = await fetch(`${SPOTIFY_API_BASE}/users/${spotifyUserId}/playlists`, {
+		const createRes = await fetch(`${SPOTIFY_API_BASE}/me/playlists`, {
 			method: 'POST',
 			headers: {
 				...authHeader,
@@ -132,29 +122,35 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 
 		if (!createRes.ok) {
-			const errorData = await createRes.json();
-			console.error('[Export] Create playlist error:', errorData);
+			const errorData = await createRes.json().catch(() => ({}));
+			console.error('[Export] Create playlist error:', createRes.status, errorData);
 
 			if (createRes.status === 401 || createRes.status === 403) {
-				return json({
-					error: 'Missing permission to create playlists. Please log in again.',
-					code: 'AUTH_EXPIRED'
-				}, { status: 401 });
+				return json(
+					{
+						error: 'Missing permission to create playlists. Please reconnect your Spotify account.',
+						code: 'SCOPE_MISSING'
+					},
+					{ status: 403 }
+				);
 			}
 
-			return json({ error: errorData.error?.message || 'Failed to create Spotify playlist' }, { status: createRes.status });
+			return json(
+				{ error: errorData.error?.message || 'Failed to create Spotify playlist' },
+				{ status: createRes.status }
+			);
 		}
 
 		const playlist: SpotifyPlaylist = await createRes.json();
 
-		// 4. Add tracks in batches
+		// 3. Add tracks in batches
 		const trackUris = results.map((r) => `spotify:track:${r.songId}`);
 		let added = 0;
 
 		for (let i = 0; i < trackUris.length; i += TRACKS_PER_REQUEST) {
 			const batch = trackUris.slice(i, i + TRACKS_PER_REQUEST);
 
-			const addRes = await fetch(`${SPOTIFY_API_BASE}/playlists/${playlist.id}/tracks`, {
+			const addRes = await fetch(`${SPOTIFY_API_BASE}/playlists/${playlist.id}/items`, {
 				method: 'POST',
 				headers: {
 					...authHeader,
@@ -164,8 +160,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			});
 
 			if (!addRes.ok) {
-				const errorData = await addRes.json();
-				console.error('[Export] Add tracks error:', errorData);
+				const errorData = await addRes.json().catch(() => ({}));
+				console.error('[Export] Add tracks error:', addRes.status, errorData);
 				return json(
 					{
 						error: `Playlist created, but failed to add some tracks: ${errorData.error?.message || 'Unknown error'}`,

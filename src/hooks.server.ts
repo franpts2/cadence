@@ -5,6 +5,7 @@ import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "$env/static/private";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { db } from "$lib/server/db";
 import { accounts, sessions, users } from "$lib/server/db/schema";
+import { SPOTIFY_SCOPES } from "$lib/server/spotify";
 
 /**
  * Refreshes an expired Spotify access token using the refresh token.
@@ -33,6 +34,7 @@ async function refreshAccessToken(token: any) {
       accessToken: refreshedTokens.access_token,
       accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
       refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
+      scope: refreshedTokens.scope ?? token.scope,
     };
   } catch (error) {
     console.error("Error refreshing access token", error);
@@ -56,7 +58,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
     Spotify({
       clientId: SPOTIFY_CLIENT_ID,
       clientSecret: SPOTIFY_CLIENT_SECRET,
-      authorization: "https://accounts.spotify.com/authorize?scope=user-read-email+user-read-private+playlist-read-private+playlist-read-collaborative+playlist-modify-private&show_dialog=true"
+      authorization: `https://accounts.spotify.com/authorize?scope=${SPOTIFY_SCOPES.join('+')}&show_dialog=true`
     }),
   ],
   callbacks: {
@@ -66,6 +68,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
           accessToken: account.access_token,
           accessTokenExpires: account.expires_at ? account.expires_at * 1000 : Date.now() + 3600 * 1000,
           refreshToken: account.refresh_token,
+          scope: account.scope,
           user,
         };
       }
@@ -79,6 +82,9 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
     async session({ session, token }) {
       if (token.accessToken) {
         session.accessToken = token.accessToken as string;
+      }
+      if (token.scope) {
+        session.scope = token.scope as string;
       }
       if (token.user) {
         const u = token.user as any;
