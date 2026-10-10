@@ -62,33 +62,38 @@
 		{isSelected ? 'bg-surface/50' : 'hover:bg-surface/30'}
 		{isDraggingOver || isTouchHovered ? 'bg-accent/10 ring-2 ring-inset ring-accent/30' : ''}"
 >
-	<div class="relative w-full md:absolute md:top-1.5 md:left-1.5 md:right-3 flex justify-between items-start z-10 pointer-events-none mb-1 md:mb-0 px-0.5 md:px-0">
+	<div class="relative w-full md:absolute md:top-1.5 md:left-1.5 md:right-3 flex items-start z-10 pointer-events-none mb-1 md:mb-0 px-0.5 md:px-0">
 		<span class="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 text-[10px] sm:text-xs rounded-full transition-[transform,color,background-color] duration-150 ease-out
 			{isToday ? 'bg-text text-bg font-bold scale-110' : 'text-text-muted group-hover:text-text'}
 			{isSelected && !isToday ? 'ring-1 ring-border-subtle text-text' : ''}">
 			{day}
 		</span>
 
-		<div class="flex items-center pointer-events-auto pr-2">
-			{#if hasSong}
+		<!-- Delete stays in the corner for pointer devices only; on touch it moved to the song modal -->
+		{#if hasSong}
+			<div class="ml-auto flex items-center pointer-events-auto pr-2 hidden pointer-fine:block">
 				<button
 					onclick={(e) => { e.stopPropagation(); onDeleteSong(); }}
-					class=" cursor-pointer opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity p-1 text-text-muted focus:opacity-100 outline-none"
+					class="cursor-pointer opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity p-1 text-text-muted focus:opacity-100 outline-none"
 					aria-label="Remove song for day {day}"
 				>
 					<TrashIcon class="h-3.5 w-3.5 sm:h-4 sm:w-4" />
 				</button>
-			{:else}
-				<button 
-					onclick={(e) => { e.stopPropagation(); onAddSong(); }}
-					class="cursor-pointer opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity p-1 text-text-muted focus:opacity-100 outline-none"
-					aria-label="Add song for day {day}"
-				>
-					<PlusIcon class="h-4 w-4 sm:h-5 sm:w-5" />
-				</button>
-			{/if}
-		</div>
+			</div>
+		{/if}
 	</div>
+
+	<!-- Add: centred in the cell on touch (the whole empty cell is the target);
+	     tucked into the top-right corner for pointer devices, hover-revealed -->
+	{#if !hasSong}
+		<button
+			onclick={(e) => { e.stopPropagation(); onAddSong(); }}
+			aria-label="Add song for day {day}"
+			class="absolute inset-0 z-10 flex items-center justify-center p-2 cursor-pointer text-text-muted transition-opacity outline-none opacity-100 md:inset-auto md:top-1.5 md:right-2 md:opacity-0 md:group-hover:opacity-40 md:hover:!opacity-100"
+		>
+			<PlusIcon class="h-5 w-5 sm:h-6 sm:w-6 md:h-4 md:w-4" />
+		</button>
+	{/if}
 
 	<div class="w-full flex flex-col items-center justify-center md:pt-2">
 		{#each songs as song}

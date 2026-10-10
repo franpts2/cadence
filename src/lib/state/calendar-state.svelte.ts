@@ -22,6 +22,7 @@ export class CalendarState {
 	isImportOpen = $state(false);
 	searchingForDate = $state<Date | null>(null);
 	previewingSong = $state<Song | null>(null);
+	previewingDay = $state<number | null>(null);
 
 	// Drag state
 	draggingSong = $state<Song | null>(null);
@@ -32,6 +33,10 @@ export class CalendarState {
 	// Pending move state
 	pendingMove = $state<{ fromDay: number; toDay: number } | null>(null);
 	isMoveConfirmOpen = $state(false);
+
+	// Pending delete state: the day awaiting removal confirmation
+	pendingDeleteDay = $state<number | null>(null);
+	isDeleteConfirmOpen = $state(false);
 
 	// Navigation feedback state
 	navTargetDate = $state<Date | null>(null);
@@ -54,12 +59,45 @@ export class CalendarState {
 	}
 
 	// Preview Logic
-	openPreview = (song: Song) => {
+	openPreview = (song: Song, day?: number) => {
 		this.previewingSong = song;
+		this.previewingDay = day ?? null;
 	};
 
 	closePreview = () => {
 		this.previewingSong = null;
+		this.previewingDay = null;
+	};
+
+	// Deletes the song currently being previewed. On touch devices the day grid
+	// has no per-cell delete affordance, so the song modal owns it instead —
+	// it hands off to the confirmation instead of deleting outright.
+	removePreviewSong = () => {
+		const day = this.previewingDay;
+		this.previewingSong = null;
+		this.previewingDay = null;
+		if (day === null) return;
+		this.requestDeleteSong(day);
+	};
+
+	// Both delete entry points (day grid on pointer devices, song modal on touch)
+	// pass through here so every removal is confirmed first.
+	requestDeleteSong = (day: number) => {
+		this.pendingDeleteDay = day;
+		this.isDeleteConfirmOpen = true;
+	};
+
+	confirmDeleteSong = async () => {
+		const day = this.pendingDeleteDay;
+		this.isDeleteConfirmOpen = false;
+		this.pendingDeleteDay = null;
+		if (day === null) return;
+		await this.removeSongFromDate(day);
+	};
+
+	cancelDeleteSong = () => {
+		this.isDeleteConfirmOpen = false;
+		this.pendingDeleteDay = null;
 	};
 
 	// Toast Logic

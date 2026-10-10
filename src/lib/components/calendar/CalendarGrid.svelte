@@ -93,7 +93,7 @@
 				songs={cal.getSongsForDay(day)}
 				onclick={() => cal.selectDate(day)}
 				onAddSong={() => cal.startSearchForDay(day)}
-				onDeleteSong={() => cal.removeSongFromDate(day)}
+				onDeleteSong={() => cal.requestDeleteSong(day)}
 			/>
 		{/each}
 

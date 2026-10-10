@@ -7,7 +7,7 @@
 
 	function handleClick(e: MouseEvent) {
 		e.stopPropagation();
-		cal.openPreview(song);
+		cal.openPreview(song, day);
 	}
 
 	function handleDragStart(e: DragEvent) {

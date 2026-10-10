@@ -82,4 +82,61 @@ describe('CalendarState', () => {
 		expect(state.toasts).toHaveLength(1);
 		expect(state.toasts[0].message).toBe('Failed to move song');
 	});
+
+	describe('delete confirmation', () => {
+		const song = { id: '1', name: 'Song 1', artists: [], album: { name: 'Album', images: [] } };
+
+		beforeEach(() => {
+			state.viewDate = new Date(2026, 4, 1);
+			state.songsPerDay['2026-05-01'] = song as any;
+		});
+
+		it('should open the confirmation without deleting', () => {
+			state.requestDeleteSong(1);
+
+			expect(state.isDeleteConfirmOpen).toBe(true);
+			expect(state.pendingDeleteDay).toBe(1);
+			expect(state.songsPerDay['2026-05-01']).toEqual(song);
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+
+		it('should delete the song once confirmed', async () => {
+			(global.fetch as any).mockResolvedValue({ ok: true });
+
+			state.requestDeleteSong(1);
+			await state.confirmDeleteSong();
+
+			expect(state.songsPerDay['2026-05-01']).toBeUndefined();
+			expect(state.isDeleteConfirmOpen).toBe(false);
+			expect(state.pendingDeleteDay).toBeNull();
+			expect(global.fetch).toHaveBeenCalledWith(
+				'/api/songs?dateKey=2026-05-01',
+				{ method: 'DELETE' }
+			);
+		});
+
+		it('should keep the song when cancelled', () => {
+			state.requestDeleteSong(1);
+			state.cancelDeleteSong();
+
+			expect(state.songsPerDay['2026-05-01']).toEqual(song);
+			expect(state.isDeleteConfirmOpen).toBe(false);
+			expect(state.pendingDeleteDay).toBeNull();
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+
+		it('should route the preview deletion through the confirmation', async () => {
+			state.openPreview(song as any, 1);
+			(global.fetch as any).mockResolvedValue({ ok: true });
+
+			state.removePreviewSong();
+
+			expect(state.previewingSong).toBeNull();
+			expect(state.previewingDay).toBeNull();
+			expect(state.isDeleteConfirmOpen).toBe(true);
+			expect(state.pendingDeleteDay).toBe(1);
+			expect(state.songsPerDay['2026-05-01']).toEqual(song);
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+	});
 });
