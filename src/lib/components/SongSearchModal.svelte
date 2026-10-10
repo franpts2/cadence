@@ -92,7 +92,7 @@
 				</button>
 			</div>
 
-			<div class="max-h-[60vh] overflow-y-auto">
+			<div class="max-h-[60vh] overflow-y-auto overscroll-contain">
 				{#if isSearching && results.length === 0}
 					<div class="p-8 text-center text-text-dim">
 						<div class="animate-pulse">Searching...</div>

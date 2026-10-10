@@ -1,6 +1,38 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@layer base {
+  :root {
+    /* Safe-area insets — 0px unless the page is under a notch / home indicator.
+       Only non-zero once the viewport uses `viewport-fit=cover`. */
+    --safe-inset-top: env(safe-area-inset-top, 0px);
+    --safe-inset-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html {
+    /* No gray/blue flash on tap on iOS Safari / Android Chrome */
+    -webkit-tap-highlight-color: transparent;
+    /* No font inflation in landscape */
+    -webkit-text-size-adjust: 100%;
+    /* Stop pull-to-refresh and the iOS rubber band from hijacking the fixed calendar */
+    overscroll-behavior: none;
+  }
+
+  /* Pressable surfaces: kill the 300ms double-tap click delay, stop long-press from
+     selecting button labels, and suppress the copy/share callout.
+     Hover styling stays gated by Tailwind's `hover:` variant (@media hover: hover).
+     Never put `user-select: none` on body — calendar text is content, not a control. */
+  button,
+  a,
+  [role="button"],
+  summary {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+}
+
 @theme {
   --color-bg: var(--color-zinc-950);
 

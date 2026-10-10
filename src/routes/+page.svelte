@@ -46,7 +46,9 @@
 	});
 </script>
 
-<div class="h-screen w-screen overflow-hidden bg-bg flex flex-col relative">
+	<div
+		class="h-dvh w-full overflow-hidden bg-bg flex flex-col relative pb-[var(--safe-inset-bottom)]"
+	>
 	{#if cal.isLoading}
 		<LoadingIndicator />
 	{/if}

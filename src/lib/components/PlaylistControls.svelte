@@ -4,7 +4,7 @@
 	const cal = getCalendarState();
 </script>
 
-<div class="fixed bottom-6 right-6 flex flex-row gap-3 z-40">
+<div class="fixed bottom-[calc(1.5rem+var(--safe-inset-bottom))] right-6 flex flex-row gap-3 z-40">
 	<button
 		onclick={() => cal.openImport()}
 		class="flex items-center gap-2 px-4 py-2.5 bg-surface hover:bg-surface-hover border border-border text-text rounded-full shadow-lg group"

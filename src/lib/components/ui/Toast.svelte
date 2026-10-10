@@ -5,7 +5,7 @@
 	const cal = getCalendarState();
 </script>
 
-<div class="fixed top-2 left-1/2 -translate-x-1/2 z-[110] flex flex-col gap-2 w-full max-w-xs pointer-events-none">
+<div class="fixed top-[calc(0.5rem+var(--safe-inset-top))] left-1/2 -translate-x-1/2 z-[110] flex flex-col gap-2 w-full max-w-xs pointer-events-none">
 	{#each cal.toasts as toast (toast.id)}
 		<div animate:flip={{ duration: 300 }} class="pointer-events-none">
 			<div

@@ -12,7 +12,7 @@
 </script>
 
 <header
-	class="grid grid-cols-2 items-center gap-y-4 px-4 py-4 border-b border-border bg-bg md:flex md:justify-between md:px-8"
+	class="grid grid-cols-2 items-center gap-y-4 px-4 pt-[calc(1rem+var(--safe-inset-top))] pb-4 border-b border-border bg-bg md:flex md:justify-between md:px-8"
 >
 	<div class="flex items-center gap-3 md:gap-4 order-1">
 		<h1 class="text-xl font-light tracking-tighter text-text-muted md:text-2xl">
