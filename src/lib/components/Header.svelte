@@ -28,9 +28,9 @@
 
 	<div class="flex items-center justify-center col-span-2 order-3 md:order-2 md:col-auto md:mr-auto">
 		<div class="flex flex-col items-center gap-2 md:flex-row md:gap-0">
-			<h2 class="text-xl font-medium text-text whitespace-nowrap md:hidden">
+			<p class="text-xl font-medium text-text whitespace-nowrap md:hidden">
 				{cal.monthLabel} {cal.yearLabel}
-			</h2>
+			</p>
 			<CalendarNav />
 		</div>
 	</div>

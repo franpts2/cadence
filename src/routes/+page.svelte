@@ -58,6 +58,15 @@
 	<Header {session} />
 	
 	<main class="flex-1 overflow-hidden flex flex-col">
+		<!-- Crawlable, screen-reader description of the page. -->
+		<section class="sr-only">
+			<h2>Cadence — your daily music journal for Spotify</h2>
+			<p>
+				Cadence turns your Spotify listening into a personal music journal. Pick one song
+				each day to build a visual calendar of your listening history, drag songs between
+				days, and import or export Spotify playlists. Track your life, one song at a time.
+			</p>
+		</section>
 		<Calendar />
 	</main>
 </div>
