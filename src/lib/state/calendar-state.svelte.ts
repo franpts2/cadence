@@ -1,6 +1,6 @@
 import { getContext, setContext } from 'svelte';
 import type { Song, Toast, ToastType } from '../types/index';
-import { getDateKey, MONTHS } from '../utils/date';
+import { getDateKey, MONTHS, MONTHS_SHORT } from '../utils/date';
 
 export class CalendarState {
 	today = new Date();
@@ -48,7 +48,7 @@ export class CalendarState {
 	private lastNavTime = 0;
 	private navCooldown = 500;
 
-	monthLabel = $derived(MONTHS[this.viewDate.getMonth()]);
+	monthLabel = $derived(MONTHS_SHORT[this.viewDate.getMonth()]);
 	yearLabel = $derived(this.viewDate.getFullYear());
 
 	constructor(initialSongs: Record<string, Song> = {}) {

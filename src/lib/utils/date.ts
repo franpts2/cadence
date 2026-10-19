@@ -3,6 +3,11 @@ export const MONTHS = [
 	'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
+export const MONTHS_SHORT = [
+	'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+	'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+];
+
 export const DAYS_OF_WEEK = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
 export function getDaysInMonth(year: number, month: number): number {

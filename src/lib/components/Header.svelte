@@ -20,7 +20,7 @@
 		</h1>
 		<div class="hidden h-5 w-px bg-border md:block"></div>
 		<h2
-			class="hidden text-lg text-text whitespace-nowrap md:block md:min-w-[9rem] lg:text-xl lg:min-w-[10rem]"
+			class="hidden text-lg text-text whitespace-nowrap md:block md:min-w-[6rem] lg:text-xl lg:min-w-[6.5rem]"
 		>
 			{cal.monthLabel} {cal.yearLabel}
 		</h2>
