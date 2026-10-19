@@ -9,7 +9,7 @@ export const SITE = {
 	name: 'Cadence',
 	/** Canonical production origin. No trailing slash. */
 	url: 'https://cadence.franciscapt.dev',
-	title: 'Cadence — A daily music journal for Spotify',
+	title: 'Cadence',
 	tagline: 'Track your life, one song at a time',
 	description:
 		'Cadence turns your Spotify listening into a personal music journal. Save a song of the day and build a calendar of your life in music.',
