@@ -1,3 +1,8 @@
-# allow crawling everything by default
+# Allow crawling of the public app shell and marketing content.
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /api/
+Disallow: /auth/
+
+# Single-page app — see https://cadence.franciscapt.dev/sitemap.xml
+Sitemap: https://cadence.franciscapt.dev/sitemap.xml
