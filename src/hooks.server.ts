@@ -46,6 +46,10 @@ async function refreshAccessToken(token: any) {
 }
 
 export const { handle, signIn, signOut } = SvelteKitAuth({
+  // Cloudflare Pages puts the app behind Cloudflare's proxy, so the forwarded host
+  // is the canonical host. This is required on Workers, where process.env is not
+  // available for Auth.js to read AUTH_TRUST_HOST at runtime.
+  trustHost: true,
   adapter: DrizzleAdapter(db, {
     usersTable: users,
     accountsTable: accounts,

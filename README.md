@@ -162,14 +162,48 @@ npm run preview # Preview the production build locally
 
 ## Deployment
 
-This project uses `@sveltejs/adapter-auto` by default, which auto-detects some platforms. For a production deployment, choose the adapter that matches your platform and install it:
+Cadence deploys to **Cloudflare Pages** with [`@sveltejs/adapter-cloudflare`](https://svelte.dev/docs/kit/adapter-cloudflare).
 
-- **Vercel:** `npm install -D @sveltejs/adapter-vercel`
-- **Netlify:** `npm install -D @sveltejs/adapter-netlify`
-- **Cloudflare Pages:** `npm install -D @sveltejs/adapter-cloudflare`
-- **Node server:** `npm install -D @sveltejs/adapter-node`
+### Cloudflare Pages project
 
-Then update `svelte.config.js` to import and use your chosen adapter. Set the same environment variables on your hosting provider.
+Create a Pages project named `cadence-franciscapt` connected to this repository with these build settings:
+
+| Setting | Value |
+|---------|-------|
+| Framework preset | SvelteKit |
+| Build command | `npm run build` |
+| Build output directory | `.svelte-kit/cloudflare` |
+| Root directory | `/` |
+
+Add every variable from the [Environment Variables](#environment-variables) table to the Pages project (Production **and** Preview). The app reads them through `$env/static/private`, so they must be present at build time.
+
+### Custom domain
+
+After the first deploy, open **Workers & Pages → cadence-franciscapt → Custom domains → Set up a domain** and enter `cadence.franciscapt.dev`. When `franciscapt.dev` is a zone in the same Cloudflare account, the required proxied CNAME is created automatically. If it is not, add:
+
+| Type | Name | Content | Proxy status |
+|------|------|---------|--------------|
+| `CNAME` | `cadence` | `cadence-franciscapt.pages.dev` | Proxied |
+
+Add the production callback URL to the Spotify app's Redirect URIs:
+
+```
+https://cadence.franciscapt.dev/auth/callback/spotify
+```
+
+### Previewing / deploying locally
+
+```bash
+npm run build
+npx wrangler pages dev .svelte-kit/cloudflare
+```
+
+To deploy from the CLI instead of the Git integration:
+
+```bash
+npm run build
+npx wrangler pages deploy .svelte-kit/cloudflare --project-name cadence-franciscapt
+```
 
 > **Note:** After adding the `playlist-modify-private` scope for the export feature, existing users may need to log out and back in to grant the new permission.
 
