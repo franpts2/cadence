@@ -40,11 +40,37 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const playlistData = await playlistRes.json();
 		
-		// 3. Robust track extraction (using the fix we discovered)
-		let rawItems = [];
-		if (playlistData.tracks?.items) rawItems = playlistData.tracks.items;
-		else if (playlistData.items?.items) rawItems = playlistData.items.items;
-		else if (Array.isArray(playlistData.items)) rawItems = playlistData.items;
+		// 3. Collect every track, following Spotify's pagination (100 items per page)
+		const firstPage = playlistData.tracks ?? playlistData.items;
+		let rawItems: any[] = [];
+
+		if (Array.isArray(firstPage)) {
+			rawItems = firstPage;
+		} else if (firstPage?.items) {
+			rawItems = [...firstPage.items];
+
+			let nextUrl: string | null = firstPage.next ?? null;
+			const visitedUrls = new Set<string>();
+
+			while (nextUrl && !visitedUrls.has(nextUrl)) {
+				visitedUrls.add(nextUrl);
+
+				const pageRes = await fetch(nextUrl, { headers: authHeader });
+
+				if (!pageRes.ok) {
+					const errorData = await pageRes.json();
+					console.error('[Import] Spotify pagination error:', errorData);
+					return json(
+						{ error: errorData.error?.message || 'Failed to read playlist tracks' },
+						{ status: pageRes.status }
+					);
+				}
+
+				const page = await pageRes.json();
+				rawItems.push(...(page.items ?? []));
+				nextUrl = page.next ?? null;
+			}
+		}
 
 		const tracks = rawItems.map((item: any) => {
 			const t = item?.track || item?.item || (item?.name ? item : null);
