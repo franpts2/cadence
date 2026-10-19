@@ -15,6 +15,7 @@
 	</button>
 
 	<button
+		onclick={() => cal.openExport()}
 		class="flex items-center gap-2 px-4 py-2.5 bg-surface hover:bg-surface-hover border border-border text-text rounded-full shadow-lg group"
 		title="Export Playlist"
 	>
