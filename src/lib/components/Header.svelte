@@ -12,21 +12,23 @@
 </script>
 
 <header
-	class="grid grid-cols-2 items-center gap-y-4 px-4 pt-[calc(1rem+var(--safe-inset-top))] pb-4 border-b border-border bg-bg md:flex md:justify-between md:px-8"
+	class="grid grid-cols-2 items-center gap-y-4 px-4 pt-[calc(1rem+var(--safe-inset-top))] pb-4 border-b border-border bg-bg md:flex md:justify-between md:gap-x-8 md:px-8"
 >
 	<div class="flex items-center gap-3 md:gap-4 order-1">
 		<h1 class="text-xl font-light tracking-tighter text-text-muted md:text-2xl">
 			CADENCE
 		</h1>
 		<div class="hidden h-5 w-px bg-border md:block"></div>
-		<h2 class="hidden text-lg text-text min-w-[120px] md:block lg:text-xl lg:min-w-[150px]">
+		<h2
+			class="hidden text-lg text-text whitespace-nowrap md:block md:min-w-[9rem] lg:text-xl lg:min-w-[10.5rem]"
+		>
 			{cal.monthLabel} {cal.yearLabel}
 		</h2>
 	</div>
 
-	<div class="flex items-center justify-center col-span-2 order-3 md:order-2 md:col-auto md:ml-0 md:mr-auto">
+	<div class="flex items-center justify-center col-span-2 order-3 md:order-2 md:col-auto md:mr-auto">
 		<div class="flex flex-col items-center gap-2 md:flex-row md:gap-0">
-			<h2 class="text-xl font-medium text-text md:hidden">
+			<h2 class="text-xl font-medium text-text whitespace-nowrap md:hidden">
 				{cal.monthLabel} {cal.yearLabel}
 			</h2>
 			<CalendarNav />
