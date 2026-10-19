@@ -1,5 +1,6 @@
 export * from './types';
 export * from './utils/date';
+export * from './utils/transitions';
 export { getCalendarState, setCalendarState, CalendarState } from './state/calendar-state.svelte';
 
 // Icons

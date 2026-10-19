@@ -7,6 +7,7 @@
 	import ImportPlaylistModal from '$lib/components/ImportPlaylistModal.svelte';
 	import ExportPlaylistModal from '$lib/components/ExportPlaylistModal.svelte';
 	import MoveConfirmModal from '$lib/components/MoveConfirmModal.svelte';
+	import DeleteConfirmModal from '$lib/components/DeleteConfirmModal.svelte';
 	import Toast from '$lib/components/ui/Toast.svelte';
 	import LoadingIndicator from '$lib/components/ui/LoadingIndicator.svelte';
 	import { page } from '$app/state';
@@ -47,7 +48,9 @@
 	});
 </script>
 
-<div class="h-screen w-screen overflow-hidden bg-bg flex flex-col relative">
+	<div
+		class="h-dvh w-full overflow-hidden bg-bg flex flex-col relative pb-[var(--safe-inset-bottom)]"
+	>
 	{#if cal.isLoading}
 		<LoadingIndicator />
 	{/if}
@@ -73,6 +76,7 @@
 	song={cal.previewingSong}
 	isOpen={!!cal.previewingSong}
 	onClose={() => cal.closePreview()}
+	onDelete={() => cal.removePreviewSong()}
 />
 
 <ImportPlaylistModal />
@@ -80,6 +84,8 @@
 <ExportPlaylistModal />
 
 <MoveConfirmModal />
+
+<DeleteConfirmModal />
 
 <PlaylistControls />
 

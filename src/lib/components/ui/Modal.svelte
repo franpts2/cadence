@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { fade, fly } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
+	import { prefersReducedMotion } from '$lib';
 	import type { Snippet } from 'svelte';
 	import CloseIcon from '../icons/CloseIcon.svelte';
 
@@ -21,7 +23,7 @@
 {#if isOpen}
 	<div
 		class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
-		transition:fade={{ duration: 200 }}
+		transition:fade={{ duration: 150, easing: cubicOut }}
 	>
 		<!-- Backdrop -->
 		<div
@@ -33,7 +35,7 @@
 		<!-- Modal Content -->
 		<div
 			class="relative w-full max-w-sm bg-surface rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center p-6 pt-12 text-center border border-border/50"
-			transition:fly={{ y: 20, duration: 300 }}
+			transition:fly={{ y: prefersReducedMotion() ? 0 : 20, duration: 200, easing: cubicOut }}
 		>
 			<button
 				onclick={onClose}

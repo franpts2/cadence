@@ -10,6 +10,14 @@ jobs:
   check:
     runs-on: ubuntu-latest
 
+    env:
+      SPOTIFY_CLIENT_ID: ci-spotify-client-id
+      SPOTIFY_CLIENT_SECRET: ci-spotify-client-secret
+      AUTH_SECRET: ci-auth-secret-must-be-at-least-32-characters-long
+      TURSO_DATABASE_URL: libsql://localhost
+      TURSO_AUTH_TOKEN: ci-turso-token
+      AUTH_TRUST_HOST: true
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,13 +36,6 @@ jobs:
 
       - name: Build
         run: npm run build
-        env:
-          SPOTIFY_CLIENT_ID: ci-spotify-client-id
-          SPOTIFY_CLIENT_SECRET: ci-spotify-client-secret
-          AUTH_SECRET: ci-auth-secret-must-be-at-least-32-characters-long
-          TURSO_DATABASE_URL: libsql://localhost
-          TURSO_AUTH_TOKEN: ci-turso-token
-          AUTH_TRUST_HOST: true
 
       - name: Test
         run: npm test

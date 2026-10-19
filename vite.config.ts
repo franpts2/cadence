@@ -1,7 +1,7 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vitest/config';
 import tailwindcss from '@tailwindcss/vite';
-import path from 'path';
+import { defineConfig } from 'vitest/config';
+import path from 'node:path';
 
 export default defineConfig({
 	plugins: [
@@ -10,6 +10,12 @@ export default defineConfig({
 	],
 	server: {
 		host: '127.0.0.1'
+	},
+	resolve: {
+		alias: {
+			$lib: path.resolve('./src/lib')
+		},
+		conditions: process.env.VITEST ? ['browser'] : undefined
 	},
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}'],
@@ -21,12 +27,7 @@ export default defineConfig({
 				inline: [/@auth\/sveltekit/]
 			}
 		},
-		pool: 'threads'
-	},
-	resolve: {
-		alias: {
-			'$lib': path.resolve(__dirname, './src/lib')
-		},
-		conditions: process.env.VITEST ? ['browser'] : undefined
+		// Run all test files in a single worker (Vitest 4 replacement for `threads.singleThread`).
+		maxWorkers: 1
 	}
 });

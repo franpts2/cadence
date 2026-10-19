@@ -7,7 +7,7 @@
 
 <Modal isOpen={cal.isMoveConfirmOpen} onClose={() => cal.cancelMove()}>
 	<div class="flex flex-col items-center gap-4">
-		<div class="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-error">
+		<div class="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
 			<WarningIcon class="h-6 w-6 text-red-500" />
 		</div>
 		
@@ -27,7 +27,7 @@
 			</button>
 			<button
 				onclick={() => cal.confirmMove()}
-				class="flex-1 px-4 py-2.5 rounded-xl text-bg bg-red-500 hover:bg-red-700 transition-colors font-bold text-sm shadow-lg shadow-error/20"
+				class="flex-1 px-4 py-2.5 rounded-xl text-bg bg-red-500 hover:bg-red-700 transition-colors font-bold text-sm shadow-lg"
 			>
 				Override
 			</button>

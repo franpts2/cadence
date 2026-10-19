@@ -1,4 +1,37 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@layer base {
+  :root {
+    /* Safe-area insets — 0px unless the page is under a notch / home indicator.
+       Only non-zero once the viewport uses `viewport-fit=cover`. */
+    --safe-inset-top: env(safe-area-inset-top, 0px);
+    --safe-inset-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html {
+    /* No gray/blue flash on tap on iOS Safari / Android Chrome */
+    -webkit-tap-highlight-color: transparent;
+    /* No font inflation in landscape */
+    -webkit-text-size-adjust: 100%;
+    /* Stop pull-to-refresh and the iOS rubber band from hijacking the fixed calendar */
+    overscroll-behavior: none;
+  }
+
+  /* Pressable surfaces: kill the 300ms double-tap click delay, stop long-press from
+     selecting button labels, and suppress the copy/share callout.
+     Hover styling stays gated by Tailwind's `hover:` variant (@media hover: hover).
+     Never put `user-select: none` on body — calendar text is content, not a control. */
+  button,
+  a,
+  [role="button"],
+  summary {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+}
 
 @theme {
   --color-bg: var(--color-zinc-950);
@@ -17,4 +50,33 @@
   
   --color-accent: var(--color-zinc-100);
   --color-accent-hover: var(--color-zinc-300);
+
+  /* Motion tokens — override Tailwind's weak built-in curves */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Reduced motion: gentler, not zero — drop looping/oscillating motion,
+   keep opacity and color changes that aid comprehension. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse {
+    animation: none;
+  }
+}
+
+/* Press feedback for controls. Uses :active so it works on touch as well as
+   pointer. Controls that manage their own transform can opt out with .no-press. */
+@media (prefers-reduced-motion: no-preference) {
+  button:not(.no-press):not(:disabled),
+  [role="button"]:not(.no-press) {
+    transition-property: transform, background-color, border-color, color, opacity, box-shadow;
+    transition-duration: 160ms;
+    transition-timing-function: var(--ease-out);
+  }
+
+  button:not(.no-press):not(:disabled):active,
+  [role="button"]:not(.no-press):active {
+    transform: scale(0.97);
+  }
 }

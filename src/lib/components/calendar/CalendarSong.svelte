@@ -7,7 +7,7 @@
 
 	function handleClick(e: MouseEvent) {
 		e.stopPropagation();
-		cal.openPreview(song);
+		cal.openPreview(song, day);
 	}
 
 	function handleDragStart(e: DragEvent) {
@@ -175,7 +175,7 @@
 		ondragstart={handleDragStart}
 		ondragend={handleDragEnd}
 		draggable="true"
-		class="w-full flex flex-col items-center gap-1 text-center px-1 outline-none rounded-lg transition-all cursor-grab active:cursor-grabbing hover:bg-surface/50 {cal.draggingSong?.id === song.id && cal.draggingFromDay === day ? 'opacity-30' : ''}"
+		class="w-full flex flex-col items-center gap-1 text-center px-1 outline-none rounded-lg transition-[background-color,opacity] cursor-grab active:cursor-grabbing hover:bg-surface/50 {cal.draggingSong?.id === song.id && cal.draggingFromDay === day ? 'opacity-30' : ''}"
 	>
 		{#if song.album.images[0]}
 			<div class="w-full max-w-[4rem] sm:max-w-[5rem] md:max-w-[6rem] aspect-square overflow-hidden rounded-sm flex-shrink-0">
@@ -190,7 +190,7 @@
 
 {#if isTouchDragging}
 	<div 
-		class="fixed pointer-events-none z-[9999] flex flex-col items-center gap-1.5 text-center bg-surface/95 border border-accent/30 rounded-lg p-2 shadow-2xl transition-transform duration-75 backdrop-blur-md"
+		class="fixed pointer-events-none z-[9999] flex flex-col items-center gap-1.5 text-center bg-surface/95 border border-accent/30 rounded-lg p-2 shadow-2xl transition-transform duration-75 ease-out backdrop-blur-md"
 		style="left: {touchX}px; top: {touchY}px; transform: translate(-50%, -120%); width: 80px;"
 	>
 		{#if song.album.images[0]}
