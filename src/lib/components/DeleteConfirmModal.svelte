@@ -1,22 +1,26 @@
 <script lang="ts">
 	import Modal from './ui/Modal.svelte';
-	import { getCalendarState, TrashIcon, MONTHS } from '$lib';
+	import { getCalendarState, TrashIcon, MONTHS, type Song } from '$lib';
 
 	const cal = getCalendarState();
 
-	// The confirmation restates what is about to be removed, so the song is read
-	// back out of state rather than being passed in. This is read at render time
-	// only — the month can't change while the confirmation is open.
-	const song = $derived(
-		cal.pendingDeleteDay === null
-			? null
-			: cal.getSongsForDay(cal.pendingDeleteDay)[0] ?? null
-	);
+	// Snapshot what is being removed. State clears `pendingDeleteDay` the moment
+	// the sheet closes (and the song disappears once the request succeeds), so
+	// reading it live would shrink the sheet mid-exit.
+	let visible = $state<{ day: number; song: Song | null } | null>(null);
+	$effect.pre(() => {
+		if (cal.pendingDeleteDay !== null) {
+			visible = {
+				day: cal.pendingDeleteDay,
+				song: cal.getSongsForDay(cal.pendingDeleteDay)[0] ?? null
+			};
+		}
+	});
 
 	const dateLabel = $derived(
-		cal.pendingDeleteDay === null
+		visible === null
 			? ''
-			: `${MONTHS[cal.viewDate.getMonth()]} ${cal.pendingDeleteDay}, ${cal.viewDate.getFullYear()}`
+			: `${MONTHS[cal.viewDate.getMonth()]} ${visible.day}, ${cal.viewDate.getFullYear()}`
 	);
 
 	// Focus the safe action so an errant Enter can't confirm a delete, and hand
@@ -51,8 +55,8 @@
 
 		<div class="flex flex-col gap-1 w-full">
 			<h2 id="delete-song-title" class="text-lg font-bold text-text">Remove Song?</h2>
-			{#if song}
-				<p class="text-sm font-medium text-text px-4 break-words">{song.name}</p>
+			{#if visible?.song}
+				<p class="text-sm font-medium text-text px-4 break-words">{visible.song.name}</p>
 			{/if}
 			{#if dateLabel}
 				<p class="text-xs text-text-dim">{dateLabel}</p>

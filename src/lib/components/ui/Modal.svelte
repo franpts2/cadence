@@ -1,13 +1,15 @@
 <script lang="ts">
-	import { fade, fly } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
-	import { prefersReducedMotion } from '$lib';
+	import { sheetIn, sheetOut } from '$lib';
 	import type { Snippet } from 'svelte';
 	import CloseIcon from '../icons/CloseIcon.svelte';
 
-	let { isOpen, onClose, children } = $props<{
+	let { isOpen, onClose, onClosed, children } = $props<{
 		isOpen: boolean;
 		onClose: () => void;
+		/** Fires once the exit animation has finished — use it to reset content. */
+		onClosed?: () => void;
 		children: Snippet;
 	}>();
 
@@ -21,15 +23,17 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if isOpen}
-	<div
-		class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-6"
-		transition:fade={{ duration: 150, easing: cubicOut }}
-	>
+	<!-- The wrapper stays unanimated: fading a parent that contains a
+	     backdrop-filter forces the blur to be recomposited every frame, which is
+	     what makes the sheet stutter on phones. Each layer animates itself. -->
+	<div class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-6">
 		<!-- Backdrop -->
 		<div
 			class="absolute inset-0 bg-bg/80 backdrop-blur-md"
 			onclick={onClose}
 			aria-hidden="true"
+			in:fade={{ duration: 180, easing: cubicOut }}
+			out:fade={{ duration: 260, easing: cubicOut }}
 		></div>
 
 		<!-- Modal content: a bottom sheet on phones, a centred dialog from sm up.
@@ -38,7 +42,9 @@
 			role="dialog"
 			aria-modal="true"
 			class="relative w-full max-w-sm bg-surface shadow-2xl overflow-hidden flex flex-col max-h-[92dvh] sm:max-h-[85dvh] rounded-t-2xl sm:rounded-2xl border border-border/50"
-			transition:fly={{ y: prefersReducedMotion() ? 0 : 20, duration: 200, easing: cubicOut }}
+			in:sheetIn
+			out:sheetOut
+			onoutroend={() => onClosed?.()}
 		>
 			<!-- Sheet grabber, decorative -->
 			<div class="sm:hidden shrink-0 h-4 flex items-start justify-center pt-2" aria-hidden="true">

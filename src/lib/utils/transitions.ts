@@ -1,4 +1,4 @@
-import { cubicOut } from 'svelte/easing';
+import { cubicOut, quadIn } from 'svelte/easing';
 
 /**
  * Shared Svelte transition helpers.
@@ -61,5 +61,53 @@ export function toastSlide(_node: HTMLElement, { duration = 400 }: ToastSlidePar
 		easing: cubicOut,
 		css: (t: number, u: number) =>
 			reduce ? `opacity: ${t}` : `opacity: ${t}; transform: translateY(-${u * 100}%)`
+	};
+}
+
+/** Dialogs are bottom sheets below Tailwind's `sm` breakpoint. */
+function isPhone(): boolean {
+	return typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches;
+}
+
+interface SheetParams {
+	duration?: number;
+}
+
+/**
+ * Dialog enter/exit: from `sm` up it is a centred dialog (fade + a short rise
+ * and scale); on phones it is a bottom sheet that slides its own height up from
+ * the bottom edge. Moving by 100% of the panel height — rather than a token
+ * 20px — is what makes the sheet read as a drawer.
+ *
+ * The curves differ on purpose: the sheet decelerates into place on enter and
+ * accelerates away on exit. Reduced motion keeps the opacity cross-fade only.
+ */
+export function sheetIn(_node: HTMLElement, { duration }: SheetParams = {}) {
+	const reduce = prefersReducedMotion();
+	const phone = isPhone();
+	return {
+		duration: duration ?? (phone ? 360 : 200),
+		easing: cubicOut,
+		css: (t: number, u: number) =>
+			reduce
+				? `opacity: ${t}`
+				: phone
+					? `transform: translateY(${u * 100}%)`
+					: `opacity: ${t}; transform: translateY(${u * 12}px) scale(${1 - 0.03 * u})`
+	};
+}
+
+export function sheetOut(_node: HTMLElement, { duration }: SheetParams = {}) {
+	const reduce = prefersReducedMotion();
+	const phone = isPhone();
+	return {
+		duration: duration ?? (phone ? 280 : 200),
+		easing: quadIn,
+		css: (t: number, u: number) =>
+			reduce
+				? `opacity: ${t}`
+				: phone
+					? `transform: translateY(${u * 100}%)`
+					: `opacity: ${t}; transform: translateY(${u * 12}px) scale(${1 - 0.03 * u})`
 	};
 }

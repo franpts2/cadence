@@ -98,11 +98,10 @@
 
 	function handleClose() {
 		cal.closeExport();
-		setTimeout(reset, 200);
 	}
 </script>
 
-<Modal isOpen={cal.isExportOpen} onClose={handleClose}>
+<Modal isOpen={cal.isExportOpen} onClose={handleClose} onClosed={reset}>
 	{#if isExporting}
 		<LoadingIndicator />
 	{/if}

@@ -16,19 +16,26 @@
 		onClose: () => void;
 		onDelete?: () => void;
 	} = $props();
+
+	// The state clears `song` the moment the sheet closes. Hold the last song so
+	// the sheet keeps its full height while it slides out instead of collapsing.
+	let visibleSong = $state<Song | null>(null);
+	$effect.pre(() => {
+		if (song) visibleSong = song;
+	});
 </script>
 
 <Modal {isOpen} {onClose}>
-	{#if song}
+	{#if visibleSong}
 		<SongPreviewCover
-			imageUrl={song.album.images[0]?.url}
-			albumName={song.album.name}
+			imageUrl={visibleSong.album.images[0]?.url}
+			albumName={visibleSong.album.name}
 		/>
 
 		<SongPreviewDetails
-			name={song.name}
-			artistName={song.artists[0]?.name ?? 'Unknown Artist'}
-			albumName={song.album.name}
+			name={visibleSong.name}
+			artistName={visibleSong.artists[0]?.name ?? 'Unknown Artist'}
+			albumName={visibleSong.album.name}
 		/>
 
 		<!-- Touch only: the day grid offers no delete affordance on touch, so it lives here -->
