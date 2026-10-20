@@ -8,11 +8,14 @@
 	<img src="https://img.shields.io/badge/Drizzle_ORM-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black" alt="Drizzle ORM"/>
 	<img src="https://img.shields.io/badge/Turso-000000?style=for-the-badge&logo=turso&logoColor=00FFA3" alt="Turso"/>
 	<img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite"/>
+	<a href="https://cadence.franciscapt.dev"><img src="https://img.shields.io/badge/live-cadence.franciscapt.dev-00C853?style=for-the-badge&logo=cloudflare&logoColor=white" alt="Live site"/></a>
 </div>
 
 ## About
 
 Cadence is a personal music journal that integrates with Spotify to help you track your life through songs. By selecting one track each day, you build a visual and interactive calendar of your musical journey, powered by Svelte 5's modern reactive primitives.
+
+It's live at **[cadence.franciscapt.dev](https://cadence.franciscapt.dev)** — sign in with Spotify and start picking a song a day.
 
 ## Key Features
 
@@ -162,11 +165,11 @@ npm run preview # Preview the production build locally
 
 ## Deployment
 
-Cadence deploys to **Cloudflare Pages** with [`@sveltejs/adapter-cloudflare`](https://svelte.dev/docs/kit/adapter-cloudflare).
+Cadence runs in production on **Cloudflare Pages** with [`@sveltejs/adapter-cloudflare`](https://svelte.dev/docs/kit/adapter-cloudflare), at **[cadence.franciscapt.dev](https://cadence.franciscapt.dev)**.
 
 ### Cloudflare Pages project
 
-Create a Pages project named `cadence-franciscapt` connected to this repository with these build settings:
+The live site is served by a Pages project named `cadence-franciscapt`, connected to this repository. If you fork or redeploy it, use these build settings:
 
 | Setting | Value |
 |---------|-------|
@@ -179,7 +182,7 @@ Add every variable from the [Environment Variables](#environment-variables) tabl
 
 ### Custom domain
 
-After the first deploy, open **Workers & Pages → cadence-franciscapt → Custom domains → Set up a domain** and enter `cadence.franciscapt.dev`. When `franciscapt.dev` is a zone in the same Cloudflare account, the required proxied CNAME is created automatically. If it is not, add:
+The production domain is `cadence.franciscapt.dev`, attached via **Workers & Pages → cadence-franciscapt → Custom domains**. When `franciscapt.dev` is a zone in the same Cloudflare account, the required proxied CNAME is created automatically. If it is not, add:
 
 | Type | Name | Content | Proxy status |
 |------|------|---------|--------------|
