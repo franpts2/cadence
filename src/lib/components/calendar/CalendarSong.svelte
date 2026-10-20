@@ -52,7 +52,7 @@
 			if (navigator.vibrate) {
 				navigator.vibrate(50);
 			}
-		}, 500); // 500ms long press delay
+		}, 350); // long-press delay — long enough to not fire on a scroll, short enough to feel native
 	}
 
 	function handleTouchMove(e: TouchEvent) {
