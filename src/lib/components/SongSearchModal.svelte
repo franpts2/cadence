@@ -66,33 +66,40 @@
 	bind:this={dialogElement}
 	onclose={handleClose}
 	onclick={(e) => e.target === dialogElement && handleClose()}
-	class="fixed inset-0 z-50 m-0 h-full w-full max-h-none max-w-none bg-transparent p-0 backdrop:bg-bg/50 backdrop:backdrop-blur-sm"
+	class="fixed inset-0 z-50 m-0 h-full w-full max-h-none max-w-none bg-transparent p-0 overscroll-contain backdrop:bg-bg/50 backdrop:backdrop-blur-sm"
 >
-	<div class="flex items-start justify-center pt-[15vh] px-4 h-full w-full pointer-events-none">
+	<div class="flex items-start justify-center pt-[8dvh] sm:pt-[15vh] px-3 sm:px-4 h-full w-full pointer-events-none">
 		<div 
-			class="search-panel w-full max-w-lg bg-surface border border-border rounded-xl shadow-2xl overflow-hidden pointer-events-auto"
+			class="search-panel w-full max-w-lg max-h-[84dvh] flex flex-col bg-surface border border-border rounded-xl shadow-2xl overflow-hidden pointer-events-auto"
 			role="document"
 		>
-			<div class="p-4 border-b border-border flex items-center gap-3">
+			<div class="p-4 border-b border-border flex items-center gap-3 shrink-0">
 				<SearchIcon class="h-5 w-5 text-text-dim" />
 				<input
 					bind:this={inputElement}
 					bind:value={searchQuery}
 					oninput={debouncedSearch}
 					onkeydown={handleKeydown}
+					type="search"
+					inputmode="search"
+					enterkeyhint="search"
+					autocapitalize="none"
+					autocorrect="off"
+					spellcheck="false"
 					placeholder="Search for a song..."
-					class="flex-1 bg-transparent border-none outline-none text-text placeholder:text-text-subtle text-lg"
+					aria-label="Search for a song"
+					class="flex-1 min-w-0 bg-transparent border-none outline-none text-text placeholder:text-text-subtle text-base sm:text-lg"
 				/>
 				<button 
 					onclick={handleClose} 
-					class="text-text-dim hover:text-accent-hover p-1" 
+					class="text-text-dim hover:text-accent-hover p-2 -m-1" 
 					aria-label="Close search"
 				>
 					<CloseIcon />
 				</button>
 			</div>
 
-			<div class="max-h-[60vh] overflow-y-auto overscroll-contain">
+			<div class="flex-1 min-h-0 overflow-y-auto overscroll-contain">
 				{#if isSearching && results.length === 0}
 					<div class="p-8 text-center text-text-dim">
 						<div class="animate-pulse">Searching...</div>
