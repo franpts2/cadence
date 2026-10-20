@@ -9,13 +9,24 @@
     --safe-inset-bottom: env(safe-area-inset-bottom, 0px);
   }
 
-  html {
+  html,
+  body {
     /* No gray/blue flash on tap on iOS Safari / Android Chrome */
     -webkit-tap-highlight-color: transparent;
     /* No font inflation in landscape */
     -webkit-text-size-adjust: 100%;
     /* Stop pull-to-refresh and the iOS rubber band from hijacking the fixed calendar */
     overscroll-behavior: none;
+  }
+
+  /* iOS Safari zooms the page when focus lands on an input under 16px, and does
+     not zoom back out. Fix the cause instead of disabling zoom. */
+  @media (pointer: coarse) {
+    input,
+    textarea,
+    select {
+      font-size: 16px;
+    }
   }
 
   /* Pressable surfaces: kill the 300ms double-tap click delay, stop long-press from
@@ -55,6 +66,15 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Landscape phones: with the header and day labels taking their share, a date
+   cell is only ~56px tall, so the cover has to give way to the date + title.
+   Unlayered on purpose — it beats the width-derived utilities above. */
+@media (max-height: 600px) {
+  .calendar-cover {
+    max-width: 2.5rem;
+  }
 }
 
 /* Reduced motion: gentler, not zero — drop looping/oscillating motion,

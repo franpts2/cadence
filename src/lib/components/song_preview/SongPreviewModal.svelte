@@ -35,7 +35,7 @@
 		{#if onDelete}
 			<button
 				onclick={() => onDelete()}
-				class="pointer-fine:hidden absolute bottom-4 right-4 p-2.5 rounded-full text-text-muted hover:text-red-500 hover:bg-red-500/10 transition-colors outline-none"
+				class="pointer-fine:hidden absolute z-20 bottom-[calc(0.75rem+var(--safe-inset-bottom))] right-3 sm:bottom-4 sm:right-4 p-3 rounded-full text-text-muted hover:text-red-500 hover:bg-red-500/10 transition-colors outline-none"
 				aria-label="Remove song"
 			>
 				<TrashIcon class="h-5 w-5" />

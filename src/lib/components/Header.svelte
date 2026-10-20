@@ -12,10 +12,10 @@
 </script>
 
 <header
-	class="grid grid-cols-2 items-center gap-y-4 px-4 pt-[calc(1rem+var(--safe-inset-top))] pb-4 border-b border-border bg-bg md:flex md:justify-between md:gap-x-3 md:px-8"
+	class="grid grid-cols-2 items-center gap-y-2 px-4 pt-[calc(0.75rem+var(--safe-inset-top))] pb-2 border-b border-border bg-bg md:flex md:justify-between md:gap-x-3 md:gap-y-0 md:px-8 md:py-4"
 >
 	<div class="flex items-center gap-3 md:gap-4 order-1">
-		<h1 class="text-xl font-light tracking-tighter text-text-muted md:text-2xl">
+		<h1 class="text-lg font-light tracking-tighter text-text-muted sm:text-xl md:text-2xl">
 			CADENCE
 		</h1>
 		<div class="hidden h-5 w-px bg-border md:block"></div>
@@ -26,13 +26,11 @@
 		</h2>
 	</div>
 
-	<div class="flex items-center justify-center col-span-2 order-3 md:order-2 md:col-auto md:mr-auto">
-		<div class="flex flex-col items-center gap-2 md:flex-row md:gap-0">
-			<p class="text-xl font-medium text-text whitespace-nowrap md:hidden">
-				{cal.monthLabel} {cal.yearLabel}
-			</p>
-			<CalendarNav />
-		</div>
+	<div class="flex items-center justify-center gap-3 col-span-2 order-3 md:order-2 md:col-auto md:mr-auto">
+		<p class="text-lg font-medium text-text whitespace-nowrap md:hidden">
+			{cal.monthLabel} {cal.yearLabel}
+		</p>
+		<CalendarNav />
 	</div>
 
 	<UserMenu {session} />

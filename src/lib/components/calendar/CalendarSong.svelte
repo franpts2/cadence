@@ -52,7 +52,7 @@
 			if (navigator.vibrate) {
 				navigator.vibrate(50);
 			}
-		}, 500); // 500ms long press delay
+		}, 350); // long-press delay — long enough to not fire on a scroll, short enough to feel native
 	}
 
 	function handleTouchMove(e: TouchEvent) {
@@ -175,14 +175,19 @@
 		ondragstart={handleDragStart}
 		ondragend={handleDragEnd}
 		draggable="true"
-		class="w-full flex flex-col items-center gap-1 text-center px-1 outline-none rounded-lg transition-[background-color,opacity] cursor-grab active:cursor-grabbing hover:bg-surface/50 {cal.draggingSong?.id === song.id && cal.draggingFromDay === day ? 'opacity-30' : ''}"
+		class="w-full flex flex-col items-center gap-0.5 text-center outline-none rounded-lg transition-[background-color,opacity] cursor-grab active:cursor-grabbing touch-pan-y hover:bg-surface/50 {cal.draggingSong?.id === song.id && cal.draggingFromDay === day ? 'opacity-30' : ''}"
 	>
 		{#if song.album.images[0]}
-			<div class="w-full max-w-[4rem] sm:max-w-[5rem] md:max-w-[6rem] aspect-square overflow-hidden rounded-sm flex-shrink-0">
-				<img src={song.album.images[0].url} alt="" class="w-full h-full object-cover" />
+			<div class="calendar-cover w-full max-w-[2.75rem] min-[380px]:max-w-[3.5rem] sm:max-w-[4rem] md:max-w-[5rem] aspect-square overflow-hidden rounded-sm flex-shrink-0">
+				<img
+					src={song.album.images[0].url}
+					alt=""
+					draggable="false"
+					class="w-full h-full object-cover select-none"
+				/>
 			</div>
 		{/if}
-		<span class="text-[9px] sm:text-[10px] text-accent-hover truncate font-medium w-full px-1">
+		<span class="text-[9px] min-[380px]:text-[10px] leading-none sm:leading-normal text-accent-hover truncate font-medium w-full px-0.5">
 			{song.name}
 		</span>
 	</button>

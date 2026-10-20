@@ -29,7 +29,7 @@
 		{id}
 		type="button"
 		onclick={() => (isOpen = !isOpen)}
-		class="w-full flex items-center justify-between px-4 py-2.5 bg-bg border border-border rounded-xl text-text focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/50 transition-colors text-left"
+		class="w-full min-h-11 flex items-center justify-between px-4 py-2.5 bg-bg border border-border rounded-xl text-text focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/50 transition-colors text-left"
 	>
 		<span class="truncate">{selectedLabel}</span>
 		<ChevronDownIcon class="h-4 w-4 text-text-muted transition-transform duration-200 ease-out {isOpen ? 'rotate-180' : ''}" />
@@ -48,12 +48,12 @@
 			class="absolute z-[70] w-full mt-2 bg-bg border border-border rounded-xl shadow-xl overflow-hidden py-1.5 origin-top"
 			transition:pop={{ duration: 150, start: 0.95, y: -4 }}
 		>
-			<div class="max-h-60 overflow-y-auto">
+			<div class="max-h-60 overflow-y-auto overscroll-contain">
 				{#each options as option}
 					<button
 						type="button"
 						onclick={() => selectOption(option)}
-						class="w-full px-4 py-2 text-sm text-left hover:bg-surface-hover transition-colors {value === option.value
+						class="w-full min-h-11 px-4 py-2.5 text-sm text-left hover:bg-surface-hover transition-colors {value === option.value
 							? 'text-accent font-medium bg-accent/5'
 							: 'text-text'}"
 					>

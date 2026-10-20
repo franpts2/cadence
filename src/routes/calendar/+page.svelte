@@ -57,7 +57,7 @@
 
 	<Header {session} />
 
-	<main class="flex-1 overflow-hidden flex flex-col">
+	<main class="flex-1 min-h-0 overflow-hidden flex flex-col pb-16 pointer-fine:pb-0">
 		<!-- Crawlable, screen-reader description of the page. -->
 		<section class="sr-only">
 			<h2>Cadence — your daily music journal for Spotify</h2>

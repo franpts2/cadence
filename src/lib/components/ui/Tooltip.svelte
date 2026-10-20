@@ -17,6 +17,9 @@
 	let timeoutId: any = null;
 
 	function handleMouseEnter() {
+		// Touch has no hover. Without this gate, a tap would pin the tooltip open
+		// until the user taps something else.
+		if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
 		isHovered = true;
 		if (timeoutId) clearTimeout(timeoutId);
 		timeoutId = setTimeout(() => {
