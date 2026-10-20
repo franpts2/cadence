@@ -30,13 +30,17 @@
 	<input
 		{id}
 		type="number"
+		inputmode="numeric"
+		pattern="[0-9]*"
 		{value}
 		oninput={handleInput}
 		{min}
 		{max}
 		class="w-full px-4 py-2.5 bg-bg border border-border rounded-xl text-text focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/50 transition-colors no-spinner"
 	/>
-	<div class="absolute right-2 inset-y-0 flex flex-col justify-center">
+	<!-- Steppers are a pointer affordance; on touch they'd be 16px targets. The
+	     numeric keyboard replaces them. -->
+	<div class="pointer-coarse:hidden absolute right-2 inset-y-0 flex flex-col justify-center">
 		<button
 			type="button"
 			onclick={increment}
