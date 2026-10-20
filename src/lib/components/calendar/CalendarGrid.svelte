@@ -32,10 +32,10 @@
 	}
 </script>
 
-<div class="flex-1 flex flex-col relative">
+<div class="flex-1 min-h-0 flex flex-col relative">
 	<!-- Day Labels - Also acts as a fallback for Prev Month nav if no blank cells -->
 	<div 
-		class="relative grid grid-cols-7 border-b border-border bg-bg/50"
+		class="relative shrink-0 grid grid-cols-7 border-b border-border bg-bg/50"
 		data-nav-target="prev"
 		role="row"
 		tabindex="-1"
@@ -44,7 +44,7 @@
 		ondragover={(e) => e.preventDefault()}
 	>
 		{#each DAYS_OF_WEEK as day}
-			<div class="py-2 sm:py-3 text-center text-[8px] sm:text-[10px] font-bold text-text-dim tracking-widest md:tracking-[0.2em]">
+			<div class="py-1.5 sm:py-3 text-center text-[9px] sm:text-[10px] font-bold text-text-dim tracking-widest md:tracking-[0.2em]">
 				{day}
 			</div>
 		{/each}
@@ -61,68 +61,72 @@
 		{/if}
 	</div>
 
-	<!-- Grid Cells -->
-	<div class="flex-1 grid grid-cols-7 grid-rows-6">
-		{#each Array(startDay) as _, i}
-			<div 
-				class="relative border-b border-r border-border-dim bg-bg/20 transition-colors flex items-center justify-center p-2 text-center"
-				data-nav-target="prev"
-				role="gridcell"
-				tabindex="-1"
-				ondragenter={() => handleEnter('prev')}
-				ondragleave={handleLeave}
-				ondragover={(e) => e.preventDefault()}
-			>
-				{#if i === startDay - 1 && cal.hoveringType === 'prev' && cal.navTargetDate}
-					<div class="flex flex-col items-center gap-2" transition:pop={{ duration: 200, start: 0.9 }}>
-						<div class="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
-						<span class="text-[9px] font-medium text-accent uppercase tracking-tight">
-							Moving to {MONTHS[cal.navTargetDate.getMonth()]} {cal.navTargetDate.getFullYear()}...
-						</span>
-					</div>
-				{/if}
-			</div>
-		{/each}
+	<!-- On a phone the six rows can be shorter than their content, so the grid
+	     scrolls instead of being clipped by the shell. Rows still stretch to fill
+	     the available height on every screen. -->
+	<div class="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+		<div class="grid grid-cols-7 grid-rows-[repeat(6,minmax(56px,1fr))] h-full">
+			{#each Array(startDay) as _, i}
+				<div 
+					class="relative border-b border-r border-border-dim bg-bg/20 transition-colors flex items-center justify-center p-1 sm:p-2 text-center"
+					data-nav-target="prev"
+					role="gridcell"
+					tabindex="-1"
+					ondragenter={() => handleEnter('prev')}
+					ondragleave={handleLeave}
+					ondragover={(e) => e.preventDefault()}
+				>
+					{#if i === startDay - 1 && cal.hoveringType === 'prev' && cal.navTargetDate}
+						<div class="flex flex-col items-center gap-2" transition:pop={{ duration: 200, start: 0.9 }}>
+							<div class="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+							<span class="text-[9px] font-medium text-accent uppercase tracking-tight">
+								Moving to {MONTHS[cal.navTargetDate.getMonth()]} {cal.navTargetDate.getFullYear()}...
+							</span>
+						</div>
+					{/if}
+				</div>
+			{/each}
 
-		{#each Array(daysInMonth) as _, i}
-			{@const day = i + 1}
-			<CalendarDay
-				{day}
-				isToday={isToday(day)}
-				isSelected={isSelected(day)}
-				songs={cal.getSongsForDay(day)}
-				onclick={() => cal.selectDate(day)}
-				onAddSong={() => cal.startSearchForDay(day)}
-				onDeleteSong={() => cal.requestDeleteSong(day)}
-			/>
-		{/each}
+			{#each Array(daysInMonth) as _, i}
+				{@const day = i + 1}
+				<CalendarDay
+					{day}
+					isToday={isToday(day)}
+					isSelected={isSelected(day)}
+					songs={cal.getSongsForDay(day)}
+					onclick={() => cal.selectDate(day)}
+					onAddSong={() => cal.startSearchForDay(day)}
+					onDeleteSong={() => cal.requestDeleteSong(day)}
+				/>
+			{/each}
 
-		<!-- Fill remaining grid cells -->
-		{#each Array(42 - startDay - daysInMonth) as _, i}
-			<div 
-				class="relative border-b border-r border-border-dim bg-bg/20 transition-colors flex items-center justify-center p-2 text-center"
-				data-nav-target="next"
-				role="gridcell"
-				tabindex="-1"
-				ondragenter={() => handleEnter('next')}
-				ondragleave={handleLeave}
-				ondragover={(e) => e.preventDefault()}
-			>
-				{#if i === 0 && cal.hoveringType === 'next' && cal.navTargetDate}
-					<div class="flex flex-col items-center gap-2" transition:pop={{ duration: 200, start: 0.9 }}>
-						<div class="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
-						<span class="text-[9px] font-medium text-accent uppercase tracking-tight">
-							Moving to {MONTHS[cal.navTargetDate.getMonth()]} {cal.navTargetDate.getFullYear()}...
-						</span>
-					</div>
-				{/if}
-			</div>
-		{/each}
+			<!-- Fill remaining grid cells -->
+			{#each Array(42 - startDay - daysInMonth) as _, i}
+				<div 
+					class="relative border-b border-r border-border-dim bg-bg/20 transition-colors flex items-center justify-center p-1 sm:p-2 text-center"
+					data-nav-target="next"
+					role="gridcell"
+					tabindex="-1"
+					ondragenter={() => handleEnter('next')}
+					ondragleave={handleLeave}
+					ondragover={(e) => e.preventDefault()}
+				>
+					{#if i === 0 && cal.hoveringType === 'next' && cal.navTargetDate}
+						<div class="flex flex-col items-center gap-2" transition:pop={{ duration: 200, start: 0.9 }}>
+							<div class="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+							<span class="text-[9px] font-medium text-accent uppercase tracking-tight">
+								Moving to {MONTHS[cal.navTargetDate.getMonth()]} {cal.navTargetDate.getFullYear()}...
+							</span>
+						</div>
+					{/if}
+				</div>
+			{/each}
+		</div>
 	</div>
 
 	<!-- Fallback for Next Month nav if grid is full -->
 	<div 
-		class="h-2 w-full transition-colors {cal.draggingSong ? 'bg-accent/5' : ''}"
+		class="h-3 sm:h-2 shrink-0 w-full transition-colors {cal.draggingSong ? 'bg-accent/5' : ''}"
 		data-nav-target="next"
 		role="region"
 		aria-label="Next Month Drag Zone"

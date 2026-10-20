@@ -58,13 +58,15 @@
 	tabindex="0"
 	aria-current={isToday ? 'date' : undefined}
 	aria-selected={isSelected}
-	class="relative group border-b border-r border-border-dim text-left p-1.5 sm:p-2 transition-colors h-full w-full min-h-[90px] md:min-h-[130px] flex flex-col items-start justify-start md:items-center md:justify-center focus:outline-none hover:z-50
+	class="relative group border-b border-r border-border-dim text-left p-0.5 sm:p-1.5 md:p-2 transition-colors h-full w-full min-h-0 overflow-hidden touch-manipulation flex flex-col items-center justify-center focus:outline-none hover:z-50
 		{isSelected ? 'bg-surface/50' : 'hover:bg-surface/30'}
 		{isDraggingOver || isTouchHovered ? 'bg-accent/10 ring-2 ring-inset ring-accent/30' : ''}"
 >
-	<div class="relative w-full md:absolute md:top-1.5 md:left-1.5 md:right-3 flex items-start z-10 pointer-events-none mb-1 md:mb-0 px-0.5 md:px-0">
-		<span class="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 text-[10px] sm:text-xs rounded-full transition-[transform,color,background-color] duration-150 ease-out
-			{isToday ? 'bg-text text-bg font-bold scale-110' : 'text-text-muted group-hover:text-text'}
+	<!-- The date floats over the artwork on touch, where a 50px-wide cell has no
+	     room for a separate row. The backdrop keeps it readable on any cover. -->
+	<div class="absolute top-0.5 left-0.5 right-0.5 z-20 flex items-start pointer-events-none md:top-1.5 md:left-1.5 md:right-3">
+		<span class="inline-flex items-center justify-center min-w-5 h-5 px-1 sm:min-w-6 sm:h-6 sm:px-0 text-[11px] sm:text-xs rounded-full transition-[transform,color,background-color] duration-150 ease-out
+			{isToday ? 'bg-text text-bg font-bold' : 'text-text-muted bg-bg/70 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none group-hover:text-text'}
 			{isSelected && !isToday ? 'ring-1 ring-border-subtle text-text' : ''}">
 			{day}
 		</span>
@@ -89,13 +91,13 @@
 		<button
 			onclick={(e) => { e.stopPropagation(); onAddSong(); }}
 			aria-label="Add song for day {day}"
-			class="absolute inset-0 z-10 flex items-center justify-center p-2 cursor-pointer text-text-muted transition-opacity outline-none opacity-100 md:inset-auto md:top-1.5 md:right-2 md:opacity-0 md:group-hover:opacity-40 md:hover:!opacity-100"
+			class="absolute inset-0 z-10 flex items-center justify-center p-1 cursor-pointer text-text-muted transition-opacity outline-none opacity-100 md:inset-auto md:top-1.5 md:right-2 md:opacity-0 md:group-hover:opacity-40 md:hover:!opacity-100"
 		>
 			<PlusIcon class="h-5 w-5 sm:h-6 sm:w-6 md:h-4 md:w-4" />
 		</button>
 	{/if}
 
-	<div class="w-full flex flex-col items-center justify-center md:pt-2">
+	<div class="w-full flex flex-col items-center justify-center gap-0.5 min-w-0">
 		{#each songs as song}
 			<CalendarSong {song} {day} />
 		{/each}
