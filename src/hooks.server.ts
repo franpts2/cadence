@@ -50,6 +50,12 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
   // is the canonical host. This is required on Workers, where process.env is not
   // available for Auth.js to read AUTH_TRUST_HOST at runtime.
   trustHost: true,
+  // Auth.js's built-in error page is a dead end: it has no way back and says
+  // "Server error" even for recoverable failures like an expired PKCE cookie.
+  // Send users to our own page, which explains what happened and offers a retry.
+  pages: {
+    error: "/auth-error",
+  },
   adapter: DrizzleAdapter(db, {
     usersTable: users,
     accountsTable: accounts,
@@ -62,6 +68,13 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
     Spotify({
       clientId: SPOTIFY_CLIENT_ID,
       clientSecret: SPOTIFY_CLIENT_SECRET,
+      // Auth.js keeps the PKCE verifier in a 15-minute cookie and refuses the
+      // callback when it is gone. Signing into Spotify can easily take longer
+      // than that (e.g. "Continue with Facebook"), or finish in another browser,
+      // and the user then lands on an unrecoverable "Server error" page.
+      // Spotify is a confidential client — the client secret is required to
+      // exchange the code — so PKCE adds little here and breaks real sign-ins.
+      checks: [],
       authorization: `https://accounts.spotify.com/authorize?scope=${SPOTIFY_SCOPES.join('+')}&show_dialog=true`
     }),
   ],

@@ -222,6 +222,26 @@ npx wrangler pages deploy .svelte-kit/cloudflare --project-name cadence-francisc
 | `TURSO_AUTH_TOKEN` | Turso database authentication token |
 | `AUTH_TRUST_HOST` | Set to `true` for local development or when behind a trusted reverse proxy |
 
+## Troubleshooting sign-in
+
+Failed sign-ins land on `/auth-error` instead of Auth.js's built-in error page. That page
+shows an error code and a **Try again** button, so a transient failure is never a dead end.
+
+`Configuration` is Auth.js's catch-all for any unexpected server-side error. The most common
+cause used to be a missing PKCE cookie: Auth.js stores the verifier in a 15-minute cookie and
+rejects the callback without it. A slow Spotify login (for example "Continue with Facebook")
+or a login that finishes in a different browser was enough to block sign-up.
+
+The Spotify provider now sets `checks: []`, so sign-in no longer depends on that cookie.
+This is safe because Spotify is a confidential client — the client secret is still required
+to exchange the authorization code. The retry page remains as a fallback for genuine
+provider or network failures.
+
+Other codes: `AccessDenied` (the Spotify permission screen was declined),
+`Verification` (an expired sign-in link), and `MissingCSRF` (a stale sign-in form).
+Each failed request is also logged server-side with its code by
+`src/routes/auth-error/+page.server.ts`.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
