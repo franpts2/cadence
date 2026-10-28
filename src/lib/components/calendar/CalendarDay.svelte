@@ -63,10 +63,11 @@
 		{isDraggingOver || isTouchHovered ? 'bg-accent/10 ring-2 ring-inset ring-accent/30' : ''}"
 >
 	<!-- The date floats over the artwork on touch, where a 50px-wide cell has no
-	     room for a separate row. The backdrop keeps it readable on any cover. -->
+	     room for a separate row. The opaque pill keeps it readable on any cover;
+	     a backdrop blur here would mean 30+ blurred layers on a phone. -->
 	<div class="absolute top-0.5 left-0.5 right-0.5 z-20 flex items-start pointer-events-none md:top-1.5 md:left-1.5 md:right-3">
 		<span class="inline-flex items-center justify-center min-w-5 h-5 px-1 sm:min-w-6 sm:h-6 sm:px-0 text-[11px] sm:text-xs rounded-full transition-[transform,color,background-color] duration-150 ease-out
-			{isToday ? 'bg-text text-bg font-bold' : 'text-text-muted bg-bg/70 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none group-hover:text-text'}
+			{isToday ? 'bg-text text-bg font-bold' : 'text-text-muted bg-bg/80 sm:bg-transparent group-hover:text-text'}
 			{isSelected && !isToday ? 'ring-1 ring-border-subtle text-text' : ''}">
 			{day}
 		</span>
