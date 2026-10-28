@@ -29,8 +29,29 @@
 	let touchX = $state(0);
 	let touchY = $state(0);
 	let touchTimer: ReturnType<typeof setTimeout> | null = null;
+	let dragNode: HTMLElement | null = null;
 	let startX = 0;
 	let startY = 0;
+
+	/** Move the floating ghost and find the day / nav zone under the finger. */
+	function updateDrag(touch: Touch) {
+		touchX = touch.clientX;
+		touchY = touch.clientY;
+
+		const element = document.elementFromPoint(touch.clientX, touch.clientY);
+		if (!element) return;
+
+		const dayCell = element.closest('[data-day]');
+		const targetDay = dayCell ? parseInt(dayCell.getAttribute('data-day') || '') : NaN;
+		cal.touchHoveredDay = Number.isNaN(targetDay) ? null : targetDay;
+
+		const navTarget = element.closest('[data-nav-target]');
+		if (navTarget) {
+			cal.startDelayedNav(navTarget.getAttribute('data-nav-target') as 'prev' | 'next');
+		} else {
+			cal.cancelDelayedNav();
+		}
+	}
 
 	function handleTouchStart(e: TouchEvent) {
 		if (e.touches.length !== 1) return;
@@ -44,10 +65,15 @@
 
 		touchTimer = setTimeout(() => {
 			isTouchDragging = true;
-			touchX = touch.clientX;
-			touchY = touch.clientY;
+			updateDrag(touch);
 			cal.draggingSong = song;
 			cal.draggingFromDay = day;
+
+			// Only a live drag needs preventDefault on touchmove, so the non-passive
+			// listener is attached now instead of up front. Every other touch on a
+			// song stays passive, which is what keeps the grid scrolling smoothly.
+			dragNode?.removeEventListener('touchmove', handleTouchMove);
+			dragNode?.addEventListener('touchmove', handleDragMove, { passive: false });
 
 			if (navigator.vibrate) {
 				navigator.vibrate(50);
@@ -55,54 +81,36 @@
 		}, 350); // long-press delay — long enough to not fire on a scroll, short enough to feel native
 	}
 
+	// Before the long press: passive, and only watching for movement that cancels it.
 	function handleTouchMove(e: TouchEvent) {
 		if (e.touches.length !== 1) return;
 
 		const touch = e.touches[0];
-		const dx = touch.clientX - startX;
-		const dy = touch.clientY - startY;
-
-		if (!isTouchDragging) {
-			// If user moves finger significantly before long-press, cancel the timer
-			if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
-				if (touchTimer) {
-					clearTimeout(touchTimer);
-					touchTimer = null;
-				}
+		if (Math.abs(touch.clientX - startX) > 8 || Math.abs(touch.clientY - startY) > 8) {
+			if (touchTimer) {
+				clearTimeout(touchTimer);
+				touchTimer = null;
 			}
-			return;
 		}
+	}
 
-		// Prevent scrolling once touch dragging has started
-		if (e.cancelable) {
-			e.preventDefault();
-		}
+	// During a drag: the only listener allowed to cancel the browser's scroll.
+	function handleDragMove(e: TouchEvent) {
+		if (e.touches.length !== 1) return;
+		if (e.cancelable) e.preventDefault();
+		updateDrag(e.touches[0]);
+	}
 
-		touchX = touch.clientX;
-		touchY = touch.clientY;
+	function resetDrag() {
+		isTouchDragging = false;
+		cal.draggingSong = null;
+		cal.draggingFromDay = null;
+		cal.touchHoveredDay = null;
+		cal.cancelDelayedNav(true);
 
-		// Detect target under finger
-		const element = document.elementFromPoint(touch.clientX, touch.clientY);
-		if (element) {
-			const dayCell = element.closest('[data-day]');
-			if (dayCell) {
-				const targetDay = parseInt(dayCell.getAttribute('data-day') || '');
-				if (!isNaN(targetDay)) {
-					cal.touchHoveredDay = targetDay;
-				} else {
-					cal.touchHoveredDay = null;
-				}
-			} else {
-				cal.touchHoveredDay = null;
-			}
-
-			const navTarget = element.closest('[data-nav-target]');
-			if (navTarget) {
-				const direction = navTarget.getAttribute('data-nav-target') as 'prev' | 'next';
-				cal.startDelayedNav(direction);
-			} else {
-				cal.cancelDelayedNav();
-			}
+		if (dragNode) {
+			dragNode.removeEventListener('touchmove', handleDragMove);
+			dragNode.addEventListener('touchmove', handleTouchMove, { passive: true });
 		}
 	}
 
@@ -116,24 +124,17 @@
 
 		// Prevent emulated click event
 		e.preventDefault();
-		isTouchDragging = false;
 
 		const touch = e.changedTouches[0];
-		const element = document.elementFromPoint(touch.clientX, touch.clientY);
-		if (element) {
-			const dayCell = element.closest('[data-day]');
-			if (dayCell) {
-				const toDay = parseInt(dayCell.getAttribute('data-day') || '');
-				if (!isNaN(toDay)) {
-					cal.moveSong(day, toDay);
-				}
-			}
+		const dayCell = document
+			.elementFromPoint(touch.clientX, touch.clientY)
+			?.closest('[data-day]');
+		const toDay = dayCell ? parseInt(dayCell.getAttribute('data-day') || '') : NaN;
+		if (!Number.isNaN(toDay)) {
+			cal.moveSong(day, toDay);
 		}
 
-		cal.draggingSong = null;
-		cal.draggingFromDay = null;
-		cal.touchHoveredDay = null;
-		cal.cancelDelayedNav(true);
+		resetDrag();
 	}
 
 	function handleTouchCancel() {
@@ -142,25 +143,25 @@
 			touchTimer = null;
 		}
 		if (isTouchDragging) {
-			isTouchDragging = false;
-			cal.draggingSong = null;
-			cal.draggingFromDay = null;
-			cal.touchHoveredDay = null;
-			cal.cancelDelayedNav(true);
+			resetDrag();
 		}
 	}
 
-	// Svelte action to bind touch events as non-passive
+	// Svelte action to bind touch events. `touchmove` starts passive and is
+	// swapped for a non-passive one only while a drag is actually running.
 	function touchDraggable(node: HTMLElement) {
+		dragNode = node;
 		node.addEventListener('touchstart', handleTouchStart, { passive: true });
-		node.addEventListener('touchmove', handleTouchMove, { passive: false });
+		node.addEventListener('touchmove', handleTouchMove, { passive: true });
 		node.addEventListener('touchend', handleTouchEnd, { passive: false });
 		node.addEventListener('touchcancel', handleTouchCancel, { passive: true });
 
 		return {
 			destroy() {
+				dragNode = null;
 				node.removeEventListener('touchstart', handleTouchStart);
 				node.removeEventListener('touchmove', handleTouchMove);
+				node.removeEventListener('touchmove', handleDragMove);
 				node.removeEventListener('touchend', handleTouchEnd);
 				node.removeEventListener('touchcancel', handleTouchCancel);
 			}
@@ -183,6 +184,9 @@
 					src={song.album.images[0].url}
 					alt=""
 					draggable="false"
+					loading="lazy"
+					decoding="async"
+					fetchpriority="low"
 					class="w-full h-full object-cover select-none"
 				/>
 			</div>
@@ -194,13 +198,17 @@
 </Tooltip>
 
 {#if isTouchDragging}
+	<!-- Follows the finger. Positioned with translate3d on a fixed origin so each
+	     move is a compositor-only change, and deliberately untransitioned so it
+	     tracks the finger instead of trailing 75ms behind it. No backdrop-filter:
+	     re-blurring a moving layer is what makes the drag stutter on phones. -->
 	<div 
-		class="fixed pointer-events-none z-[9999] flex flex-col items-center gap-1.5 text-center bg-surface/95 border border-accent/30 rounded-lg p-2 shadow-2xl transition-transform duration-75 ease-out backdrop-blur-md"
-		style="left: {touchX}px; top: {touchY}px; transform: translate(-50%, -120%); width: 80px;"
+		class="fixed top-0 left-0 pointer-events-none z-[9999] flex flex-col items-center gap-1.5 text-center bg-surface border border-accent/30 rounded-lg p-2 shadow-2xl will-change-transform"
+		style="transform: translate3d({touchX}px, {touchY}px, 0) translate(-50%, -120%); width: 80px;"
 	>
 		{#if song.album.images[0]}
 			<div class="w-14 h-14 aspect-square overflow-hidden rounded-sm flex-shrink-0 shadow-md">
-				<img src={song.album.images[0].url} alt="" class="w-full h-full object-cover" />
+				<img src={song.album.images[0].url} alt="" decoding="async" class="w-full h-full object-cover" />
 			</div>
 		{/if}
 		<span class="text-[9px] text-accent truncate font-medium w-full px-1">
