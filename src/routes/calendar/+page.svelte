@@ -11,6 +11,7 @@
 	import Toast from '$lib/components/ui/Toast.svelte';
 	import LoadingIndicator from '$lib/components/ui/LoadingIndicator.svelte';
 	import { page } from '$app/state';
+	import { onMount } from 'svelte';
 	import { setCalendarState } from '$lib';
 	import type { PageData } from './$types';
 
@@ -45,6 +46,25 @@
 			cal.songsPerDay = {};
 			cal.loadedMonths.clear();
 		}
+	});
+
+	// Sync on resume, the way a native app does — no pull-to-refresh, no reload.
+	// Coming back to the tab, or regaining the network, re-fetches the visible
+	// month silently so edits made on another device appear.
+	onMount(() => {
+		const resync = () => {
+			if (document.visibilityState === 'visible' && navigator.onLine) {
+				cal.refreshCurrentMonth();
+			}
+		};
+
+		document.addEventListener('visibilitychange', resync);
+		window.addEventListener('online', resync);
+
+		return () => {
+			document.removeEventListener('visibilitychange', resync);
+			window.removeEventListener('online', resync);
+		};
 	});
 </script>
 
