@@ -139,4 +139,70 @@ describe('CalendarState', () => {
 			expect(global.fetch).not.toHaveBeenCalled();
 		});
 	});
+
+	describe('refresh on resume', () => {
+		const dbSong = (dateKey: string) => ({
+			dateKey,
+			songId: 'song-1',
+			songName: 'Song 1',
+			artistName: 'Artist',
+			albumName: 'Album',
+			albumImageUrl: null
+		});
+
+		beforeEach(() => {
+			state.viewDate = new Date(2026, 4, 1); // May 2026
+		});
+
+		it('should refetch a month that is already cached', async () => {
+			state.loadedMonths.add('2026-5');
+			(global.fetch as any).mockResolvedValue({
+				ok: true,
+				json: async () => [dbSong('2026-05-02')]
+			});
+
+			await state.refreshCurrentMonth();
+
+			expect(global.fetch).toHaveBeenCalledWith('/api/songs?year=2026&month=5');
+			expect(state.songsPerDay['2026-05-02']).toBeDefined();
+		});
+
+		it('should drop songs deleted on another device, keeping other months', async () => {
+			state.songsPerDay['2026-05-01'] = {
+				id: 'old',
+				name: 'Old',
+				artists: [],
+				album: { name: '', images: [] }
+			} as any;
+			state.songsPerDay['2026-04-30'] = {
+				id: 'april',
+				name: 'April',
+				artists: [],
+				album: { name: '', images: [] }
+			} as any;
+			(global.fetch as any).mockResolvedValue({
+				ok: true,
+				json: async () => [dbSong('2026-05-02')]
+			});
+
+			await state.refreshCurrentMonth();
+
+			expect(state.songsPerDay['2026-05-01']).toBeUndefined();
+			expect(state.songsPerDay['2026-05-02']).toBeDefined();
+			expect(state.songsPerDay['2026-04-30']?.id).toBe('april');
+		});
+
+		it('should stay silent when the device is offline', async () => {
+			state.viewDate = new Date(2026, 4, 1);
+			state.loadedMonths.add('2026-5');
+			(global.fetch as any).mockRejectedValue(new Error('offline'));
+
+			await expect(state.refreshCurrentMonth()).resolves.toBeUndefined();
+
+			expect(state.isLoading).toBe(false);
+			expect(state.toasts).toHaveLength(0);
+			// Still uncached, so the next resume retries instead of staying stale.
+			expect(state.loadedMonths.has('2026-5')).toBe(false);
+		});
+	});
 });

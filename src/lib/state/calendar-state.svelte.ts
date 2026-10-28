@@ -12,6 +12,9 @@ export class CalendarState {
 	
 	// Cache: keep track of which YYYY-MM have been loaded
 	loadedMonths = new Set<string>();
+
+	// Months with a request in flight, so mount + resume can't double-fetch.
+	private inFlight = new Set<string>();
 	
 	// UI State
 	isLoading = $state(false);
@@ -230,22 +233,37 @@ export class CalendarState {
 		this.isExportOpen = false;
 	};
 
-	loadSongs = async () => {
+	loadSongs = async ({ silent = false }: { silent?: boolean } = {}) => {
 		const year = this.viewDate.getFullYear();
 		const month = this.viewDate.getMonth() + 1;
 		const cacheKey = `${year}-${month}`;
 
 		if (this.loadedMonths.has(cacheKey)) return;
+		if (this.inFlight.has(cacheKey)) return;
 
-		this.isLoading = true;
+		this.inFlight.add(cacheKey);
+		if (!silent) this.isLoading = true;
 		try {
 			const response = await fetch(`/api/songs?year=${year}&month=${month}`);
 			if (response.ok) {
 				const dbSongs: any[] = await response.json();
 				const mapped = this.mapDbSongsToRecord(dbSongs);
-				this.songsPerDay = { ...this.songsPerDay, ...mapped };
+				if (silent) {
+					// A resync replaces the month wholesale: songs deleted on another
+					// device must disappear, not linger from the cached merge.
+					const prefix = `${year}-${String(month).padStart(2, '0')}-`;
+					const otherMonths = Object.entries(this.songsPerDay).filter(
+						([key]) => !key.startsWith(prefix)
+					);
+					this.songsPerDay = { ...Object.fromEntries(otherMonths), ...mapped };
+				} else {
+					this.songsPerDay = { ...this.songsPerDay, ...mapped };
+				}
 				this.loadedMonths.add(cacheKey);
 			} else {
+				// Background resyncs happen on resume, when being offline is normal:
+				// don't toast a transient failure the user didn't ask for.
+				if (silent) return;
 				const data = await response.json();
 				if (data.code === 'AUTH_EXPIRED') {
 					this.addToast('Spotify session expired. Please log in again.', 'error');
@@ -255,10 +273,21 @@ export class CalendarState {
 			}
 		} catch (err) {
 			console.error('Failed to load songs:', err);
-			this.addToast('Network error while loading songs', 'error');
+			if (!silent) this.addToast('Network error while loading songs', 'error');
 		} finally {
-			this.isLoading = false;
+			this.inFlight.delete(cacheKey);
+			if (!silent) this.isLoading = false;
 		}
+	};
+
+	// Re-fetch the visible month so changes made on another device show up.
+	// Called when the app comes back into view or the network returns — the
+	// native pattern is to sync on resume, not to reload the page.
+	refreshCurrentMonth = async () => {
+		const year = this.viewDate.getFullYear();
+		const month = this.viewDate.getMonth() + 1;
+		this.loadedMonths.delete(`${year}-${month}`);
+		await this.loadSongs({ silent: true });
 	};
 
 	mapDbSongsToRecord = (dbSongs: any[]): Record<string, Song> => {
