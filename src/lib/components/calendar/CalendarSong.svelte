@@ -198,13 +198,17 @@
 </Tooltip>
 
 {#if isTouchDragging}
+	<!-- Follows the finger. Positioned with translate3d on a fixed origin so each
+	     move is a compositor-only change, and deliberately untransitioned so it
+	     tracks the finger instead of trailing 75ms behind it. No backdrop-filter:
+	     re-blurring a moving layer is what makes the drag stutter on phones. -->
 	<div 
-		class="fixed pointer-events-none z-[9999] flex flex-col items-center gap-1.5 text-center bg-surface/95 border border-accent/30 rounded-lg p-2 shadow-2xl transition-transform duration-75 ease-out backdrop-blur-md"
-		style="left: {touchX}px; top: {touchY}px; transform: translate(-50%, -120%); width: 80px;"
+		class="fixed top-0 left-0 pointer-events-none z-[9999] flex flex-col items-center gap-1.5 text-center bg-surface border border-accent/30 rounded-lg p-2 shadow-2xl will-change-transform"
+		style="transform: translate3d({touchX}px, {touchY}px, 0) translate(-50%, -120%); width: 80px;"
 	>
 		{#if song.album.images[0]}
 			<div class="w-14 h-14 aspect-square overflow-hidden rounded-sm flex-shrink-0 shadow-md">
-				<img src={song.album.images[0].url} alt="" class="w-full h-full object-cover" />
+				<img src={song.album.images[0].url} alt="" decoding="async" class="w-full h-full object-cover" />
 			</div>
 		{/if}
 		<span class="text-[9px] text-accent truncate font-medium w-full px-1">
