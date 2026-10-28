@@ -86,7 +86,7 @@ export function sheetIn(_node: HTMLElement, { duration }: SheetParams = {}) {
 	const reduce = prefersReducedMotion();
 	const phone = isPhone();
 	return {
-		duration: duration ?? (phone ? 360 : 200),
+		duration: duration ?? (phone ? 300 : 200),
 		easing: cubicOut,
 		css: (t: number, u: number) =>
 			reduce
@@ -101,7 +101,7 @@ export function sheetOut(_node: HTMLElement, { duration }: SheetParams = {}) {
 	const reduce = prefersReducedMotion();
 	const phone = isPhone();
 	return {
-		duration: duration ?? (phone ? 280 : 200),
+		duration: duration ?? (phone ? 240 : 200),
 		easing: quadIn,
 		css: (t: number, u: number) =>
 			reduce
