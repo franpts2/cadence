@@ -2,7 +2,7 @@
 	import CalendarNav from "./calendar/CalendarNav.svelte";
 	import UserMenu from "./UserMenu.svelte";
 	import type { Session } from "@auth/sveltekit";
-	import { getCalendarState } from "$lib";
+	import { getCalendarState, ShareIcon } from "$lib";
 
 	let { session } = $props<{
 		session: Session | null | undefined;
@@ -31,6 +31,14 @@
 			{cal.monthLabel} {cal.yearLabel}
 		</p>
 		<CalendarNav />
+		<button
+			onclick={cal.openShare}
+			class="flex h-11 w-11 items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-surface-hover transition-colors md:h-8 md:w-8 md:rounded-md"
+			aria-label="Share this month"
+			title="Share this month"
+		>
+			<ShareIcon class="h-[18px] w-[18px] md:h-4 md:w-4" />
+		</button>
 	</div>
 
 	<UserMenu {session} />

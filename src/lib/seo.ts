@@ -74,6 +74,7 @@ export function structuredData() {
 			'Visual listening calendar',
 			'Spotify playlist import',
 			'Spotify playlist export',
+			'Shareable month calendar image',
 			'Drag and drop songs between days'
 		]
 	};

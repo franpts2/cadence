@@ -24,6 +24,7 @@ export class CalendarState {
 	isSearchOpen = $state(false);
 	isImportOpen = $state(false);
 	isExportOpen = $state(false);
+	isShareOpen = $state(false);
 	searchingForDate = $state<Date | null>(null);
 	previewingSong = $state<Song | null>(null);
 	previewingDay = $state<number | null>(null);
@@ -231,6 +232,14 @@ export class CalendarState {
 
 	closeExport = () => {
 		this.isExportOpen = false;
+	};
+
+	openShare = () => {
+		this.isShareOpen = true;
+	};
+
+	closeShare = () => {
+		this.isShareOpen = false;
 	};
 
 	loadSongs = async ({ silent = false }: { silent?: boolean } = {}) => {
