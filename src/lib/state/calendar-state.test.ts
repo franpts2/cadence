@@ -205,4 +205,16 @@ describe('CalendarState', () => {
 			expect(state.loadedMonths.has('2026-5')).toBe(false);
 		});
 	});
+
+	describe('share modal', () => {
+		it('should open and close the share modal', () => {
+			expect(state.isShareOpen).toBe(false);
+
+			state.openShare();
+			expect(state.isShareOpen).toBe(true);
+
+			state.closeShare();
+			expect(state.isShareOpen).toBe(false);
+		});
+	});
 });

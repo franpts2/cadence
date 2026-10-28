@@ -25,6 +25,7 @@ It's live at **[cadence.franciscapt.dev](https://cadence.franciscapt.dev)** — 
 - **Drag & Drop:** Move songs between days on desktop and touch-drag on mobile.
 - **Playlist Import:** Bring an existing Spotify playlist into a month or year in one click.
 - **Playlist Export:** Turn your calendar back into a private Spotify playlist.
+- **Shareable Months:** Share the month you're viewing as a clean 4:5 image of just the calendar.
 - **Modern Styling:** Built with Tailwind CSS v4 for a cutting-edge, performant UI.
 - **Type-Safe Data:** Robust database schema and API validation using Drizzle ORM and Zod.
 - **Edge-Ready Database:** Powered by Turso for low-latency data access at the edge.
