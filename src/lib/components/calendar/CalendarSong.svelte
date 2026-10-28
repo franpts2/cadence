@@ -184,6 +184,9 @@
 					src={song.album.images[0].url}
 					alt=""
 					draggable="false"
+					loading="lazy"
+					decoding="async"
+					fetchpriority="low"
 					class="w-full h-full object-cover select-none"
 				/>
 			</div>

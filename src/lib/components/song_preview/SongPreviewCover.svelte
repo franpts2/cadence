@@ -11,6 +11,7 @@
 			src={imageUrl}
 			alt={albumName}
 			draggable="false"
+			decoding="async"
 			class="w-full h-full object-cover"
 		/>
 	{/if}
