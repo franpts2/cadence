@@ -5,6 +5,7 @@ import { dailySongs, songs } from '$lib/server/db/schema';
 import { eq, and, like, asc } from 'drizzle-orm';
 import { z } from 'zod';
 import { hasScopes, REQUIRED_EXPORT_SCOPES } from '$lib/server/spotify';
+import { getSpotifyAccount, getSpotifyUserToken } from '$lib/server/spotify-auth';
 
 const exportSchema = z.object({
 	exportType: z.enum(['monthly', 'yearly', 'all']),
@@ -40,22 +41,44 @@ function getPlaylistName(exportType: string, year?: number, month?: number): str
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const session = await locals.auth();
-	const accessToken = session?.accessToken;
-	const scope = session?.scope;
 
-	if (!session?.user?.id || !accessToken) {
+	if (!session?.user?.id) {
 		return json({ error: 'Not authenticated' }, { status: 401 });
 	}
 
+	const account = await getSpotifyAccount(session.user.id);
+
+	if (!account) {
+		return json(
+			{
+				error: 'Connect your Spotify account to export playlists.',
+				code: 'SPOTIFY_NOT_CONNECTED'
+			},
+			{ status: 403 }
+		);
+	}
+
 	// The token must have been granted the playlist-modify-private scope.
-	// Sessions created before the scope was requested won't have it, even
+	// Connections created before the scope was requested won't have it, even
 	// though their access token may still be valid, so we ask the user to
 	// reconnect (which forces a fresh Spotify consent screen).
-	if (!hasScopes(scope, REQUIRED_EXPORT_SCOPES)) {
+	if (!hasScopes(account.scope, REQUIRED_EXPORT_SCOPES)) {
 		return json(
 			{
 				error: 'Missing permission to create playlists. Please reconnect your Spotify account.',
 				code: 'SCOPE_MISSING'
+			},
+			{ status: 403 }
+		);
+	}
+
+	const accessToken = await getSpotifyUserToken(session.user.id);
+
+	if (!accessToken) {
+		return json(
+			{
+				error: 'Connect your Spotify account to export playlists.',
+				code: 'SPOTIFY_NOT_CONNECTED'
 			},
 			{ status: 403 }
 		);

@@ -1,17 +1,26 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
+import { getCatalogueToken } from '$lib/server/spotify-auth';
 
 export const GET: RequestHandler = async ({ url, locals }) => {
 	const session = await locals.auth();
-	const accessToken = (session as any)?.accessToken;
-	const sessionError = (session as any)?.error;
-	
-	if (!session || !accessToken || sessionError === 'RefreshAccessTokenError') {
-		return json({ error: 'Spotify session expired. Please log in again.', code: 'AUTH_EXPIRED' }, { status: 401 });
+
+	if (!session?.user?.id) {
+		return json({ error: 'Unauthorized' }, { status: 401 });
 	}
 
 	const query = url.searchParams.get('q');
 	if (!query) {
 		return json([]);
+	}
+
+	let accessToken: string;
+	try {
+		// Users who connected Spotify search with their own token; everyone else
+		// uses the app-only token, which has no per-user restriction.
+		accessToken = await getCatalogueToken(session.user.id);
+	} catch (err) {
+		console.error('Could not get a Spotify token:', err);
+		return json({ error: 'Spotify search is unavailable right now' }, { status: 503 });
 	}
 
 	try {

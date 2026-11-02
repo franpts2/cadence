@@ -7,9 +7,11 @@
 	import { getCalendarState, MONTHS } from '$lib';
 	import { fade } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
-	import { signIn, signOut } from '@auth/sveltekit/client';
+	import { signIn } from '@auth/sveltekit/client';
+	import { page } from '$app/state';
 
 	const cal = getCalendarState();
+	const spotifyConnected = $derived(page.data.spotifyConnected);
 
 	let exportType = $state<'monthly' | 'yearly' | 'all'>('monthly');
 	let year = $state(cal.viewDate.getFullYear());
@@ -17,6 +19,7 @@
 	let isExporting = $state(false);
 	let exportedUrl = $state<string | null>(null);
 	let needsReconnect = $state(false);
+	let notConnected = $state(false);
 	let isReconnecting = $state(false);
 
 	const exportTypeOptions = [
@@ -33,6 +36,7 @@
 		month = cal.viewDate.getMonth();
 		exportedUrl = null;
 		needsReconnect = false;
+		notConnected = false;
 	}
 
 	async function handleExport(e: SubmitEvent) {
@@ -63,8 +67,8 @@
 			const data = await response.json();
 
 			if (!response.ok) {
-				if (data.code === 'AUTH_EXPIRED') {
-					cal.addToast(data.error || 'Spotify session expired. Please log in again.', 'error');
+				if (data.code === 'SPOTIFY_NOT_CONNECTED') {
+					notConnected = true;
 				} else if (data.code === 'SCOPE_MISSING') {
 					needsReconnect = true;
 				} else {
@@ -87,12 +91,13 @@
 		if (isReconnecting) return;
 		isReconnecting = true;
 		try {
-			await signOut({ redirect: false });
-			await signIn('spotify');
+			// Stay signed in: Auth.js links Spotify to the current account. Signing
+			// out first would create a separate Spotify-based account instead.
+			await signIn('spotify', { redirectTo: '/calendar' });
 		} catch (err) {
 			console.error('Reconnect error:', err);
 			isReconnecting = false;
-			cal.addToast('Could not reconnect to Spotify. Please try again.', 'error');
+			cal.addToast('Could not connect to Spotify. Please try again.', 'error');
 		}
 	}
 
@@ -111,7 +116,38 @@
 		Create a private Spotify playlist from your calendar entries.
 	</p>
 
-	{#if exportedUrl}
+	{#if !spotifyConnected || notConnected}
+		<div class="w-full space-y-4" in:fade={{ duration: 180, easing: cubicOut }}>
+			<Alert title="Connect Spotify" variant="info">
+				<p>
+					Exporting creates a private playlist in your Spotify account, so Cadence needs your
+					permission first.
+				</p>
+				<p class="mt-2">
+					You can keep using Cadence without Spotify — connecting is only needed for export
+					and private playlists.
+				</p>
+			</Alert>
+
+			<button
+				type="button"
+				onclick={handleReconnect}
+				disabled={isReconnecting}
+				class="w-full px-4 py-3 bg-[#1DB954] hover:bg-[#1ed760] text-bg font-bold rounded-xl disabled:opacity-50 transition-[background-color,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.98] motion-reduce:active:scale-100"
+			>
+				{isReconnecting ? 'Connecting…' : 'Connect Spotify'}
+			</button>
+
+			<button
+				type="button"
+				onclick={handleClose}
+				disabled={isReconnecting}
+				class="w-full px-4 py-2.5 border border-border text-text-muted hover:text-text hover:bg-surface-hover rounded-xl font-medium disabled:opacity-50 transition-[background-color,color,border-color,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.98] motion-reduce:active:scale-100"
+			>
+				Not now
+			</button>
+		</div>
+	{:else if exportedUrl}
 		<div class="w-full space-y-4" in:fade={{ duration: 180, easing: cubicOut }}>
 			<Alert title="Export Complete" variant="success">
 				<p>Your playlist was created successfully on Spotify.</p>
@@ -141,7 +177,8 @@
 					Cadence needs permission to create playlists. Reconnect your Spotify account to grant it.
 				</p>
 				<p class="mt-2">
-					This signs you out and back in. If the Spotify prompt doesn't ask for playlist access, remove Cadence from your Spotify account's apps and reconnect.
+					If the Spotify prompt doesn't ask for playlist access, remove Cadence from your
+					Spotify account's apps and connect again.
 				</p>
 			</Alert>
 

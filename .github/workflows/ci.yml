@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      GOOGLE_CLIENT_ID: ci-google-client-id
+      GOOGLE_CLIENT_SECRET: ci-google-client-secret
       SPOTIFY_CLIENT_ID: ci-spotify-client-id
       SPOTIFY_CLIENT_SECRET: ci-spotify-client-secret
       AUTH_SECRET: ci-auth-secret-must-be-at-least-32-characters-long

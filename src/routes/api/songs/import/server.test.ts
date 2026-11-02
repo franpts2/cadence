@@ -21,6 +21,10 @@ vi.mock('$lib/server/db', () => ({
 	db: { transaction: transactionMock }
 }));
 
+vi.mock('$lib/server/spotify-auth', () => ({
+	getCatalogueToken: vi.fn(async () => 'access-token')
+}));
+
 import { POST } from './+server';
 
 const PLAYLIST_ID = '37i9dQZF1DXcBWIGoYBM5M';

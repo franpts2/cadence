@@ -275,7 +275,7 @@ export class CalendarState {
 				if (silent) return;
 				const data = await response.json();
 				if (data.code === 'AUTH_EXPIRED') {
-					this.addToast('Spotify session expired. Please log in again.', 'error');
+					this.addToast('Your session expired. Please log in again.', 'error');
 				} else {
 					this.addToast('Failed to load songs', 'error');
 				}

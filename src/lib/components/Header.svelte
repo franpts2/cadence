@@ -4,8 +4,9 @@
 	import type { Session } from "@auth/sveltekit";
 	import { getCalendarState, ShareIcon } from "$lib";
 
-	let { session } = $props<{
+	let { session, spotifyConnected = false } = $props<{
 		session: Session | null | undefined;
+		spotifyConnected?: boolean;
 	}>();
 
 	const cal = getCalendarState();
@@ -41,5 +42,5 @@
 		</button>
 	</div>
 
-	<UserMenu {session} />
+	<UserMenu {session} {spotifyConnected} />
 </header>

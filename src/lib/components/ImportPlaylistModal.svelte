@@ -6,8 +6,11 @@
 	import LoadingIndicator from './ui/LoadingIndicator.svelte';
 	import { getCalendarState, MONTHS } from '$lib';
 	import { fade } from 'svelte/transition';
+	import { signIn } from '@auth/sveltekit/client';
+	import { page } from '$app/state';
 
 	const cal = getCalendarState();
+	const spotifyConnected = $derived(page.data.spotifyConnected);
 
 	let playlistUrl = $state('');
 	let importType = $state<'monthly' | 'yearly'>('monthly');
@@ -93,6 +96,20 @@
 	<p class="text-sm text-text-muted mb-6">
 		Bring your Spotify playlist songs directly into your calendar.
 	</p>
+
+	{#if !spotifyConnected}
+		<p class="text-xs text-text-dim mb-6 -mt-2">
+			Only public playlists can be imported right now.
+			<button
+				type="button"
+				onclick={() => signIn('spotify', { redirectTo: '/calendar' })}
+				class="text-[#1DB954] hover:underline underline-offset-2"
+			>
+				Connect Spotify
+			</button>
+			to import your private ones.
+		</p>
+	{/if}
 
 	<form onsubmit={handleImport} class="w-full space-y-4 text-left">
 		<div class={isImporting ? 'opacity-50 pointer-events-none' : ''}>

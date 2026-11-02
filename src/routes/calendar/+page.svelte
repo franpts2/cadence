@@ -19,20 +19,15 @@
 	let { data }: { data: PageData } = $props();
 
 	const session = $derived(page.data.session);
+	const spotifyConnected = $derived(page.data.spotifyConnected);
 
 	// Initialize state with data from server
 	const cal = setCalendarState();
 
 	// Load songs when navigating months
 	$effect(() => {
-		if (session?.user && !session.error) {
+		if (session?.user) {
 			cal.loadSongs();
-		}
-	});
-
-	$effect(() => {
-		if (session?.error === 'RefreshAccessTokenError') {
-			cal.addToast('Your Spotify session has expired. Please log in again.', 'error');
 		}
 	});
 
@@ -76,7 +71,7 @@
 		<LoadingIndicator />
 	{/if}
 
-	<Header {session} />
+	<Header {session} {spotifyConnected} />
 
 	<main class="flex-1 min-h-0 overflow-hidden flex flex-col pb-16 pointer-fine:pb-0">
 		<!-- Crawlable, screen-reader description of the page. -->

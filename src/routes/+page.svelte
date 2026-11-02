@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { signIn } from '@auth/sveltekit/client';
-	import SpotifyIcon from '$lib/components/icons/SpotifyIcon.svelte';
+	import GoogleIcon from '$lib/components/icons/GoogleIcon.svelte';
 	import MusicIcon from '$lib/components/icons/MusicIcon.svelte';
 
 	let signingIn = $state(false);
@@ -11,7 +11,7 @@
 		try {
 			// Redirects to Spotify; on success the browser navigates away and the
 			// loading state stays put. Only reset if the redirect itself failed.
-			await signIn('spotify', { redirectTo: '/calendar' });
+			await signIn('google', { redirectTo: '/calendar' });
 		} catch {
 			signingIn = false;
 		}
@@ -58,7 +58,7 @@
 				onclick={handleSignIn}
 				disabled={signingIn}
 				aria-busy={signingIn}
-				class="inline-flex items-center gap-2.5 rounded-full bg-[#1DB954] px-6 py-3 text-sm font-semibold text-bg hover:bg-[#1ed760] disabled:cursor-default disabled:opacity-80"
+				class="inline-flex items-center gap-2.5 rounded-full bg-text px-6 py-3 text-sm font-semibold text-bg hover:bg-white disabled:cursor-default disabled:opacity-80"
 			>
 				{#if signingIn}
 					<span
@@ -67,12 +67,12 @@
 					></span>
 					Connecting…
 				{:else}
-					<SpotifyIcon class="h-4 w-4" />
-					Continue with Spotify
+					<GoogleIcon class="h-4 w-4" />
+					Continue with Google
 				{/if}
 			</button>
 
-			<p class="text-[11px] text-text-subtle">Free to use</p>
+			<p class="text-[11px] text-text-subtle">Free to use — no Spotify login needed</p>
 		</div>
 
 		<!-- Quiet miniature of the calendar -->

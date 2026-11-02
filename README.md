@@ -15,16 +15,16 @@
 
 Cadence is a personal music journal that integrates with Spotify to help you track your life through songs. By selecting one track each day, you build a visual and interactive calendar of your musical journey, powered by Svelte 5's modern reactive primitives.
 
-It's live at **[cadence.franciscapt.dev](https://cadence.franciscapt.dev)** — sign in with Spotify and start picking a song a day.
+It's live at **[cadence.franciscapt.dev](https://cadence.franciscapt.dev)** — sign in and start picking a song a day.
 
 ## Key Features
 
-- **Spotify Integration:** Secure authentication and real-time song searching via the Spotify Web API.
+- **Spotify Integration:** Real-time song search via the Spotify Web API, no Spotify login required.
 - **Interactive Calendar:** A fluid, responsive calendar interface built with Svelte 5 Runes for seamless state management.
 - **Daily Selection:** Log your "song of the day" to build a persistent history of your listening habits.
 - **Drag & Drop:** Move songs between days on desktop and touch-drag on mobile.
-- **Playlist Import:** Bring an existing Spotify playlist into a month or year in one click.
-- **Playlist Export:** Turn your calendar back into a private Spotify playlist.
+- **Playlist Import:** Bring a public Spotify playlist into a month or year in one click.
+- **Playlist Export:** Turn your calendar back into a private Spotify playlist (connect Spotify to enable).
 - **Shareable Months:** Share the month you're viewing as a clean 4:5 image of just the calendar.
 - **Modern Styling:** Built with Tailwind CSS v4 for a cutting-edge, performant UI.
 - **Type-Safe Data:** Robust database schema and API validation using Drizzle ORM and Zod.
@@ -90,14 +90,34 @@ cd cadence
 npm install
 ```
 
-### 2. Create a Spotify app
+### 2. Create a Google OAuth client
+
+Sign-in uses Google. Create an OAuth client:
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
+2. Create or pick a project, then configure the OAuth consent screen.
+3. Create an **OAuth client ID** of type *Web application*.
+4. Add these Authorised redirect URIs:
+   - `http://localhost:5173/auth/callback/google`
+   - `https://cadence.franciscapt.dev/auth/callback/google`
+5. Copy the **Client ID** and **Client Secret**.
+
+> Only the default `openid`, `email`, and `profile` scopes are used, so the consent screen can be published without Google verification.
+
+### 3. Create a Spotify app
+
+Spotify is optional. Song search and public playlist import use an app-only token, so they work without a Spotify login. Connecting Spotify per user additionally enables private playlists and export.
 
 1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
 2. Create an app.
-3. Add `http://localhost:5173/auth/callback/spotify` to the Redirect URIs.
+3. Add these Redirect URIs:
+   - `http://localhost:5173/auth/callback/spotify`
+   - `https://cadence.franciscapt.dev/auth/callback/spotify`
 4. Copy the **Client ID** and **Client Secret**.
 
-### 3. Create a Turso database
+> Spotify apps in development mode can only be used by a handful of allowlisted accounts. Cadence doesn't depend on that: only the optional connect flow is affected.
+
+### 4. Create a Turso database
 
 ```bash
 # Install the Turso CLI if you haven't already
@@ -112,7 +132,7 @@ turso db show cadence --url
 turso db tokens create cadence
 ```
 
-### 4. Configure environment variables
+### 5. Configure environment variables
 
 ```bash
 cp .env.example .env
@@ -121,6 +141,8 @@ cp .env.example .env
 Fill in the values:
 
 ```env
+GOOGLE_CLIENT_ID=your_google_oauth_client_id
+GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret
 SPOTIFY_CLIENT_ID=your_spotify_client_id
 SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
 AUTH_SECRET=your_auth_secret_generate_with_openssl_rand_base64_32
@@ -134,19 +156,19 @@ Generate `AUTH_SECRET` with:
 openssl rand -base64 32
 ```
 
-### 5. Push the database schema
+### 6. Push the database schema
 
 ```bash
 npm run db:push
 ```
 
-### 6. Run the dev server
+### 7. Run the dev server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) and log in with Spotify.
+Open [http://localhost:5173](http://localhost:5173) and log in with Google.
 
 ## Testing
 
@@ -189,9 +211,10 @@ The production domain is `cadence.franciscapt.dev`, attached via **Workers & Pag
 |------|------|---------|--------------|
 | `CNAME` | `cadence` | `cadence-franciscapt.pages.dev` | Proxied |
 
-Add the production callback URL to the Spotify app's Redirect URIs:
+Add the production callback URLs to each provider:
 
 ```
+https://cadence.franciscapt.dev/auth/callback/google
 https://cadence.franciscapt.dev/auth/callback/spotify
 ```
 
@@ -209,38 +232,56 @@ npm run build
 npx wrangler pages deploy .svelte-kit/cloudflare --project-name cadence-franciscapt
 ```
 
-> **Note:** After adding the `playlist-modify-private` scope for the export feature, existing users may need to log out and back in to grant the new permission.
+> **Note:** If an existing Spotify connection predates the playlist-modify scopes, the user must connect Spotify again to grant them.
 
 ## Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `SPOTIFY_CLIENT_ID` | Spotify app client ID |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID (sign-in) |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
+| `SPOTIFY_CLIENT_ID` | Spotify app client ID (search + optional connect) |
 | `SPOTIFY_CLIENT_SECRET` | Spotify app client secret |
 | `AUTH_SECRET` | Random secret for Auth.js sessions |
 | `TURSO_DATABASE_URL` | Turso database connection URL |
 | `TURSO_AUTH_TOKEN` | Turso database authentication token |
 | `AUTH_TRUST_HOST` | Set to `true` for local development or when behind a trusted reverse proxy |
 
+## Authentication model
+
+Cadence signs users in with **Google**. Spotify is an optional connection, started from the
+user menu, the import dialog, or the export dialog:
+
+| Feature | Needs Spotify connected? |
+|---------|--------------------------|
+| Calendar, daily songs, sharing | No |
+| Song search | No (app-only Client Credentials token) |
+| Import a **public** playlist | No |
+| Import a **private** playlist | Yes |
+| Export to a Spotify playlist | Yes |
+
+This exists because Spotify apps in development mode are limited to a handful of allowlisted
+accounts, so Spotify cannot be the sign-up path for a public app. Connecting Spotify links it
+to the signed-in Cadence account (Auth.js account linking) and stores the tokens in the
+`account` table; they are refreshed server-side when needed.
+
+An account created with Spotify before this change is preserved: signing in with Google using
+the same email address links to the existing user, calendar included.
+
 ## Troubleshooting sign-in
 
 Failed sign-ins land on `/auth-error` instead of Auth.js's built-in error page. That page
-shows an error code and a **Try again** button, so a transient failure is never a dead end.
+shows an error code and, when signed out, a **Try again with Google** button, so a transient
+failure is never a dead end.
 
-`Configuration` is Auth.js's catch-all for any unexpected server-side error. The most common
-cause used to be a missing PKCE cookie: Auth.js stores the verifier in a 15-minute cookie and
-rejects the callback without it. A slow Spotify login (for example "Continue with Facebook")
-or a login that finishes in a different browser was enough to block sign-up.
+`Configuration` is Auth.js's catch-all for any unexpected server-side error. It used to be
+caused by the Spotify PKCE cookie expiring after 15 minutes (a slow "Continue with Facebook"
+login was enough). The Spotify provider now sets `checks: []`, and Spotify is only used for
+the optional connect flow.
 
-The Spotify provider now sets `checks: []`, so sign-in no longer depends on that cookie.
-This is safe because Spotify is a confidential client — the client secret is still required
-to exchange the authorization code. The retry page remains as a fallback for genuine
-provider or network failures.
-
-Other codes: `AccessDenied` (the Spotify permission screen was declined),
-`Verification` (an expired sign-in link), and `MissingCSRF` (a stale sign-in form).
-Each failed request is also logged server-side with its code by
-`src/routes/auth-error/+page.server.ts`.
+Other codes: `AccessDenied` (permissions were declined), `Verification` (an expired sign-in
+link), and `MissingCSRF` (a stale sign-in form). Each failed request is also logged
+server-side with its code by `src/routes/auth-error/+page.server.ts`.
 
 ## License
 

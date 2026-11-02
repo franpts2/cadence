@@ -4,13 +4,23 @@ import { db } from '$lib/server/db';
 import { dailySongs, songs } from '$lib/server/db/schema';
 import { getDaysInMonth, getDateKey } from '$lib/utils/date';
 import { sql } from 'drizzle-orm';
+import { getCatalogueToken } from '$lib/server/spotify-auth';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const session = await locals.auth();
-	const accessToken = (session as any)?.accessToken;
 
-	if (!session?.user?.id || !accessToken) {
+	if (!session?.user?.id) {
 		return json({ error: 'Not authenticated' }, { status: 401 });
+	}
+
+	let accessToken: string;
+	try {
+		// Connected users can import their own private playlists; everyone else
+		// can import any public playlist through the app-only token.
+		accessToken = await getCatalogueToken(session.user.id);
+	} catch (err) {
+		console.error('[Import] Could not get a Spotify token:', err);
+		return json({ error: 'Spotify is unavailable right now' }, { status: 503 });
 	}
 
 	const { playlistUrl, importType, year, month } = await request.json();
