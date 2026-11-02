@@ -135,11 +135,4 @@ export async function getSpotifyUserToken(userId: string): Promise<string | null
 	}
 }
 
-/**
- * Token for reading catalogue data (search, playlists). Prefers the user's own
- * connection so private playlists work, then falls back to the app token so
- * everyone else can still use the app.
- */
-export async function getCatalogueToken(userId: string): Promise<string> {
-	return (await getSpotifyUserToken(userId)) ?? (await getAppAccessToken());
-}
+

@@ -4,7 +4,10 @@ import { db } from '$lib/server/db';
 import { dailySongs, songs } from '$lib/server/db/schema';
 import { getDaysInMonth, getDateKey } from '$lib/utils/date';
 import { sql } from 'drizzle-orm';
-import { getCatalogueToken } from '$lib/server/spotify-auth';
+import { getSpotifyUserToken } from '$lib/server/spotify-auth';
+
+const SPOTIFY_API_BASE = 'https://api.spotify.com/v1';
+const ITEMS_PER_PAGE = 100;
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const session = await locals.auth();
@@ -13,14 +16,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Not authenticated' }, { status: 401 });
 	}
 
-	let accessToken: string;
-	try {
-		// Connected users can import their own private playlists; everyone else
-		// can import any public playlist through the app-only token.
-		accessToken = await getCatalogueToken(session.user.id);
-	} catch (err) {
-		console.error('[Import] Could not get a Spotify token:', err);
-		return json({ error: 'Spotify is unavailable right now' }, { status: 503 });
+	// Spotify requires user authentication to read playlist tracks: the
+	// app-only (Client Credentials) token gets a 401 from /playlists/{id}/items.
+	const accessToken = await getSpotifyUserToken(session.user.id);
+
+	if (!accessToken) {
+		return json(
+			{
+				error: 'Connect your Spotify account to import playlists.',
+				code: 'SPOTIFY_NOT_CONNECTED'
+			},
+			{ status: 403 }
+		);
 	}
 
 	const { playlistUrl, importType, year, month } = await request.json();
@@ -37,53 +44,42 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
 		const authHeader = { Authorization: `Bearer ${accessToken}` };
 
-		// 2. Fetch Playlist Metadata
-		const playlistRes = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
-			headers: authHeader
-		});
+		// 2. Read the playlist's items, following Spotify's pagination.
+		//    Spotify removed the embedded tracks from the playlist object and
+		//    deprecated /tracks; /items is the current endpoint.
+		let nextUrl: string | null = `${SPOTIFY_API_BASE}/playlists/${playlistId}/items?limit=${ITEMS_PER_PAGE}`;
+		const rawItems: any[] = [];
+		const visitedUrls = new Set<string>();
 
-		if (!playlistRes.ok) {
-			const errorData = await playlistRes.json();
-			console.error('[Import] Spotify Error:', errorData);
-			return json({ error: errorData.error?.message || 'Spotify Error' }, { status: playlistRes.status });
-		}
+		while (nextUrl && !visitedUrls.has(nextUrl)) {
+			visitedUrls.add(nextUrl);
 
-		const playlistData = await playlistRes.json();
-		
-		// 3. Collect every track, following Spotify's pagination (100 items per page)
-		const firstPage = playlistData.tracks ?? playlistData.items;
-		let rawItems: any[] = [];
+			const pageRes: Response = await fetch(nextUrl, { headers: authHeader });
 
-		if (Array.isArray(firstPage)) {
-			rawItems = firstPage;
-		} else if (firstPage?.items) {
-			rawItems = [...firstPage.items];
+			if (!pageRes.ok) {
+				const errorData = await pageRes.json().catch(() => ({}));
+				console.error('[Import] Spotify error:', pageRes.status, errorData);
 
-			let nextUrl: string | null = firstPage.next ?? null;
-			const visitedUrls = new Set<string>();
-
-			while (nextUrl && !visitedUrls.has(nextUrl)) {
-				visitedUrls.add(nextUrl);
-
-				const pageRes = await fetch(nextUrl, { headers: authHeader });
-
-				if (!pageRes.ok) {
-					const errorData = await pageRes.json();
-					console.error('[Import] Spotify pagination error:', errorData);
+				if (pageRes.status === 404) {
 					return json(
-						{ error: errorData.error?.message || 'Failed to read playlist tracks' },
-						{ status: pageRes.status }
+						{ error: 'Playlist not found. If it is private, connect Spotify first.' },
+						{ status: 404 }
 					);
 				}
 
-				const page = await pageRes.json();
-				rawItems.push(...(page.items ?? []));
-				nextUrl = page.next ?? null;
+				return json(
+					{ error: errorData.error?.message || 'Failed to read playlist tracks' },
+					{ status: pageRes.status }
+				);
 			}
+
+			const page: { items?: any[]; next?: string | null } = await pageRes.json();
+			rawItems.push(...(page.items ?? []));
+			nextUrl = page.next ?? null;
 		}
 
 		const tracks = rawItems.map((item: any) => {
-			const t = item?.track || item?.item || (item?.name ? item : null);
+			const t = item?.item || item?.track || (item?.name ? item : null);
 			return t;
 		}).filter(Boolean);
 

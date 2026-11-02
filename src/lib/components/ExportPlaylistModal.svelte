@@ -125,7 +125,7 @@
 				</p>
 				<p class="mt-2">
 					You can keep using Cadence without Spotify — connecting is only needed for export
-					and private playlists.
+					and playlist import.
 				</p>
 			</Alert>
 

@@ -12,6 +12,18 @@
 	const cal = getCalendarState();
 	const spotifyConnected = $derived(page.data.spotifyConnected);
 
+	let connecting = $state(false);
+
+	async function connectSpotify() {
+		if (connecting) return;
+		connecting = true;
+		try {
+			await signIn('spotify', { redirectTo: '/calendar' });
+		} catch {
+			connecting = false;
+		}
+	}
+
 	let playlistUrl = $state('');
 	let importType = $state<'monthly' | 'yearly'>('monthly');
 	let year = $state(cal.viewDate.getFullYear());
@@ -98,19 +110,36 @@
 	</p>
 
 	{#if !spotifyConnected}
-		<p class="text-xs text-text-dim mb-6 -mt-2">
-			Only public playlists can be imported right now.
+		<div class="space-y-4">
+			<Alert title="Connect Spotify" variant="info">
+				<p>
+					Spotify only allows reading playlist tracks with your permission, so Cadence needs
+					you to connect your Spotify account before importing.
+				</p>
+				<p class="mt-2">
+					The calendar and song search keep working without it.
+				</p>
+			</Alert>
+
 			<button
 				type="button"
-				onclick={() => signIn('spotify', { redirectTo: '/calendar' })}
-				class="text-[#1DB954] hover:underline underline-offset-2"
+				onclick={connectSpotify}
+				disabled={connecting}
+				class="w-full px-4 py-3 bg-[#1DB954] hover:bg-[#1ed760] text-bg font-bold rounded-xl disabled:opacity-50 transition-[background-color,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.98] motion-reduce:active:scale-100"
 			>
-				Connect Spotify
+				{connecting ? 'Connecting…' : 'Connect Spotify'}
 			</button>
-			to import your private ones.
-		</p>
-	{/if}
 
+			<button
+				type="button"
+				onclick={() => cal.closeImport()}
+				disabled={connecting}
+				class="w-full px-4 py-2.5 border border-border text-text-muted hover:text-text hover:bg-surface-hover rounded-xl font-medium disabled:opacity-50 transition-[background-color,color,border-color,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.98] motion-reduce:active:scale-100"
+			>
+				Not now
+			</button>
+		</div>
+	{:else}
 	<form onsubmit={handleImport} class="w-full space-y-4 text-left">
 		<div class={isImporting ? 'opacity-50 pointer-events-none' : ''}>
 			<div>
@@ -181,4 +210,5 @@
 			</button>
 		</div>
 	</form>
+	{/if}
 </Modal>

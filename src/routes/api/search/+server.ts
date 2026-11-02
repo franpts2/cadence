@@ -1,5 +1,5 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import { getCatalogueToken } from '$lib/server/spotify-auth';
+import { getAppAccessToken } from '$lib/server/spotify-auth';
 
 export const GET: RequestHandler = async ({ url, locals }) => {
 	const session = await locals.auth();
@@ -15,9 +15,9 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 
 	let accessToken: string;
 	try {
-		// Users who connected Spotify search with their own token; everyone else
-		// uses the app-only token, which has no per-user restriction.
-		accessToken = await getCatalogueToken(session.user.id);
+		// Catalogue search works with the app-only token, so it needs no Spotify
+		// connection from the user.
+		accessToken = await getAppAccessToken();
 	} catch (err) {
 		console.error('Could not get a Spotify token:', err);
 		return json({ error: 'Spotify search is unavailable right now' }, { status: 503 });

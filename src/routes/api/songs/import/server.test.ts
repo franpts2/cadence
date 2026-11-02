@@ -22,13 +22,15 @@ vi.mock('$lib/server/db', () => ({
 }));
 
 vi.mock('$lib/server/spotify-auth', () => ({
-	getCatalogueToken: vi.fn(async () => 'access-token')
+	getSpotifyUserToken: vi.fn(async () => 'access-token')
 }));
 
 import { POST } from './+server';
+import { getSpotifyUserToken } from '$lib/server/spotify-auth';
 
 const PLAYLIST_ID = '37i9dQZF1DXcBWIGoYBM5M';
-const NEXT_URL = `https://api.spotify.com/v1/playlists/${PLAYLIST_ID}/tracks?offset=100&limit=100`;
+const ITEMS_URL = `https://api.spotify.com/v1/playlists/${PLAYLIST_ID}/items?limit=100`;
+const NEXT_URL = `https://api.spotify.com/v1/playlists/${PLAYLIST_ID}/items?offset=100&limit=100`;
 
 function makeTrack(index: number) {
 	return {
@@ -73,14 +75,15 @@ describe('POST /api/songs/import', () => {
 	});
 
 	it('follows Spotify pagination and imports more than 100 tracks', async () => {
-		const firstPageItems = Array.from({ length: 100 }, (_, i) => ({ track: makeTrack(i) }));
-		const secondPageItems = Array.from({ length: 74 }, (_, i) => ({ track: makeTrack(100 + i) }));
+		const firstPageItems = Array.from({ length: 100 }, (_, i) => ({ item: makeTrack(i) }));
+		const secondPageItems = Array.from({ length: 74 }, (_, i) => ({ item: makeTrack(100 + i) }));
 
 		const fetchMock = vi
 			.fn()
 			.mockResolvedValueOnce(
 				jsonResponse({
-					tracks: { items: firstPageItems, next: NEXT_URL }
+					items: firstPageItems,
+					next: NEXT_URL
 				})
 			)
 			.mockResolvedValueOnce(
@@ -103,8 +106,9 @@ describe('POST /api/songs/import', () => {
 			period: 'year'
 		});
 
-		// First request fetches metadata, second follows the `next` page.
+		// First request reads the playlist items, second follows the `next` page.
 		expect(fetchMock).toHaveBeenCalledTimes(2);
+		expect(fetchMock.mock.calls[0][0]).toBe(ITEMS_URL);
 		expect(fetchMock.mock.calls[1][0]).toBe(NEXT_URL);
 		expect(fetchMock.mock.calls[1][1]).toEqual({
 			headers: { Authorization: 'Bearer access-token' }
@@ -117,10 +121,11 @@ describe('POST /api/songs/import', () => {
 	});
 
 	it('imports a playlist that fits in a single page unchanged', async () => {
-		const items = Array.from({ length: 12 }, (_, i) => ({ track: makeTrack(i) }));
+		const items = Array.from({ length: 12 }, (_, i) => ({ item: makeTrack(i) }));
 		const fetchMock = vi.fn().mockResolvedValueOnce(
 			jsonResponse({
-				tracks: { items, next: null }
+				items,
+				next: null
 			})
 		);
 
@@ -132,5 +137,15 @@ describe('POST /api/songs/import', () => {
 		expect(response.status).toBe(200);
 		expect(body.count).toBe(12);
 		expect(fetchMock).toHaveBeenCalledTimes(1);
+	});
+
+	it('asks the user to connect Spotify when there is no connection', async () => {
+		vi.mocked(getSpotifyUserToken).mockResolvedValueOnce(null);
+
+		const response = await POST(makeEvent());
+		const body = await response.json();
+
+		expect(response.status).toBe(403);
+		expect(body.code).toBe('SPOTIFY_NOT_CONNECTED');
 	});
 });

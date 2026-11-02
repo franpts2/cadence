@@ -23,7 +23,7 @@ It's live at **[cadence.franciscapt.dev](https://cadence.franciscapt.dev)** — 
 - **Interactive Calendar:** A fluid, responsive calendar interface built with Svelte 5 Runes for seamless state management.
 - **Daily Selection:** Log your "song of the day" to build a persistent history of your listening habits.
 - **Drag & Drop:** Move songs between days on desktop and touch-drag on mobile.
-- **Playlist Import:** Bring a public Spotify playlist into a month or year in one click.
+- **Playlist Import:** Bring a Spotify playlist into a month or year in one click (connect Spotify to enable).
 - **Playlist Export:** Turn your calendar back into a private Spotify playlist (connect Spotify to enable).
 - **Shareable Months:** Share the month you're viewing as a clean 4:5 image of just the calendar.
 - **Modern Styling:** Built with Tailwind CSS v4 for a cutting-edge, performant UI.
@@ -106,7 +106,7 @@ Sign-in uses Google. Create an OAuth client:
 
 ### 3. Create a Spotify app
 
-Spotify is optional. Song search and public playlist import use an app-only token, so they work without a Spotify login. Connecting Spotify per user additionally enables private playlists and export.
+Spotify is optional. Song search uses an app-only token, so it works without a Spotify login. Connecting Spotify per user enables playlist import, private playlists, and export.
 
 1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
 2. Create an app.
@@ -256,9 +256,12 @@ user menu, the import dialog, or the export dialog:
 |---------|--------------------------|
 | Calendar, daily songs, sharing | No |
 | Song search | No (app-only Client Credentials token) |
-| Import a **public** playlist | No |
-| Import a **private** playlist | Yes |
+| Import a playlist | Yes |
 | Export to a Spotify playlist | Yes |
+
+Spotify requires user authentication to read playlist tracks (`/playlists/{id}/items`
+returns 401 for app-only tokens), so playlist import needs the connection too. Song search
+still works for everyone because the search endpoint accepts app-only tokens.
 
 This exists because Spotify apps in development mode are limited to a handful of allowlisted
 accounts, so Spotify cannot be the sign-up path for a public app. Connecting Spotify links it
