@@ -3,9 +3,6 @@
 	import Header from '$lib/components/Header.svelte';
 	import SongSearchModal from '$lib/components/SongSearchModal.svelte';
 	import SongPreviewModal from '$lib/components/song_preview/SongPreviewModal.svelte';
-	import PlaylistControls from '$lib/components/PlaylistControls.svelte';
-	import ImportPlaylistModal from '$lib/components/ImportPlaylistModal.svelte';
-	import ExportPlaylistModal from '$lib/components/ExportPlaylistModal.svelte';
 	import ShareMonthModal from '$lib/components/ShareMonthModal.svelte';
 	import MoveConfirmModal from '$lib/components/MoveConfirmModal.svelte';
 	import DeleteConfirmModal from '$lib/components/DeleteConfirmModal.svelte';
@@ -19,7 +16,6 @@
 	let { data }: { data: PageData } = $props();
 
 	const session = $derived(page.data.session);
-	const spotifyConnected = $derived(page.data.spotifyConnected);
 
 	// Initialize state with data from server
 	const cal = setCalendarState();
@@ -71,16 +67,16 @@
 		<LoadingIndicator />
 	{/if}
 
-	<Header {session} {spotifyConnected} />
+	<Header {session} />
 
-	<main class="flex-1 min-h-0 overflow-hidden flex flex-col pb-16 pointer-fine:pb-0">
+	<main class="flex-1 min-h-0 overflow-hidden flex flex-col">
 		<!-- Crawlable, screen-reader description of the page. -->
 		<section class="sr-only">
 			<h2>Cadence — your daily music journal for Spotify</h2>
 			<p>
 				Cadence turns your Spotify listening into a personal music journal. Pick one song
 				each day to build a visual calendar of your listening history, drag songs between
-				days, and import or export Spotify playlists. Track your life, one song at a time.
+				days, and share your month. Track your life, one song at a time.
 			</p>
 		</section>
 		<Calendar />
@@ -104,16 +100,10 @@
 	onDelete={() => cal.removePreviewSong()}
 />
 
-<ImportPlaylistModal />
-
-<ExportPlaylistModal />
-
 <ShareMonthModal />
 
 <MoveConfirmModal />
 
 <DeleteConfirmModal />
-
-<PlaylistControls />
 
 <Toast />

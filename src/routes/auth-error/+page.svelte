@@ -18,11 +18,11 @@
 		},
 		OAuthAccountNotLinked: {
 			title: 'This account is already linked',
-			body: 'That Spotify account is already connected to a different Cadence account.'
+			body: 'That account is already connected to a different Cadence account.'
 		},
 		OAuthCallbackError: {
-			title: "Spotify couldn't finish the connection",
-			body: 'Spotify returned an error before we could sign you in. Trying again usually fixes it.'
+			title: "Couldn't finish the connection",
+			body: 'The sign-in provider returned an error before we could sign you in. Trying again usually fixes it.'
 		},
 		MissingCSRF: {
 			title: 'Your session expired',

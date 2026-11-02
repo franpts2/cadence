@@ -22,8 +22,6 @@ export class CalendarState {
 	
 	// Modal state
 	isSearchOpen = $state(false);
-	isImportOpen = $state(false);
-	isExportOpen = $state(false);
 	isShareOpen = $state(false);
 	searchingForDate = $state<Date | null>(null);
 	previewingSong = $state<Song | null>(null);
@@ -216,22 +214,6 @@ export class CalendarState {
 	closeSearch = () => {
 		this.isSearchOpen = false;
 		this.searchingForDate = null;
-	};
-
-	openImport = () => {
-		this.isImportOpen = true;
-	};
-
-	closeImport = () => {
-		this.isImportOpen = false;
-	};
-
-	openExport = () => {
-		this.isExportOpen = true;
-	};
-
-	closeExport = () => {
-		this.isExportOpen = false;
 	};
 
 	openShare = () => {

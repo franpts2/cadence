@@ -19,8 +19,7 @@ export const SITE = {
 		'Spotify calendar',
 		'listening history',
 		'daily song',
-		'playlist import',
-		'playlist export'
+		'shareable calendar'
 	],
 	/** Locale used for Open Graph. */
 	locale: 'en_US',
@@ -56,7 +55,7 @@ export function structuredData() {
 		description: SITE.description,
 		applicationCategory: 'LifestyleApplication',
 		operatingSystem: 'Web',
-		browserRequirements: 'Requires JavaScript and a Spotify account',
+		browserRequirements: 'Requires JavaScript and a Google account',
 		isAccessibleForFree: true,
 		inLanguage: 'en',
 		author: {
@@ -72,8 +71,7 @@ export function structuredData() {
 		featureList: [
 			'Daily song of the day',
 			'Visual listening calendar',
-			'Spotify playlist import',
-			'Spotify playlist export',
+			'Song search powered by Spotify',
 			'Shareable month calendar image',
 			'Drag and drop songs between days'
 		]

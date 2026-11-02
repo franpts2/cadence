@@ -13,8 +13,6 @@ export { default as ChevronLeftIcon } from './components/icons/ChevronLeftIcon.s
 export { default as ChevronRightIcon } from './components/icons/ChevronRightIcon.svelte';
 export { default as ChevronDownIcon } from './components/icons/ChevronDownIcon.svelte';
 export { default as ChevronUpIcon } from './components/icons/ChevronUpIcon.svelte';
-export { default as ExportIcon } from './components/icons/ExportIcon.svelte';
-export { default as ImportIcon } from './components/icons/ImportIcon.svelte';
 export { default as ShareIcon } from './components/icons/ShareIcon.svelte';
 export { default as WarningIcon } from './components/icons/WarningIcon.svelte';
 export { default as InfoIcon } from './components/icons/InfoIcon.svelte';

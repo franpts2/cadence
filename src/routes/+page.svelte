@@ -9,7 +9,7 @@
 		if (signingIn) return;
 		signingIn = true;
 		try {
-			// Redirects to Spotify; on success the browser navigates away and the
+			// Redirects to Google; on success the browser navigates away and the
 			// loading state stays put. Only reset if the redirect itself failed.
 			await signIn('google', { redirectTo: '/calendar' });
 		} catch {
@@ -111,7 +111,7 @@
 		class="px-6 pb-[calc(1.5rem+var(--safe-inset-bottom))] pt-8 text-center sm:px-10"
 	>
 		<p class="text-[10px] uppercase tracking-[0.2em] text-text-subtle">
-			Powered by Spotify
+			Song data by Spotify
 		</p>
 	</footer>
 </div>

@@ -19,12 +19,10 @@ It's live at **[cadence.franciscapt.dev](https://cadence.franciscapt.dev)** — 
 
 ## Key Features
 
-- **Spotify Integration:** Real-time song search via the Spotify Web API, no Spotify login required.
+- **Spotify Integration:** Real-time song search via the Spotify Web API — no Spotify account or login required.
 - **Interactive Calendar:** A fluid, responsive calendar interface built with Svelte 5 Runes for seamless state management.
 - **Daily Selection:** Log your "song of the day" to build a persistent history of your listening habits.
 - **Drag & Drop:** Move songs between days on desktop and touch-drag on mobile.
-- **Playlist Import:** Bring a Spotify playlist into a month or year in one click (connect Spotify to enable).
-- **Playlist Export:** Turn your calendar back into a private Spotify playlist (connect Spotify to enable).
 - **Shareable Months:** Share the month you're viewing as a clean 4:5 image of just the calendar.
 - **Modern Styling:** Built with Tailwind CSS v4 for a cutting-edge, performant UI.
 - **Type-Safe Data:** Robust database schema and API validation using Drizzle ORM and Zod.
@@ -106,16 +104,16 @@ Sign-in uses Google. Create an OAuth client:
 
 ### 3. Create a Spotify app
 
-Spotify is optional. Song search uses an app-only token, so it works without a Spotify login. Connecting Spotify per user enables playlist import, private playlists, and export.
+Song search uses Spotify's app-only (Client Credentials) token. There is no Spotify OAuth
+flow and no redirect URI to configure.
 
 1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
 2. Create an app.
-3. Add these Redirect URIs:
-   - `http://localhost:5173/auth/callback/spotify`
-   - `https://cadence.franciscapt.dev/auth/callback/spotify`
-4. Copy the **Client ID** and **Client Secret**.
+3. Copy the **Client ID** and **Client Secret**.
 
-> Spotify apps in development mode can only be used by a handful of allowlisted accounts. Cadence doesn't depend on that: only the optional connect flow is affected.
+> Development-mode apps cannot authorize arbitrary Spotify users, but Cadence does not ask
+> for that: the Client Credentials token reads public catalogue data only. Development-mode
+> request quotas still apply, so heavy use may return `429` responses.
 
 ### 4. Create a Turso database
 
@@ -211,11 +209,10 @@ The production domain is `cadence.franciscapt.dev`, attached via **Workers & Pag
 |------|------|---------|--------------|
 | `CNAME` | `cadence` | `cadence-franciscapt.pages.dev` | Proxied |
 
-Add the production callback URLs to each provider:
+Add the production callback URL to the Google OAuth client:
 
 ```
 https://cadence.franciscapt.dev/auth/callback/google
-https://cadence.franciscapt.dev/auth/callback/spotify
 ```
 
 ### Previewing / deploying locally
@@ -232,7 +229,8 @@ npm run build
 npx wrangler pages deploy .svelte-kit/cloudflare --project-name cadence-franciscapt
 ```
 
-> **Note:** If an existing Spotify connection predates the playlist-modify scopes, the user must connect Spotify again to grant them.
+> **Note:** Existing Spotify connections are no longer used. Cadence only needs Google
+> sign-in and the app-only Spotify token.
 
 ## Environment Variables
 
@@ -240,7 +238,7 @@ npx wrangler pages deploy .svelte-kit/cloudflare --project-name cadence-francisc
 |----------|-------------|
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID (sign-in) |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
-| `SPOTIFY_CLIENT_ID` | Spotify app client ID (search + optional connect) |
+| `SPOTIFY_CLIENT_ID` | Spotify app client ID (app-only token for search) |
 | `SPOTIFY_CLIENT_SECRET` | Spotify app client secret |
 | `AUTH_SECRET` | Random secret for Auth.js sessions |
 | `TURSO_DATABASE_URL` | Turso database connection URL |
@@ -249,24 +247,12 @@ npx wrangler pages deploy .svelte-kit/cloudflare --project-name cadence-francisc
 
 ## Authentication model
 
-Cadence signs users in with **Google**. Spotify is an optional connection, started from the
-user menu, the import dialog, or the export dialog:
+Cadence signs users in with **Google**. That is the only OAuth flow: there is no way to
+connect a Spotify account, and no feature depends on one.
 
-| Feature | Needs Spotify connected? |
-|---------|--------------------------|
-| Calendar, daily songs, sharing | No |
-| Song search | No (app-only Client Credentials token) |
-| Import a playlist | Yes |
-| Export to a Spotify playlist | Yes |
-
-Spotify requires user authentication to read playlist tracks (`/playlists/{id}/items`
-returns 401 for app-only tokens), so playlist import needs the connection too. Song search
-still works for everyone because the search endpoint accepts app-only tokens.
-
-This exists because Spotify apps in development mode are limited to a handful of allowlisted
-accounts, so Spotify cannot be the sign-up path for a public app. Connecting Spotify links it
-to the signed-in Cadence account (Auth.js account linking) and stores the tokens in the
-`account` table; they are refreshed server-side when needed.
+Song search uses Spotify's **Client Credentials** flow — an app-only token cached per Worker
+isolate. It reads public catalogue data, so it works for every user without a Spotify login
+and is unaffected by Spotify's per-user development-mode allowlist.
 
 An account created with Spotify before this change is preserved: signing in with Google using
 the same email address links to the existing user, calendar included.
@@ -277,14 +263,12 @@ Failed sign-ins land on `/auth-error` instead of Auth.js's built-in error page. 
 shows an error code and, when signed out, a **Try again with Google** button, so a transient
 failure is never a dead end.
 
-`Configuration` is Auth.js's catch-all for any unexpected server-side error. It used to be
-caused by the Spotify PKCE cookie expiring after 15 minutes (a slow "Continue with Facebook"
-login was enough). The Spotify provider now sets `checks: []`, and Spotify is only used for
-the optional connect flow.
+`Configuration` is Auth.js's catch-all for any unexpected server-side error — check the
+server-side log emitted by `src/routes/auth-error/+page.server.ts` for the code the user hit.
 
 Other codes: `AccessDenied` (permissions were declined), `Verification` (an expired sign-in
-link), and `MissingCSRF` (a stale sign-in form). Each failed request is also logged
-server-side with its code by `src/routes/auth-error/+page.server.ts`.
+link), `OAuthAccountNotLinked` (that Google account is attached to another Cadence user), and
+`MissingCSRF` (a stale sign-in form).
 
 ## License
 
