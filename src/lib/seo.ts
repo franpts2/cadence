@@ -12,7 +12,7 @@ export const SITE = {
 	title: 'Cadence',
 	tagline: 'Track your life, one song at a time',
 	description:
-		'Cadence turns your Spotify listening into a personal music journal. Save a song of the day and build a calendar of your life in music.',
+		'Cadence is a daily music journal powered by Spotify search. Save a song of the day and build a calendar of your life in music.',
 	keywords: [
 		'music journal',
 		'song of the day',
@@ -24,7 +24,7 @@ export const SITE = {
 	/** Locale used for Open Graph. */
 	locale: 'en_US',
 	ogImage: '/og.png',
-	ogImageAlt: 'Cadence — a song each day. A daily music journal for Spotify.',
+	ogImageAlt: 'Cadence — a song each day. A daily music journal powered by Spotify search.',
 	ogImageWidth: 1200,
 	ogImageHeight: 630,
 	author: 'franciscapt',
@@ -50,7 +50,7 @@ export function structuredData() {
 		'@context': 'https://schema.org',
 		'@type': 'WebApplication',
 		name: SITE.name,
-		alternateName: 'Cadence — Spotify music journal',
+		alternateName: 'Cadence — daily music journal',
 		url: absoluteUrl('/'),
 		description: SITE.description,
 		applicationCategory: 'LifestyleApplication',

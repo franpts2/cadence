@@ -72,11 +72,11 @@
 	<main class="flex-1 min-h-0 overflow-hidden flex flex-col">
 		<!-- Crawlable, screen-reader description of the page. -->
 		<section class="sr-only">
-			<h2>Cadence — your daily music journal for Spotify</h2>
+			<h2>Cadence — your daily music journal</h2>
 			<p>
-				Cadence turns your Spotify listening into a personal music journal. Pick one song
-				each day to build a visual calendar of your listening history, drag songs between
-				days, and share your month. Track your life, one song at a time.
+				Cadence is a daily music journal. Pick one song each day to build a visual calendar of
+				your listening history, drag songs between days, and share your month. Track your life,
+				one song at a time.
 			</p>
 		</section>
 		<Calendar />

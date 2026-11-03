@@ -13,13 +13,16 @@
 
 ## About
 
-Cadence is a personal music journal that integrates with Spotify to help you track your life through songs. By selecting one track each day, you build a visual and interactive calendar of your musical journey, powered by Svelte 5's modern reactive primitives.
+Cadence is a personal music journal. Pick one track each day and build a visual, interactive
+calendar of your musical journey, powered by Svelte 5's modern reactive primitives. Song
+search is powered by Spotify's public catalogue — you never sign in to Spotify or connect an
+account, and Cadence never reads your playlists, liked songs, or Spotify profile.
 
-It's live at **[cadence.franciscapt.dev](https://cadence.franciscapt.dev)** — sign in and start picking a song a day.
+It's live at **[cadence.franciscapt.dev](https://cadence.franciscapt.dev)** — sign in with Google and start picking a song a day.
 
 ## Key Features
 
-- **Spotify Integration:** Real-time song search via the Spotify Web API — no Spotify account or login required.
+- **Spotify-powered search:** Real-time song search via the Spotify Web API using an app-only token — no Spotify account or login required.
 - **Interactive Calendar:** A fluid, responsive calendar interface built with Svelte 5 Runes for seamless state management.
 - **Daily Selection:** Log your "song of the day" to build a persistent history of your listening habits.
 - **Drag & Drop:** Move songs between days on desktop and touch-drag on mobile.
@@ -50,6 +53,9 @@ It's live at **[cadence.franciscapt.dev](https://cadence.franciscapt.dev)** — 
 │       Turso (LibSQL)         │
 └──────────────────────────────┘
 ```
+
+External services: **Spotify Web API** for public catalogue search, called server-side with
+an app-only token. There is no Spotify OAuth callback and no user-level Spotify scope.
 
 ## Folder Structure
 
@@ -202,6 +208,8 @@ The live site is served by a Pages project named `cadence-franciscapt`, connecte
 
 Add every variable from the [Environment Variables](#environment-variables) table to the Pages project (Production **and** Preview). The app reads them through `$env/static/private`, so they must be present at build time.
 
+The build runs on Node 22 via `.nvmrc`. If the project has a `NODE_VERSION` environment variable set to an older release, remove it or set it to `22` — it overrides `.nvmrc` and will fail `npm ci`.
+
 ### Custom domain
 
 The production domain is `cadence.franciscapt.dev`, attached via **Workers & Pages → cadence-franciscapt → Custom domains**. When `franciscapt.dev` is a zone in the same Cloudflare account, the required proxied CNAME is created automatically. If it is not, add:
@@ -230,9 +238,6 @@ npm run build
 npx wrangler pages deploy .svelte-kit/cloudflare --project-name cadence-franciscapt
 ```
 
-> **Note:** Existing Spotify connections are no longer used. Cadence only needs Google
-> sign-in and the app-only Spotify token.
-
 ## Environment Variables
 
 | Variable | Description |
@@ -253,10 +258,13 @@ connect a Spotify account, and no feature depends on one.
 
 Song search uses Spotify's **Client Credentials** flow — an app-only token cached per Worker
 isolate. It reads public catalogue data, so it works for every user without a Spotify login
-and is unaffected by Spotify's per-user development-mode allowlist.
+and is unaffected by Spotify's per-user development-mode allowlist. Cadence never requests
+user-level Spotify scopes, so it cannot read playlists, liked songs, or the Spotify profile.
 
-An account created with Spotify before this change is preserved: signing in with Google using
-the same email address links to the existing user, calendar included.
+Accounts created before the Google-only migration are preserved: sign in with Google using
+the same email address and the calendar is linked to the existing user instead of duplicated.
+Existing Spotify account rows are unused and can be deleted
+(`DELETE FROM account WHERE provider = 'spotify';`).
 
 ## Troubleshooting sign-in
 
