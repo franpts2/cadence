@@ -33,7 +33,7 @@ It's live at **[cadence.franciscapt.dev](https://cadence.franciscapt.dev)** — 
 - **Framework:** SvelteKit (Svelte 5 Runes)
 - **Styling:** Tailwind CSS v4
 - **Database:** Turso (LibSQL) + Drizzle ORM
-- **Auth:** Auth.js (Spotify Provider)
+- **Auth:** Auth.js (Google OAuth)
 - **Language:** TypeScript
 - **Testing:** Vitest + Svelte Testing Library
 
@@ -77,7 +77,8 @@ cadence/
 ### Prerequisites
 
 - Node.js 20+
-- A [Spotify Developer](https://developer.spotify.com/dashboard) account
+- A [Google Cloud](https://console.cloud.google.com/) project (OAuth client for sign-in)
+- A [Spotify Developer](https://developer.spotify.com/dashboard) account (app-only token for search)
 - A [Turso](https://turso.tech) account (free tier is enough)
 
 ### 1. Clone and install
