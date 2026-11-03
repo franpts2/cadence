@@ -76,7 +76,7 @@ cadence/
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 22.13+ (see `.nvmrc`)
 - A [Google Cloud](https://console.cloud.google.com/) project (OAuth client for sign-in)
 - A [Spotify Developer](https://developer.spotify.com/dashboard) account (app-only token for search)
 - A [Turso](https://turso.tech) account (free tier is enough)
