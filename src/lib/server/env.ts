@@ -2,6 +2,8 @@ import { z } from 'zod';
 import * as env from '$env/static/private';
 
 const envSchema = z.object({
+	GOOGLE_CLIENT_ID: z.string().min(1, "Missing GOOGLE_CLIENT_ID"),
+	GOOGLE_CLIENT_SECRET: z.string().min(1, "Missing GOOGLE_CLIENT_SECRET"),
 	SPOTIFY_CLIENT_ID: z.string().min(1, "Missing SPOTIFY_CLIENT_ID"),
 	SPOTIFY_CLIENT_SECRET: z.string().min(1, "Missing SPOTIFY_CLIENT_SECRET"),
 	AUTH_SECRET: z.string().min(1, "AUTH_SECRET is required"),

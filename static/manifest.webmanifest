@@ -1,7 +1,7 @@
 {
 	"name": "Cadence — A daily music journal",
 	"short_name": "Cadence",
-	"description": "Cadence turns your Spotify listening into a personal music journal. Save a song of the day and build a calendar of your life in music.",
+	"description": "Cadence is a daily music journal powered by Spotify search. Save a song of the day and build a calendar of your life in music.",
 	"start_url": "/",
 	"scope": "/",
 	"display": "standalone",

@@ -25,10 +25,10 @@
 		</button>
 	{:else}
 		<button
-			onclick={() => signIn('spotify')}
-			class="px-4 py-1.5 md:px-6 md:py-2 bg-[#1DB954] hover:bg-[#1ed760] text-bg font-bold rounded-full transition-colors text-xs md:text-sm"
+			onclick={() => signIn('google')}
+			class="px-4 py-1.5 md:px-6 md:py-2 bg-text hover:bg-white text-bg font-bold rounded-full transition-colors text-xs md:text-sm"
 		>
-			Log in to Spotify
+			Log in
 		</button>
 	{/if}
 </div>

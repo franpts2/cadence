@@ -22,8 +22,6 @@ export class CalendarState {
 	
 	// Modal state
 	isSearchOpen = $state(false);
-	isImportOpen = $state(false);
-	isExportOpen = $state(false);
 	isShareOpen = $state(false);
 	searchingForDate = $state<Date | null>(null);
 	previewingSong = $state<Song | null>(null);
@@ -218,22 +216,6 @@ export class CalendarState {
 		this.searchingForDate = null;
 	};
 
-	openImport = () => {
-		this.isImportOpen = true;
-	};
-
-	closeImport = () => {
-		this.isImportOpen = false;
-	};
-
-	openExport = () => {
-		this.isExportOpen = true;
-	};
-
-	closeExport = () => {
-		this.isExportOpen = false;
-	};
-
 	openShare = () => {
 		this.isShareOpen = true;
 	};
@@ -275,7 +257,7 @@ export class CalendarState {
 				if (silent) return;
 				const data = await response.json();
 				if (data.code === 'AUTH_EXPIRED') {
-					this.addToast('Spotify session expired. Please log in again.', 'error');
+					this.addToast('Your session expired. Please log in again.', 'error');
 				} else {
 					this.addToast('Failed to load songs', 'error');
 				}

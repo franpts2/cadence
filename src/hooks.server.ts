@@ -1,58 +1,18 @@
 import "./lib/server/env";
 import { SvelteKitAuth } from "@auth/sveltekit";
-import Spotify from "@auth/sveltekit/providers/spotify";
-import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "$env/static/private";
+import Google from "@auth/sveltekit/providers/google";
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from "$env/static/private";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { db } from "$lib/server/db";
 import { accounts, sessions, users } from "$lib/server/db/schema";
-import { SPOTIFY_SCOPES } from "$lib/server/spotify";
-
-/**
- * Refreshes an expired Spotify access token using the refresh token.
- */
-async function refreshAccessToken(token: any) {
-  try {
-    const response = await fetch("https://accounts.spotify.com/api/token", {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      method: "POST",
-      body: new URLSearchParams({
-        client_id: SPOTIFY_CLIENT_ID,
-        client_secret: SPOTIFY_CLIENT_SECRET,
-        grant_type: "refresh_token",
-        refresh_token: token.refreshToken,
-      }),
-    });
-
-    const refreshedTokens = await response.json();
-
-    if (!response.ok) {
-      throw refreshedTokens;
-    }
-
-    return {
-      ...token,
-      accessToken: refreshedTokens.access_token,
-      accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
-      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
-      scope: refreshedTokens.scope ?? token.scope,
-    };
-  } catch (error) {
-    console.error("Error refreshing access token", error);
-    return {
-      ...token,
-      error: "RefreshAccessTokenError",
-    };
-  }
-}
 
 export const { handle, signIn, signOut } = SvelteKitAuth({
   // Cloudflare Pages puts the app behind Cloudflare's proxy, so the forwarded host
   // is the canonical host. This is required on Workers, where process.env is not
   // available for Auth.js to read AUTH_TRUST_HOST at runtime.
   trustHost: true,
-  // Auth.js's built-in error page is a dead end: it has no way back and says
-  // "Server error" even for recoverable failures like an expired PKCE cookie.
-  // Send users to our own page, which explains what happened and offers a retry.
+  // Auth.js's built-in error page is a dead end: it has no way back. Send users
+  // to our own page, which explains what happened and offers a retry.
   pages: {
     error: "/auth-error",
   },
@@ -65,53 +25,29 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
     strategy: "jwt",
   },
   providers: [
-    Spotify({
-      clientId: SPOTIFY_CLIENT_ID,
-      clientSecret: SPOTIFY_CLIENT_SECRET,
-      // Auth.js keeps the PKCE verifier in a 15-minute cookie and refuses the
-      // callback when it is gone. Signing into Spotify can easily take longer
-      // than that (e.g. "Continue with Facebook"), or finish in another browser,
-      // and the user then lands on an unrecoverable "Server error" page.
-      // Spotify is a confidential client — the client secret is required to
-      // exchange the code — so PKCE adds little here and breaks real sign-ins.
-      checks: [],
-      authorization: `https://accounts.spotify.com/authorize?scope=${SPOTIFY_SCOPES.join('+')}&show_dialog=true`
+    Google({
+      clientId: GOOGLE_CLIENT_ID,
+      clientSecret: GOOGLE_CLIENT_SECRET,
+      // Google verifies email ownership, so an account that already exists with
+      // the same address (e.g. one created before Google sign-in) is linked
+      // instead of duplicated. This keeps existing calendars intact.
+      allowDangerousEmailAccountLinking: true,
     }),
   ],
   callbacks: {
-    async jwt({ token, account, user }) {
-      if (account && user) {
-        return {
-          accessToken: account.access_token,
-          accessTokenExpires: account.expires_at ? account.expires_at * 1000 : Date.now() + 3600 * 1000,
-          refreshToken: account.refresh_token,
-          scope: account.scope,
-          user,
-        };
+    async jwt({ token, user }) {
+      if (user?.id) {
+        token.sub = user.id;
       }
-
-      if (Date.now() < (token.accessTokenExpires as number)) {
-        return token;
-      }
-
-      return refreshAccessToken(token);
+      return token;
     },
     async session({ session, token }) {
-      if (token.accessToken) {
-        session.accessToken = token.accessToken as string;
+      const userId =
+        (token.sub as string | undefined) ??
+        (token as { user?: { id?: string } }).user?.id;
+      if (session.user && userId) {
+        session.user.id = userId;
       }
-      if (token.scope) {
-        session.scope = token.scope as string;
-      }
-      if (token.user) {
-        const u = token.user as any;
-        session.user = {
-          ...session.user,
-          ...u,
-          id: u.id
-        };
-      }
-      (session as any).error = token.error;
       return session;
     }
   }

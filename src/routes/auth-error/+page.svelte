@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { signIn } from '@auth/sveltekit/client';
-	import SpotifyIcon from '$lib/components/icons/SpotifyIcon.svelte';
+	import { page } from '$app/state';
+	import GoogleIcon from '$lib/components/icons/GoogleIcon.svelte';
 
 	let { data } = $props();
 	let signingIn = $state(false);
+	const signedIn = $derived(Boolean(page.data.session?.user));
 
 	const messages: Record<string, { title: string; body: string }> = {
 		AccessDenied: {
-			title: 'Spotify access was denied',
-			body: 'Cadence needs permission to read your Spotify profile and playlists. You can try again and accept the permissions on the Spotify screen.'
+			title: 'Access was denied',
+			body: 'Cadence needs permission to connect to your account. You can try again and accept the permissions on the next screen.'
 		},
 		Verification: {
 			title: 'That link has expired',
@@ -16,11 +18,11 @@
 		},
 		OAuthAccountNotLinked: {
 			title: 'This account is already linked',
-			body: 'That Spotify account is already connected to a different Cadence account.'
+			body: 'That account is already connected to a different Cadence account.'
 		},
 		OAuthCallbackError: {
-			title: "Spotify couldn't finish the connection",
-			body: 'Spotify returned an error before we could sign you in. Trying again usually fixes it.'
+			title: "Couldn't finish the connection",
+			body: 'The sign-in provider returned an error before we could sign you in. Trying again usually fixes it.'
 		},
 		MissingCSRF: {
 			title: 'Your session expired',
@@ -31,7 +33,7 @@
 	const message = $derived(
 		messages[data.error] ?? {
 			title: "Sign-in didn't finish",
-			body: "We couldn't complete the connection to Spotify. This usually happens when the Spotify login opens in a different browser or app than the one you started in — for example inside Instagram or WhatsApp — or when the sign-in page stays open for more than 15 minutes."
+			body: 'Something interrupted the flow before we could finish. This usually happens when the login opens in a different browser or app than the one you started in — for example inside Instagram or WhatsApp — or when the page stays open for a long time. Trying again usually fixes it.'
 		}
 	);
 
@@ -39,7 +41,7 @@
 		if (signingIn) return;
 		signingIn = true;
 		try {
-			await signIn('spotify', { redirectTo: '/calendar' });
+			await signIn('google', { redirectTo: '/calendar' });
 		} catch {
 			signingIn = false;
 		}
@@ -66,24 +68,33 @@
 		</p>
 
 		<div class="mt-9 flex flex-col items-center gap-4">
-			<button
-				type="button"
-				onclick={retry}
-				disabled={signingIn}
-				aria-busy={signingIn}
-				class="inline-flex items-center gap-2.5 rounded-full bg-[#1DB954] px-6 py-3 text-sm font-semibold text-bg hover:bg-[#1ed760] disabled:cursor-default disabled:opacity-80"
-			>
-				{#if signingIn}
-					<span
-						class="h-4 w-4 animate-spin rounded-full border-2 border-bg/40 border-t-bg"
-						aria-hidden="true"
-					></span>
-					Connecting…
-				{:else}
-					<SpotifyIcon class="h-4 w-4" />
-					Try again with Spotify
-				{/if}
-			</button>
+			{#if signedIn}
+				<a
+					href="/calendar"
+					class="inline-flex items-center gap-2.5 rounded-full bg-text px-6 py-3 text-sm font-semibold text-bg hover:bg-white"
+				>
+					Back to calendar
+				</a>
+			{:else}
+				<button
+					type="button"
+					onclick={retry}
+					disabled={signingIn}
+					aria-busy={signingIn}
+					class="inline-flex items-center gap-2.5 rounded-full bg-text px-6 py-3 text-sm font-semibold text-bg hover:bg-white disabled:cursor-default disabled:opacity-80"
+				>
+					{#if signingIn}
+						<span
+							class="h-4 w-4 animate-spin rounded-full border-2 border-bg/40 border-t-bg"
+							aria-hidden="true"
+						></span>
+						Connecting…
+					{:else}
+						<GoogleIcon class="h-4 w-4" />
+						Try again with Google
+					{/if}
+				</button>
+			{/if}
 
 			<a href="/" class="text-xs text-text-dim underline-offset-4 hover:text-text-muted hover:underline">
 				Back to home

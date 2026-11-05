@@ -12,20 +12,19 @@ export const SITE = {
 	title: 'Cadence',
 	tagline: 'Track your life, one song at a time',
 	description:
-		'Cadence turns your Spotify listening into a personal music journal. Save a song of the day and build a calendar of your life in music.',
+		'Cadence is a daily music journal powered by Spotify search. Save a song of the day and build a calendar of your life in music.',
 	keywords: [
 		'music journal',
 		'song of the day',
 		'Spotify calendar',
 		'listening history',
 		'daily song',
-		'playlist import',
-		'playlist export'
+		'shareable calendar'
 	],
 	/** Locale used for Open Graph. */
 	locale: 'en_US',
 	ogImage: '/og.png',
-	ogImageAlt: 'Cadence — a song each day. A daily music journal for Spotify.',
+	ogImageAlt: 'Cadence — a song each day. A daily music journal powered by Spotify search.',
 	ogImageWidth: 1200,
 	ogImageHeight: 630,
 	author: 'franciscapt',
@@ -51,12 +50,12 @@ export function structuredData() {
 		'@context': 'https://schema.org',
 		'@type': 'WebApplication',
 		name: SITE.name,
-		alternateName: 'Cadence — Spotify music journal',
+		alternateName: 'Cadence — daily music journal',
 		url: absoluteUrl('/'),
 		description: SITE.description,
 		applicationCategory: 'LifestyleApplication',
 		operatingSystem: 'Web',
-		browserRequirements: 'Requires JavaScript and a Spotify account',
+		browserRequirements: 'Requires JavaScript and a Google account',
 		isAccessibleForFree: true,
 		inLanguage: 'en',
 		author: {
@@ -72,8 +71,7 @@ export function structuredData() {
 		featureList: [
 			'Daily song of the day',
 			'Visual listening calendar',
-			'Spotify playlist import',
-			'Spotify playlist export',
+			'Song search powered by Spotify',
 			'Shareable month calendar image',
 			'Drag and drop songs between days'
 		]
