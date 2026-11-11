@@ -71,8 +71,6 @@
 					Continue with Google
 				{/if}
 			</button>
-
-			<p class="text-[11px] text-text-subtle">Free to use — no Spotify login needed</p>
 		</div>
 
 		<!-- Quiet miniature of the calendar -->
