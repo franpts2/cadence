@@ -58,7 +58,7 @@
 	tabindex="0"
 	aria-current={isToday ? 'date' : undefined}
 	aria-selected={isSelected}
-	class="relative group border-b border-r border-border-dim text-left p-0.5 sm:p-1.5 md:p-2 transition-colors h-full w-full min-h-0 overflow-hidden touch-manipulation flex flex-col items-center justify-center focus:outline-none hover:z-50
+	class="relative group border-b border-r border-border-dim text-left p-0.5 sm:p-1.5 md:p-2 transition-colors h-full w-full min-h-0 overflow-hidden touch-manipulation flex flex-col items-center justify-center focus:outline-none hover:z-50 active:bg-surface/60
 		{isSelected ? 'bg-surface/50' : 'hover:bg-surface/30'}
 		{isDraggingOver || isTouchHovered ? 'bg-accent/10 ring-2 ring-inset ring-accent/30' : ''}"
 >
@@ -66,7 +66,7 @@
 	     room for a separate row. The opaque pill keeps it readable on any cover;
 	     a backdrop blur here would mean 30+ blurred layers on a phone. -->
 	<div class="absolute top-0.5 left-0.5 right-0.5 z-20 flex items-start pointer-events-none md:top-1.5 md:left-1.5 md:right-3">
-		<span class="inline-flex items-center justify-center min-w-5 h-5 px-1 sm:min-w-6 sm:h-6 sm:px-0 text-[11px] sm:text-xs rounded-full transition-[transform,color,background-color] duration-150 ease-out
+		<span class="inline-flex items-center justify-center min-w-5 h-5 px-1 sm:min-w-6 sm:h-6 sm:px-0 text-[11px] sm:text-xs rounded-full transition-[transform,color,background-color] duration-150 ease-out select-none [-webkit-touch-callout:none]
 			{isToday ? 'bg-text text-bg font-bold' : 'text-text-muted bg-bg/80 sm:bg-transparent group-hover:text-text'}
 			{isSelected && !isToday ? 'ring-1 ring-border-subtle text-text' : ''}">
 			{day}
