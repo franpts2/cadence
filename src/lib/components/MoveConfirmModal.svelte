@@ -21,13 +21,13 @@
 		<div class="flex w-full gap-3 mt-4">
 			<button
 				onclick={() => cal.cancelMove()}
-				class="flex-1 px-4 py-2.5 rounded-xl border border-border text-text-muted hover:text-text hover:bg-surface-hover transition-colors font-medium text-sm"
+				class="flex-1 min-h-11 px-4 py-2.5 rounded-xl border border-border text-text-muted hover:text-text hover:bg-surface-hover transition-colors font-medium text-sm"
 			>
 				Cancel
 			</button>
 			<button
 				onclick={() => cal.confirmMove()}
-				class="flex-1 px-4 py-2.5 rounded-xl text-bg bg-red-500 hover:bg-red-700 transition-colors font-bold text-sm shadow-lg"
+				class="flex-1 min-h-11 px-4 py-2.5 rounded-xl text-bg bg-red-500 hover:bg-red-700 transition-colors font-bold text-sm shadow-lg"
 			>
 				Override
 			</button>

@@ -19,14 +19,14 @@
 		</div>
 		<button
 			onclick={() => signOut()}
-			class="px-3 py-1.5 md:px-4 md:py-2 bg-surface hover:bg-surface-hover border border-border text-accent-hover hover:text-text rounded-md transition-colors text-xs md:text-sm font-medium"
+			class="inline-flex items-center justify-center min-h-11 px-3 md:px-4 bg-surface hover:bg-surface-hover border border-border text-accent-hover hover:text-text rounded-md transition-colors text-xs md:text-sm font-medium"
 		>
 			Log out
 		</button>
 	{:else}
 		<button
 			onclick={() => signIn('google')}
-			class="px-4 py-1.5 md:px-6 md:py-2 bg-text hover:bg-white text-bg font-bold rounded-full transition-colors text-xs md:text-sm"
+			class="inline-flex items-center justify-center min-h-11 px-4 md:px-6 bg-text hover:bg-white text-bg font-bold rounded-full transition-colors text-xs md:text-sm"
 		>
 			Log in
 		</button>
