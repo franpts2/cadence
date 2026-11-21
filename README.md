@@ -1,15 +1,20 @@
 # Cadence
 
-<div align="left">
-	<img src="https://img.shields.io/badge/Svelte_5-FF3E00?style=for-the-badge&logo=svelte&logoColor=white" alt="Svelte 5"/>
-	<img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/>
-	<img src="https://img.shields.io/badge/Tailwind_CSS_v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS"/>
-	<img src="https://img.shields.io/badge/SvelteKit-FF3E00?style=for-the-badge&logo=svelte&logoColor=white" alt="SvelteKit"/>
-	<img src="https://img.shields.io/badge/Drizzle_ORM-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black" alt="Drizzle ORM"/>
-	<img src="https://img.shields.io/badge/Turso-000000?style=for-the-badge&logo=turso&logoColor=00FFA3" alt="Turso"/>
-	<img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite"/>
-	<a href="https://cadence.franciscapt.dev"><img src="https://img.shields.io/badge/live-cadence.franciscapt.dev-00C853?style=for-the-badge&logo=cloudflare&logoColor=white" alt="Live site"/></a>
-</div>
+A personal music journal: pick one track a day and build a visual calendar of your listening history.
+
+<p align="left">
+  <a href="https://cadence.franciscapt.dev"><img src="https://img.shields.io/badge/live-cadence.franciscapt.dev-FF3D81?style=flat-square" alt="Live site"></a>
+  <a href="https://github.com/franpts2/cadence/actions/workflows/ci.yml"><img src="https://github.com/franpts2/cadence/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/MIT-green?style=flat-square" alt="MIT license"></a>
+</p>
+
+<p align="left">
+  <img src="https://img.shields.io/badge/SvelteKit-FF3E00?style=for-the-badge&logo=Svelte&logoColor=white" alt="SvelteKit">
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
+  <img src="https://img.shields.io/badge/drizzle-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black" alt="Drizzle">
+  <img src="https://img.shields.io/badge/Sqlite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite">
+</p>
 
 ## About
 
@@ -20,7 +25,11 @@ account, and Cadence never reads your playlists, liked songs, or Spotify profile
 
 It's live at **[cadence.franciscapt.dev](https://cadence.franciscapt.dev)** — sign in with Google and start picking a song a day.
 
-## Key Features
+## Screenshot
+
+![Cadence landing page](docs/screenshots/home.jpg)
+
+## Features
 
 - **Spotify-powered search:** Real-time song search via the Spotify Web API using an app-only token — no Spotify account or login required.
 - **Interactive Calendar:** A fluid, responsive calendar interface built with Svelte 5 Runes for seamless state management.
@@ -31,16 +40,7 @@ It's live at **[cadence.franciscapt.dev](https://cadence.franciscapt.dev)** — 
 - **Type-Safe Data:** Robust database schema and API validation using Drizzle ORM and Zod.
 - **Edge-Ready Database:** Powered by Turso for low-latency data access at the edge.
 
-## Tech Stack
-
-- **Framework:** SvelteKit (Svelte 5 Runes)
-- **Styling:** Tailwind CSS v4
-- **Database:** Turso (LibSQL) + Drizzle ORM
-- **Auth:** Auth.js (Google OAuth)
-- **Language:** TypeScript
-- **Testing:** Vitest + Svelte Testing Library
-
-## System Architecture
+## How It Works
 
 ```
 ┌──────────────────────────────┐
@@ -57,7 +57,7 @@ It's live at **[cadence.franciscapt.dev](https://cadence.franciscapt.dev)** — 
 External services: **Spotify Web API** for public catalogue search, called server-side with
 an app-only token. There is no Spotify OAuth callback and no user-level Spotify scope.
 
-## Folder Structure
+## Project Structure
 
 ```
 cadence/
@@ -78,7 +78,7 @@ cadence/
 └── vite.config.ts           # Vite build tool configuration
 ```
 
-## Getting Started
+## Quick Start
 
 ### Prerequisites
 
@@ -285,4 +285,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-_Cadence - Track your life, one song at a time._
+_Cadence — track your life, one song at a time._
