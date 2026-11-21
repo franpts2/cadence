@@ -36,6 +36,9 @@ export function monthSwipe(node: HTMLElement, params: MonthSwipeParams) {
 	let moved = false;
 	let animating = false;
 	let suppressClick = false;
+	let wheelAccum = 0;
+	let wheelResetTimer: ReturnType<typeof setTimeout> | null = null;
+	let wheelLockedUntil = 0;
 
 	function wait(ms: number) {
 		return new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -201,6 +204,30 @@ export function monthSwipe(node: HTMLElement, params: MonthSwipeParams) {
 		animating = false;
 	}
 
+	// Trackpads send horizontal wheel deltas rather than pointer drags. Treat a
+	// deliberate horizontal scroll as a month change, with enough accumulation
+	// that a diagonal vertical scroll never triggers it.
+	function handleWheel(e: WheelEvent) {
+		if (e.ctrlKey || animating || opts.isBlocked?.()) return;
+		if (Math.abs(e.deltaX) < 4 || Math.abs(e.deltaX) <= Math.abs(e.deltaY) * 1.2) return;
+
+		const now = performance.now();
+		if (now < wheelLockedUntil) return;
+
+		e.preventDefault();
+		wheelAccum += e.deltaX;
+
+		if (wheelResetTimer) clearTimeout(wheelResetTimer);
+		wheelResetTimer = setTimeout(() => (wheelAccum = 0), 200);
+
+		if (Math.abs(wheelAccum) < 48) return;
+
+		const direction = wheelAccum > 0 ? 'next' : 'prev';
+		wheelAccum = 0;
+		wheelLockedUntil = now + 500;
+		void changeMonth(direction);
+	}
+
 	function handleClickCapture(e: MouseEvent) {
 		if (!suppressClick) return;
 		e.preventDefault();
@@ -216,6 +243,7 @@ export function monthSwipe(node: HTMLElement, params: MonthSwipeParams) {
 	node.addEventListener('pointerup', handlePointerUp);
 	node.addEventListener('pointercancel', handlePointerCancel);
 	node.addEventListener('click', handleClickCapture, true);
+	node.addEventListener('wheel', handleWheel, { passive: false });
 
 	return {
 		update(next: MonthSwipeParams) {
@@ -227,7 +255,9 @@ export function monthSwipe(node: HTMLElement, params: MonthSwipeParams) {
 			node.removeEventListener('pointerup', handlePointerUp);
 			node.removeEventListener('pointercancel', handlePointerCancel);
 			node.removeEventListener('click', handleClickCapture, true);
+			node.removeEventListener('wheel', handleWheel);
 			node.style.touchAction = previousTouchAction;
+			if (wheelResetTimer) clearTimeout(wheelResetTimer);
 		}
 	};
 }
