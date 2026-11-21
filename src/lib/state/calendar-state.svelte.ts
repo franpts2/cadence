@@ -104,16 +104,61 @@ export class CalendarState {
 	};
 
 	// Toast Logic
+	private readonly TOAST_DURATION = 5000;
+	private toastTimers = new Map<
+		string,
+		{ timeout: ReturnType<typeof setTimeout> | null; deadline: number; remaining: number }
+	>();
+
 	addToast = (message: string, type: ToastType = 'info') => {
 		// Prevent duplicate toasts with the same message
 		if (this.toasts.some(t => t.message === message)) return;
 
 		const id = crypto.randomUUID();
 		this.toasts.push({ id, message, type });
-		setTimeout(() => this.removeToast(id), 5000);
+		this.scheduleToastDismiss(id, this.TOAST_DURATION);
+	};
+
+	private scheduleToastDismiss = (id: string, duration: number) => {
+		const existing = this.toastTimers.get(id);
+		if (existing?.timeout) clearTimeout(existing.timeout);
+
+		const entry = {
+			timeout: null as ReturnType<typeof setTimeout> | null,
+			deadline: Date.now() + duration,
+			remaining: duration
+		};
+
+		entry.timeout = setTimeout(() => this.removeToast(id), duration);
+		this.toastTimers.set(id, entry);
+	};
+
+	// Touching a toast pauses its timer so it doesn't vanish mid-swipe.
+	pauseToast = (id: string) => {
+		const entry = this.toastTimers.get(id);
+		if (!entry || !entry.timeout) return;
+
+		clearTimeout(entry.timeout);
+		entry.timeout = null;
+		entry.remaining = Math.max(0, entry.deadline - Date.now());
+	};
+
+	resumeToast = (id: string) => {
+		const entry = this.toastTimers.get(id);
+		if (!entry || entry.timeout) return;
+
+		if (entry.remaining <= 0) {
+			this.removeToast(id);
+			return;
+		}
+
+		this.scheduleToastDismiss(id, entry.remaining);
 	};
 
 	removeToast = (id: string) => {
+		const entry = this.toastTimers.get(id);
+		if (entry?.timeout) clearTimeout(entry.timeout);
+		this.toastTimers.delete(id);
 		this.toasts = this.toasts.filter(t => t.id !== id);
 	};
 
