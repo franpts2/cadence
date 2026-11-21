@@ -263,6 +263,7 @@
 	<button 
 		use:touchDraggable
 		onclick={handleClick}
+		oncontextmenu={(e) => e.preventDefault()}
 		ondragstart={handleDragStart}
 		ondragend={handleDragEnd}
 		draggable="true"
@@ -277,7 +278,7 @@
 					loading="lazy"
 					decoding="async"
 					fetchpriority="low"
-					class="w-full h-full object-cover select-none"
+					class="w-full h-full object-cover select-none pointer-events-none [-webkit-touch-callout:none] [-webkit-user-drag:none]"
 				/>
 			</div>
 		{/if}
