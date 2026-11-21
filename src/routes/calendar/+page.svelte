@@ -11,6 +11,7 @@
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { setCalendarState } from '$lib';
+	import { monthSwipe } from '$lib/actions/month-swipe';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -19,6 +20,8 @@
 
 	// Initialize state with data from server
 	const cal = setCalendarState();
+
+	let pageEl = $state<HTMLElement>();
 
 	// Load songs when navigating months
 	$effect(() => {
@@ -61,6 +64,13 @@
 </script>
 
 <div
+	bind:this={pageEl}
+	use:monthSwipe={{
+		onPrev: cal.prevMonth,
+		onNext: cal.nextMonth,
+		target: () => pageEl?.querySelector<HTMLElement>('[data-month-slide]') ?? null,
+		isBlocked: () => !!cal.draggingSong
+	}}
 	class="h-dvh w-full overflow-hidden bg-bg flex flex-col relative pb-[var(--safe-inset-bottom)]"
 >
 	{#if cal.isLoading}
