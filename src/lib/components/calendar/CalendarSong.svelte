@@ -144,7 +144,9 @@
 		if (e.touches.length !== 1) return;
 
 		const touch = e.touches[0];
-		if (Math.abs(touch.clientX - startX) > 8 || Math.abs(touch.clientY - startY) > 8) {
+		// A little more slack than the old 8px: finger jitter on a real phone
+		// could cancel the long press before it ever became a drag.
+		if (Math.abs(touch.clientX - startX) > 12 || Math.abs(touch.clientY - startY) > 12) {
 			if (touchTimer) {
 				clearTimeout(touchTimer);
 				touchTimer = null;
