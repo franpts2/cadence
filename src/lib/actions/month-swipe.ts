@@ -14,7 +14,10 @@ export interface MonthSwipeParams {
 const SWIPE_LOCK = 8;
 const DISTANCE_RATIO = 0.22;
 const FLING_VELOCITY = 400;
-const INTERACTIVE = 'button, a, input, textarea, select, [data-no-swipe]';
+// Buttons are deliberately allowed: songs and the empty-day "add" target are
+// buttons, and the swipe surface would shrink to nothing if they were excluded.
+// A horizontal drag suppresses the click, so a swipe never turns into a tap.
+const INTERACTIVE = 'a, input, textarea, select, [data-no-swipe]';
 
 /**
  * Tracks a horizontal swipe 1:1 and slides the month in from the gesture's
