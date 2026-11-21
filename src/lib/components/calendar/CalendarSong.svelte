@@ -32,13 +32,25 @@
 	let dragNode: HTMLElement | null = null;
 	let startX = 0;
 	let startY = 0;
+	let lastPoint: { x: number; y: number } | null = null;
+	let autoScrollFrame: number | null = null;
+
+	// Auto-scroll near the top / bottom edge of the day grid. Without this a
+	// drag cannot reach a day that is off-screen on a tall month.
+	const EDGE_ZONE = 56;
+	const MAX_SCROLL_SPEED = 14;
 
 	/** Move the floating ghost and find the day / nav zone under the finger. */
 	function updateDrag(touch: Touch) {
+		lastPoint = { x: touch.clientX, y: touch.clientY };
 		touchX = touch.clientX;
 		touchY = touch.clientY;
+		refreshHover(lastPoint);
+		scheduleAutoScroll();
+	}
 
-		const element = document.elementFromPoint(touch.clientX, touch.clientY);
+	function refreshHover(point: { x: number; y: number }) {
+		const element = document.elementFromPoint(point.x, point.y);
 		if (!element) return;
 
 		const dayCell = element.closest('[data-day]');
@@ -50,6 +62,45 @@
 			cal.startDelayedNav(navTarget.getAttribute('data-nav-target') as 'prev' | 'next');
 		} else {
 			cal.cancelDelayedNav();
+		}
+	}
+
+	function scheduleAutoScroll() {
+		if (autoScrollFrame !== null || !isTouchDragging) return;
+		autoScrollFrame = requestAnimationFrame(autoScrollStep);
+	}
+
+	function autoScrollStep() {
+		autoScrollFrame = null;
+		if (!isTouchDragging || !lastPoint) return;
+
+		const scroller = dragNode?.closest('[data-calendar-scroll]') as HTMLElement | null;
+		if (!scroller) return;
+
+		const rect = scroller.getBoundingClientRect();
+		let delta = 0;
+
+		if (lastPoint.y < rect.top + EDGE_ZONE) {
+			delta = -((rect.top + EDGE_ZONE - lastPoint.y) / EDGE_ZONE) * MAX_SCROLL_SPEED;
+		} else if (lastPoint.y > rect.bottom - EDGE_ZONE) {
+			delta = ((lastPoint.y - (rect.bottom - EDGE_ZONE)) / EDGE_ZONE) * MAX_SCROLL_SPEED;
+		}
+
+		if (Math.abs(delta) < 0.5) return;
+
+		const before = scroller.scrollTop;
+		scroller.scrollTop = before + delta;
+		if (scroller.scrollTop === before) return;
+
+		// The content moved under a stationary finger, so re-hit-test.
+		refreshHover(lastPoint);
+		autoScrollFrame = requestAnimationFrame(autoScrollStep);
+	}
+
+	function stopAutoScroll() {
+		if (autoScrollFrame !== null) {
+			cancelAnimationFrame(autoScrollFrame);
+			autoScrollFrame = null;
 		}
 	}
 
@@ -102,6 +153,8 @@
 	}
 
 	function resetDrag() {
+		stopAutoScroll();
+		lastPoint = null;
 		isTouchDragging = false;
 		cal.draggingSong = null;
 		cal.draggingFromDay = null;
@@ -158,6 +211,7 @@
 
 		return {
 			destroy() {
+				stopAutoScroll();
 				dragNode = null;
 				node.removeEventListener('touchstart', handleTouchStart);
 				node.removeEventListener('touchmove', handleTouchMove);

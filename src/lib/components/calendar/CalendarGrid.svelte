@@ -64,7 +64,7 @@
 	<!-- On a phone the six rows can be shorter than their content, so the grid
 	     scrolls instead of being clipped by the shell. Rows still stretch to fill
 	     the available height on every screen. -->
-	<div class="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+	<div class="flex-1 min-h-0 overflow-y-auto overscroll-contain" data-calendar-scroll>
 		<div class="grid grid-cols-7 grid-rows-[repeat(6,minmax(56px,1fr))] h-full">
 			{#each Array(startDay) as _, i}
 				<div 
