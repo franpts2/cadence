@@ -252,7 +252,7 @@
 					/>
 					<button
 						onclick={handleClose}
-						class="text-text-dim hover:text-accent-hover p-2 -m-1"
+						class="text-text-dim hover:text-accent-hover p-3 -m-2"
 						aria-label="Close search"
 					>
 						<CloseIcon />

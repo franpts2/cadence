@@ -133,7 +133,7 @@
 	</div>
 	<button
 		onclick={() => onDismiss()}
-		class="shrink-0 text-text-dim hover:text-accent-hover transition-colors"
+		class="shrink-0 p-3.5 -m-2.5 text-text-dim hover:text-accent-hover transition-colors"
 		aria-label="Dismiss notification"
 	>
 		<CloseIcon class="h-4 w-4" />
