@@ -34,6 +34,8 @@
 	let startY = 0;
 	let lastPoint: { x: number; y: number } | null = null;
 	let autoScrollFrame: number | null = null;
+	let isDropping = $state(false);
+	let dropTimer: ReturnType<typeof setTimeout> | null = null;
 
 	// Auto-scroll near the top / bottom edge of the day grid. Without this a
 	// drag cannot reach a day that is off-screen on a tall month.
@@ -111,8 +113,13 @@
 		startX = touch.clientX;
 		startY = touch.clientY;
 		isTouchDragging = false;
+		isDropping = false;
 
 		if (touchTimer) clearTimeout(touchTimer);
+		if (dropTimer) {
+			clearTimeout(dropTimer);
+			dropTimer = null;
+		}
 
 		touchTimer = setTimeout(() => {
 			isTouchDragging = true;
@@ -156,6 +163,11 @@
 		stopAutoScroll();
 		lastPoint = null;
 		isTouchDragging = false;
+		isDropping = false;
+		if (dropTimer) {
+			clearTimeout(dropTimer);
+			dropTimer = null;
+		}
 		cal.draggingSong = null;
 		cal.draggingFromDay = null;
 		cal.touchHoveredDay = null;
@@ -187,7 +199,28 @@
 			cal.moveSong(day, toDay);
 		}
 
-		resetDrag();
+		finishDrag();
+	}
+
+	// Release phase: the ghost keeps its position for one short beat while it
+	// fades and shrinks, instead of blinking out the instant the finger lifts.
+	function finishDrag() {
+		stopAutoScroll();
+		isTouchDragging = false;
+		isDropping = true;
+
+		// Stop treating further movement as a drag immediately, even while the
+		// drop animation is still playing.
+		if (dragNode) {
+			dragNode.removeEventListener('touchmove', handleDragMove);
+			dragNode.addEventListener('touchmove', handleTouchMove, { passive: true });
+		}
+
+		if (dropTimer) clearTimeout(dropTimer);
+		dropTimer = setTimeout(() => {
+			dropTimer = null;
+			resetDrag();
+		}, 150);
 	}
 
 	function handleTouchCancel() {
@@ -196,7 +229,7 @@
 			touchTimer = null;
 		}
 		if (isTouchDragging) {
-			resetDrag();
+			finishDrag();
 		}
 	}
 
@@ -212,6 +245,7 @@
 		return {
 			destroy() {
 				stopAutoScroll();
+				if (dropTimer) clearTimeout(dropTimer);
 				dragNode = null;
 				node.removeEventListener('touchstart', handleTouchStart);
 				node.removeEventListener('touchmove', handleTouchMove);
@@ -251,13 +285,14 @@
 	</button>
 </Tooltip>
 
-{#if isTouchDragging}
+{#if isTouchDragging || isDropping}
 	<!-- Follows the finger. Positioned with translate3d on a fixed origin so each
 	     move is a compositor-only change, and deliberately untransitioned so it
 	     tracks the finger instead of trailing 75ms behind it. No backdrop-filter:
 	     re-blurring a moving layer is what makes the drag stutter on phones. -->
-	<div 
-		class="fixed top-0 left-0 pointer-events-none z-[9999] flex flex-col items-center gap-1.5 text-center bg-surface border border-accent/30 rounded-lg p-2 shadow-2xl will-change-transform"
+	<div
+		class="drag-ghost fixed top-0 left-0 pointer-events-none z-[9999] flex flex-col items-center gap-1.5 text-center bg-surface border border-accent/30 rounded-lg p-2 shadow-2xl will-change-transform"
+		class:dropping={isDropping}
 		style="transform: translate3d({touchX}px, {touchY}px, 0) translate(-50%, -120%); width: 80px;"
 	>
 		{#if song.album.images[0]}
@@ -270,3 +305,43 @@
 		</span>
 	</div>
 {/if}
+
+<style>
+	.drag-ghost {
+		opacity: 1;
+		scale: 1;
+		transition:
+			opacity 140ms cubic-bezier(0.23, 1, 0.32, 1),
+			scale 140ms cubic-bezier(0.23, 1, 0.32, 1);
+	}
+
+	@starting-style {
+		.drag-ghost {
+			opacity: 0;
+			scale: 0.88;
+		}
+	}
+
+	.drag-ghost.dropping {
+		opacity: 0;
+		scale: 0.9;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.drag-ghost {
+			transition: none;
+		}
+
+		@starting-style {
+			.drag-ghost {
+				opacity: 1;
+				scale: 1;
+			}
+		}
+
+		.drag-ghost.dropping {
+			opacity: 0;
+			scale: 1;
+		}
+	}
+</style>
