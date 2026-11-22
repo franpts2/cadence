@@ -106,14 +106,8 @@
 <SongPreviewModal
 	song={cal.previewingSong}
 	isOpen={!!cal.previewingSong}
-	day={cal.previewingDay}
 	onClose={() => cal.closePreview()}
 	onDelete={() => cal.removePreviewSong()}
-	onMove={(toDay) => {
-		const fromDay = cal.previewingDay;
-		cal.closePreview();
-		if (fromDay !== null) void cal.moveSong(fromDay, toDay);
-	}}
 />
 
 <ShareMonthModal />
